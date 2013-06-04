@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:int="http://www.springframework.org/schema/integration"
+	xmlns:int-ws="http://www.springframework.org/schema/integration/ws"
+	xmlns:oxm="http://www.springframework.org/schema/oxm" xmlns:int-xml="http://www.springframework.org/schema/integration/xml"
+	xmlns:sws="http://www.springframework.org/schema/web-services"
+	xsi:schemaLocation="http://www.springframework.org/schema/integration/xml http://www.springframework.org/schema/integration/xml/spring-integration-xml-2.2.xsd
+		http://www.springframework.org/schema/integration/ws http://www.springframework.org/schema/integration/ws/spring-integration-ws.xsd
+		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+		http://www.springframework.org/schema/oxm http://www.springframework.org/schema/oxm/spring-oxm-3.1.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/web-services http://www.springframework.org/schema/web-services/web-services.xsd">
+
+	<int:channel id="input">
+		<int:interceptors>
+			<int:wire-tap channel="logXml" />
+		</int:interceptors>
+	</int:channel>
+	
+	
+	<int:channel id="orders">
+		<int:interceptors>
+			<int:wire-tap channel="logXml" />
+		</int:interceptors>
+	</int:channel>
+
+	<int:channel id="confirmations" />
+	<int:channel id="responses" />
+	
+	<int:channel id="logXml"/>
+	
+	<int:channel id="dummy"/>
+
+	<int:logging-channel-adapter id="logger" 
+		level="DEBUG" />
+
+	<int-ws:inbound-gateway id="ws-inbound-gateway"
+		request-channel="input" reply-channel="responses" />
+
+	<int-xml:unmarshalling-transformer
+		unmarshaller="jaxb" input-channel="input" output-channel="dummy"/>
+
+
+	<int-xml:marshalling-transformer
+		marshaller="jaxb" input-channel="confirmations" output-channel="responses"
+		result-transformer="resultTx" />
+
+
+	<int:service-activator input-channel="dummy"
+		ref="orderServiceImpl" method="placeOrder" output-channel="confirmations" />
+
+	<int-xml:xslt-transformer id="xmlConverter" input-channel="logXml" output-channel="logger" result-transformer="toString" 
+		xsl-resource="classpath:/META-INF/spring/integration/noop.xslt"/>
+
+	<bean id="toString" class="org.springframework.integration.xml.transformer.ResultToStringTransformer"/>
+
+	<!-- Beans -->
+
+	<oxm:jaxb2-marshaller id="jaxb">
+		<oxm:class-to-be-bound name="gv.api.Order" />
+		<oxm:class-to-be-bound name="gv.api.OrderLine" />
+		<oxm:class-to-be-bound name="gv.api.Product" />
+
+		<oxm:class-to-be-bound name="gv.api.OrderConfirmation" />
+		<oxm:class-to-be-bound name="gv.api.Warehouse" />
+		<oxm:class-to-be-bound name="gv.api.Shipment" />
+		<oxm:class-to-be-bound name="gv.api.ShipmentLine" />
+	</oxm:jaxb2-marshaller>
+
+	<sws:dynamic-wsdl id="orderServiceGateway" portTypeName="ws-inbound-gateway"
+		locationUri="/orders/orderService">
+		<sws:xsd location="classpath:/META-INF/schemas/dw.xsd"/>
+	</sws:dynamic-wsdl>
+
+	<bean
+		class="org.springframework.ws.server.endpoint.mapping.UriEndpointMapping">
+		<property name="defaultEndpoint" ref="ws-inbound-gateway" />
+	</bean>
+
+	<bean id="resultTx"
+		class="org.springframework.integration.xml.transformer.ResultToDocumentTransformer" />
+
+</beans>
