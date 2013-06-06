@@ -2,12 +2,15 @@ package gv;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.reset;
+import gv.api.Product;
 import gv.api.Warehouse;
 import gv.core.service.DistributedWarehouseServiceImpl;
 import gv.core.service.WarehouseServiceList;
 import gv.core.service.WarehouseServiceLocatorImpl;
 import gv.core.service.entity.WarehouseServiceBinding;
+import gv.core.service.repository.StockAlertEntityRepository;
 import gv.core.service.repository.WarehouseRepository;
+import gv.products.api.ProductService;
 import gv.warehouse.api.WarehouseService;
 
 import java.util.ArrayList;
@@ -17,6 +20,7 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.Lists;
 
@@ -48,6 +52,16 @@ abstract public class AbstractWarehouseTest {
 
 	@Mock
 	protected WarehouseRepository warehouseRepository;
+	
+	@Mock
+	protected StockAlertEntityRepository stockAlertRepository;
+	
+	@Mock
+	protected ProductService productService;
+	
+	
+	protected Product ham;
+	protected Product cheese;
 
 	@Before
 	public void setUp() {
@@ -84,8 +98,18 @@ abstract public class AbstractWarehouseTest {
 				Lists.newArrayList(londonEntity, parisEntity, tokyoEntity));
 
 		warehouseService = new DistributedWarehouseServiceImpl();
-		warehouseService.setRepository(warehouseRepository);
+		warehouseService.setWarehouseRepository(warehouseRepository);
 		warehouseService.setWarehouseServiceLocator(locator);
+		
+		warehouseService.setProductService(productService);
+		warehouseService.setStockAlertEntityRepository(stockAlertRepository);
+		
+		ham = new Product(1L, "Ham", "A nice bit of ham");
+		cheese = new Product(2L, "Cheese", "A mature cheddar");
+		
+		given(productService.getProductById(1L)).willReturn(ham);
+		given(productService.getProductById(2L)).willReturn(cheese);
+		
 		reset(londonService, parisService, tokyoService);
 
 	}

@@ -82,21 +82,35 @@ public class RoutingTests {
 	}
 	
 	@Test
-	public void shouldSetStock() {
+	public void shouldSetStock() throws InterruptedException {
 		// given
 		StockChangeRequest request = new StockChangeRequest(1L,3L,5);
 		Message<StockChangeRequest> message = MessageBuilder.withPayload(request)
 				.setHeader("DW_WarehouseId", 1)
 				.setHeader("DW_Method", "set-stock")
+				.setReplyChannel(outputChannel)
 				.build();
 		
-		// when
-		inputChannel.send(message);
-		
-		// then
 		ArgumentCaptor<StockChangeRequest> captor = ArgumentCaptor.forClass(StockChangeRequest.class);
-		Mockito.verify(warehouseService).setStock(captor.capture());
+		given(warehouseService.setStock(captor.capture())).willReturn(55);
 		
+		
+		CountDownHandler handler = new CountDownHandler() {
+			
+			@Override
+			protected void verifyMessage(Message<?> message) {
+				Integer newStock = (Integer)message.getPayload();
+				assertEquals(new Integer(55), newStock);
+			}
+		};
+
+		
+		// when
+		boolean sent = sendAndExpectResponse(message, handler);
+		
+		
+		// then		
+		assertTrue("message not sent to expected output channel", sent);
 		assertEquals(request.getWarehouseId(), captor.getValue().getWarehouseId());
 		assertEquals(request.getProductId(), captor.getValue().getProductId());
 		assertEquals(request.getQty(), captor.getValue().getQty());

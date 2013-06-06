@@ -5,6 +5,7 @@ import gv.api.OrderConfirmation;
 import gv.api.OrderLine;
 import gv.api.Product;
 import gv.api.Warehouse;
+import gv.core.StockAlertDetails;
 import gv.core.service.DistributedWarehouseService;
 import gv.core.service.WarehouseServiceLocator;
 import gv.core.service.entity.WarehouseServiceBinding;
@@ -139,6 +140,13 @@ public class AdminController {
 		OrderConfirmation confirmation = orderService.placeOrder(order);
 		model.addAttribute("confirmation", confirmation);
 		return "orderConfirmation";
+	}
+	
+	@RequestMapping("/stockAlerts.html")
+	public String stockAlerts(Model model) {
+		List<StockAlertDetails> stockAlerts = warehouseService.getStockAlerts();
+		model.addAttribute("stockAlerts", stockAlerts);
+		return "stockAlerts";
 	}
 	
 	public StockForm getStockForm(Product product) {

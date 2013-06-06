@@ -49,8 +49,16 @@ public class DistributedWarehouseServiceImpl implements DistributedWarehouseServ
 		this.warehouseServiceLocator = warehouseServiceLocator;
 	}
 
-	public void setRepository(WarehouseRepository repository) {
+	public void setWarehouseRepository(WarehouseRepository repository) {
 		this.repository = repository;
+	}
+	
+	public void setProductService(ProductService productService) {
+		this.productService = productService;
+	}
+	
+	public void setStockAlertEntityRepository(StockAlertEntityRepository repository) {
+		stockAlertRepository = repository;
 	}
 
 	@Override
@@ -130,6 +138,7 @@ public class DistributedWarehouseServiceImpl implements DistributedWarehouseServ
 		ent.setWarehouseId(alert.getWarehouseId());
 		ent.setProductId(alert.getProductId());
 		ent.setStockLevel(alert.getStockLevel());
+		ent.setThreshold(alert.getThreshold());
 		stockAlertRepository.save(ent);
 	}
 

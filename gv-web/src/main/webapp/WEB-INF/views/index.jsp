@@ -45,7 +45,7 @@
 		</form:form>
 		
 	</fieldset>
-
+	
 	<fieldset>
 		<legend>Stock Levels</legend>
 

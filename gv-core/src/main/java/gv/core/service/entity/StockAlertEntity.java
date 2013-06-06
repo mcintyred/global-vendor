@@ -3,8 +3,10 @@ package gv.core.service.entity;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity
+@Table(name="stockAlerts")
 public class StockAlertEntity {
 	
 	@Id

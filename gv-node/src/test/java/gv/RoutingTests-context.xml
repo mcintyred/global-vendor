@@ -16,7 +16,7 @@
 	<!-- 
 	Test context just wires up the routes and injects a mock service
 	 -->
-	 <context:property-placeholder location="classpath:gv-warehouse-node.properties" />
+	 <context:property-placeholder location="classpath:test.properties" />
 
 	 <import resource="classpath:META-INF/spring/integration/warehouse-service-context.xml" />
 	 

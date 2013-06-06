@@ -3,6 +3,7 @@ package gv.core.service.entity;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 /**
  * This entity is used by the core system to bind Warehouses to the appropriate repositories
@@ -12,6 +13,7 @@ import javax.persistence.Id;
  */
 
 @Entity
+@Table(name="warehouses")
 public class WarehouseServiceBinding {
 	
 	@Id

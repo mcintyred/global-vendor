@@ -6,7 +6,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="stock_level")
+@Table(name="stockLevels")
 public class StockLevel {
 	
 	@Id

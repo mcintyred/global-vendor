@@ -9,18 +9,26 @@
 		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">	
 		
-		
-	<!-- Creates an outbound gateway to be registered as a StockAlertsListener with the warehouse service -->
-	<int:channel id="stock-alerts"/>
-	<int:channel id="outbound-stock-alerts"/>
-	
+ 	<!-- Creates an outbound gateway to be registered as a StockAlertsListener with the warehouse service -->
 	<int:gateway id="stockAlertsGateway" service-interface="gv.warehouse.api.StockAlertListener"
 		default-request-channel="stock-alerts">	
 	</int:gateway>
 	
+	<int:channel id="stock-alerts">
+		<int:interceptors>
+			<int:wire-tap channel="logger" />
+		</int:interceptors>
+	</int:channel>
+
 	<int:object-to-json-transformer
 		input-channel="stock-alerts"
 		output-channel="outbound-stock-alerts">
 	</int:object-to-json-transformer>
 		
+	<int:channel id="outbound-stock-alerts">
+ 		<int:interceptors>
+			<int:wire-tap channel="logger" />
+		</int:interceptors>
+	</int:channel>
+	
 </beans>

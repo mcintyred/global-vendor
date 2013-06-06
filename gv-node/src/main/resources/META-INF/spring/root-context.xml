@@ -17,6 +17,7 @@
 	 
 	 <context:property-placeholder location="classpath:gv-warehouse-node.properties" />
 
+	 <import resource="classpath:META-INF/spring/integration/amqp-context.xml" />
 	 <import resource="classpath:META-INF/spring/integration/rabbitmq-context.xml" />
 	 <import resource="classpath:META-INF/spring/integration/warehouse-service-context.xml" />
  	 <import resource="classpath:META-INF/spring/integration/stock-alerts-context.xml" />

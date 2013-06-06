@@ -31,7 +31,6 @@
  	<!-- Service gateway -->
 	<int:gateway id="outboundGateway" service-interface="gv.warehouse.api.WarehouseService"
 		default-request-channel="outbound-requests"
-		default-reply-channel="inbound-responses" 
 	>
 		<!-- Set the method header -->
 		<int:method name="setStock">
@@ -52,16 +51,13 @@
 		
 		
 		<!-- Implement the getName() method -->
-		<int:method name="getName" request-channel="get-name" reply-channel="get-name-reply" payload-expression="'null'"/>
+		<int:method name="getName" request-channel="get-name" payload-expression="'null'"/>
 		
 	</int:gateway>
 	
 	<int:channel id="get-name"/>
-	<int:channel id="get-name-reply" />
+	<int:service-activator input-channel="get-name" expression="'Remote Warehouse'"/>
 
-	<int:chain input-channel="get-name" output-channel="get-name-reply">
-		<int:service-activator expression="'Remote Warehouse'"/>
-	</int:chain>
 	
 	
 	<!-- Outbound requests go through this chain to set headers and map to json -->
@@ -82,10 +78,15 @@
 		mapped-request-headers="DW*" routing-key-expression="headers.DW_WarehouseId"
 	/>
 	
-	<int:router input-channel="inbound-rabbit-responses" expression="headers.DW_Method == 'request-shipment' ? 'request-shipment-ack' : 'inbound-responses'"/>
+	<int:header-value-router header-name="DW_Method" input-channel="inbound-rabbit-responses">
+		<int:mapping value="request-shipment" channel="request-shipment-ack"/>	
+		<int:mapping value="set-stock" channel="inbound-responses"/>	
+		<int:mapping value="get-stock" channel="inbound-responses"/>	
+		<int:mapping value="update-stock" channel="inbound-responses"/>	
+	</int:header-value-router>	
 	
-	<int:chain input-channel="request-shipment-ack" output-channel="inbound-responses">
-		<int:json-to-object-transformer type="gv.warehouse.api.ShipmentConfirmation"/>
-	</int:chain>
+	<int:json-to-object-transformer type="gv.warehouse.api.ShipmentConfirmation" input-channel="request-shipment-ack" output-channel="inbound-responses"/>
+	
+	<int:service-activator input-channel="inbound-responses" expression="payload"/>
 		
 </beans>

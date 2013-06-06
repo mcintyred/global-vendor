@@ -15,6 +15,10 @@
 		<level value="debug" />
 	</logger>
 
+<!-- 	<logger name="org.springframework.amqp"> -->
+<!-- 		<level value="debug" /> -->
+<!-- 	</logger> -->
+
 	<logger name="gv">
 		<level value="info" />
 	</logger>

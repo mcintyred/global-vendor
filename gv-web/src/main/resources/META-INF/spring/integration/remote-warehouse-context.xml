@@ -29,8 +29,20 @@
 		<property name="password" value="${dw.rabbit.password}" />
 	</bean>
 
-	<!-- Declare the exchange. Each node will declare its own queue -->
+	<!-- Declare the exchange to which requests are sent. Each node will declare its own queue -->
 	<rabbit:direct-exchange name="stockExchange" id="stockExchange" />
+	
+	<!-- 
+	Declare the exchange to which remote nodes send stock alerts.
+	A fanout exchange since other components might want to consume alerts also
+	 -->
+	<rabbit:fanout-exchange name="stockAlertsExchange">
+		<rabbit:bindings>
+			<rabbit:binding queue="core-stock-alerts"></rabbit:binding>
+		</rabbit:bindings>
+	</rabbit:fanout-exchange>
+	
+	<rabbit:queue name="core-stock-alerts"/>
 
 
 	<!-- declare the SI channels needed to wire things up -->
@@ -40,63 +52,93 @@
 	<int:channel id="inbound-rabbit-responses" />
 	<int:channel id="outbound-rabbit-requests" />
 	<int:channel id="request-shipment-ack" />
-
-
-	<int:channel id="get-name" />
-	<int:channel id="get-name-reply" />
-
-	<int:chain input-channel="get-name" output-channel="get-name-reply">
-		<int:service-activator expression="'Remote Warehouse'" />
-	</int:chain>
-
-
-	<!-- Service gateway -->
+	
+	<int:channel id="inbound-stock-alerts"/>
+	<int:channel id="stock-alerts">
+ 		<int:interceptors>
+			<int:wire-tap channel="logger" />
+		</int:interceptors>
+	</int:channel>
+	
+	<int:logging-channel-adapter id="logger" level="DEBUG" />	
+	
+	 
+ 	<!-- Service gateway -->
 	<int:gateway id="outboundGateway" service-interface="gv.warehouse.api.WarehouseService"
-		default-request-channel="outbound-requests" default-reply-channel="inbound-responses">
+		default-request-channel="outbound-requests"
+	>
 		<!-- Set the method header -->
 		<int:method name="setStock">
-			<int:header name="DW_Method" value="set-stock" />
+			<int:header name="DW_Method" value="set-stock"/>
 		</int:method>
-
+		
 		<int:method name="updateStock">
-			<int:header name="DW_Method" value="update-stock" />
+			<int:header name="DW_Method" value="update-stock"/>
 		</int:method>
-
+		
 		<int:method name="getStock">
-			<int:header name="DW_Method" value="get-stock" />
+			<int:header name="DW_Method" value="get-stock"/>
 		</int:method>
-
+		
 		<int:method name="requestShipment">
-			<int:header name="DW_Method" value="request-shipment" />
+			<int:header name="DW_Method" value="request-shipment"/>
 		</int:method>
-
+		
+		
 		<!-- Implement the getName() method -->
-		<int:method name="getName" request-channel="get-name"
-			reply-channel="get-name-reply" payload-expression="'null'" />
-
+		<int:method name="getName" request-channel="get-name" payload-expression="'null'"/>
+		
 	</int:gateway>
+	
+	<int:channel id="get-name"/>
+	<int:service-activator input-channel="get-name" expression="'Remote Warehouse'"/>
 
+	
+	
 	<!-- Outbound requests go through this chain to set headers and map to json -->
 	<int:chain input-channel="outbound-requests" output-channel="outbound-rabbit-requests">
 		<int:header-enricher>
-			<int:header name="DW_WarehouseId" expression="'warehouse_' + payload.warehouseId" />
+			<int:header name="DW_WarehouseId" expression="'warehouse_' + payload.warehouseId"/>
 		</int:header-enricher>
 		<int:object-to-json-transformer />
 	</int:chain>
-
-
+	
+	
 	<!-- Declare the gateway to rabbit -->
-	<int-amqp:outbound-gateway amqp-template="amqpTemplate"
-		exchange-name="stockExchange" request-channel="outbound-rabbit-requests"
-		reply-channel="inbound-rabbit-responses" mapped-request-headers="DW*"
-		routing-key-expression="headers.DW_WarehouseId" />
-
-	<int:router input-channel="inbound-rabbit-responses"
-		expression="headers.DW_Method == 'request-shipment' ? 'request-shipment-ack' : 'inbound-responses'" />
-
-	<int:chain input-channel="request-shipment-ack"
-		output-channel="inbound-responses">
-		<int:json-to-object-transformer
-			type="gv.warehouse.api.ShipmentConfirmation" />
+	<int-amqp:outbound-gateway 
+		amqp-template="amqpTemplate"
+		exchange-name="stockExchange"
+		request-channel="outbound-rabbit-requests"
+		reply-channel="inbound-rabbit-responses"
+		mapped-request-headers="DW*" routing-key-expression="headers.DW_WarehouseId"
+	/>
+	
+	<int:header-value-router header-name="DW_Method" input-channel="inbound-rabbit-responses">
+		<int:mapping value="request-shipment" channel="request-shipment-ack"/>	
+		<int:mapping value="set-stock" channel="inbound-responses"/>	
+		<int:mapping value="get-stock" channel="inbound-responses"/>	
+		<int:mapping value="update-stock" channel="inbound-responses"/>	
+	</int:header-value-router>	
+	
+	<int:json-to-object-transformer type="gv.warehouse.api.ShipmentConfirmation" input-channel="request-shipment-ack" output-channel="inbound-responses"/>
+	
+	<int:service-activator input-channel="inbound-responses" expression="payload"/>
+	
+	<!-- Channel adapter to receive stock alerts -->
+	<int-amqp:inbound-channel-adapter
+		acknowledge-mode="AUTO"
+		channel="inbound-stock-alerts"
+		connection-factory="rabbitConnectionFactory"
+		queue-names="core-stock-alerts"
+	/>
+	
+	<int:chain input-channel="inbound-stock-alerts">
+		<int:json-to-object-transformer 
+			type="gv.warehouse.api.StockAlert"
+		/>
+		<int:service-activator
+			method="handleStockAlert"
+			ref="distributedWarehouseServiceImpl"
+		/>
 	</int:chain>
 </beans>

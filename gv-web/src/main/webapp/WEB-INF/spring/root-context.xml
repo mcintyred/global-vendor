@@ -12,32 +12,13 @@
 
 	<context:property-placeholder location="classpath:gv-web.properties"/>
 
-	<import resource="classpath:/META-INF/spring/integration/remote-warehouse-context.xml"/>
+	<import resource="classpath:/META-INF/spring/data-context.xml"/>
 
-	<jdbc:embedded-database id="dataSource" type="HSQL" />
+	<import resource="classpath:/META-INF/spring/integration/remote-warehouse-context.xml"/>
 
 	<context:component-scan base-package="gv" />
 
-	<bean id="entityManagerFactory"
-		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
-		<property name="dataSource" ref="dataSource" />
-		<property name="jpaVendorAdapter">
-			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
-				<property name="generateDdl" value="true" />
-				<property name="database" value="HSQL" />
-				<property name="showSql" value="true" />
-			</bean>
-		</property>
-		<property name="packagesToScan" value="gv" />
-	</bean>
 
-	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
-		<property name="entityManagerFactory" ref="entityManagerFactory" />
-	</bean>
-
-	<tx:annotation-driven transaction-manager="transactionManager" />
-
-	<jpa:repositories base-package="gv" />
 
 	<!-- Declare the list of WarehouseServices -->
 	<bean id="warehouseServiceList" class="gv.core.service.WarehouseServiceList">

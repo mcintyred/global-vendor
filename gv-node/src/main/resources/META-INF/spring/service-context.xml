@@ -17,7 +17,7 @@
 		<constructor-arg ref="stockLevelRepository" />
 		
 		<property name="stockAlertThreshold" value="10" />
-		<property name="stockAlertListener" ref="stockAlertsGateway" />
+ 		<property name="stockAlertListener" ref="stockAlertsGateway" />
 	</bean>
 
 </beans>
