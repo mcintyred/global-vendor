@@ -1,6 +1,6 @@
 @javax.xml.bind.annotation.XmlSchema(
 		namespace = "http://www.gv.demo/api",
-		elementFormDefault = XmlNsForm.UNQUALIFIED,
+		elementFormDefault = XmlNsForm.QUALIFIED,
 		attributeFormDefault = XmlNsForm.UNQUALIFIED
 		)
 

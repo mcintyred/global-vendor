@@ -32,14 +32,14 @@ public class OrderConfirmationSerializationTest {
 	Unmarshaller unmarshaller;
 	
 	String orderConfirmation = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
-			"<ns2:orderConfirmation xmlns:ns2=\"http://www.gv.demo/api\"><order><lines><line qty=\"13\" productId=\"12\"/>" +
+			"<orderConfirmation xmlns=\"http://www.gv.demo/api\"><order><lines><line qty=\"13\" productId=\"12\"/>" +
 			"</lines></order>" +
 			"<shipments><shipment><warehouse name=\"Test Warehouse\" id=\"13\"/>" +
 			"<lines><line qty=\"13\" shipDate=\"2012-05-03\">" +
 			"<product name=\"ProductA\" id=\"12\">" +
 			"<description>Description</description>" +
 			"</product>" +
-			"</line></lines></shipment></shipments></ns2:orderConfirmation>";
+			"</line></lines></shipment></shipments></orderConfirmation>";
 
 	@Test
 	public void shouldSerialize() throws IOException {

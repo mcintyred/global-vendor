@@ -41,7 +41,7 @@ public class OrderSerializationTest {
 		String xml = toString(order);
 		
 		String expected ="<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
-				"<ns2:order xmlns:ns2=\"http://www.gv.demo/api\"><lines><line qty=\"13\" productId=\"12\"/></lines></ns2:order>";
+				"<order xmlns=\"http://www.gv.demo/api\"><lines><line qty=\"13\" productId=\"12\"/></lines></order>";
 		
 		assertEquals(expected, xml);
 

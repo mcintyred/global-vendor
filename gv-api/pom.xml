@@ -20,12 +20,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.springframework.dw</groupId>
-			<artifactId>gv-jaxb-support</artifactId>
-			<version>1.0.0.CI-SNAPSHOT</version>
-		</dependency>
-		
-		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.7</version>
@@ -43,150 +37,153 @@
 			<version>${spring.version}</version>
 		</dependency>
 		<dependency>
-   <groupId>org.springframework</groupId>
-   <artifactId>spring-oxm</artifactId>
-   <version>${spring.version}</version>
-  </dependency>
-  
-  <dependency>
-	<groupId>joda-time</groupId>
-	<artifactId>joda-time</artifactId>
-	<version>2.2</version>
-</dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-oxm</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+			<version>2.2</version>
+		</dependency>
 
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 			<version>1.2.14</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<version>14.0.1</version>
 		</dependency>
-		
-				<dependency>
+
+		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
 			<version>1.9.5</version>
 		</dependency>
-		
-	</dependencies>
-   <build>
 
-        <plugins>
-        
+	</dependencies>
+	<build>
+
+		<plugins>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 			</plugin>
-            
-            <plugin>
-     <groupId>com.sun.tools.jxc.maven2</groupId>
-     <artifactId>maven-jaxb-schemagen-plugin</artifactId>
-     <version>1.2</version>
-     <executions>
-         <execution>
-            <phase>generate-resources</phase>
-            <goals>
-               <goal>generate</goal>
-            </goals>
-         </execution>
-     </executions>
 
-     <configuration>
-        <project>${project}</project>
-        <destdir>${project.build.directory}/META-INF/schemas</destdir>
-        <srcdir>${project.build.sourceDirectory}</srcdir>
-        <includes>
-                        <include>**/Order.java</include>
-                        <include>**/OrderLine.java</include>
-                        <include>**/OrderConfirmation.java</include>
-                        <include>**/Product.java</include>
-                        <include>**/Warehouse.java</include>
-                        <include>**/Shipment.java</include>
-                        <include>**/ShipmentLine.java</include>
-        </includes>
-        <schemas>
-             <schema>
-                 <namespace>http://www.gv.demo/api</namespace>
-                 <file>dw.xsd</file>
-             </schema>
-        </schemas>
-        <verbose>true</verbose>
-     </configuration>
-     <dependencies>
-         <dependency>
-             <groupId>javax.xml.bind</groupId>
-             <artifactId>jaxb-api</artifactId>
-             <version>2.2</version>
-         </dependency>
-         <dependency>
-             <groupId>com.sun.xml.bind</groupId>
-             <artifactId>jaxb-xjc</artifactId>
-             <version>2.2</version>
-         </dependency>
-         <dependency>
-             <groupId>com.sun.xml.bind</groupId>
-             <artifactId>jaxb-impl</artifactId>
-             <version>2.2</version>
-         </dependency>
-         <dependency>
-             <groupId>com.sun.xml.bind</groupId>
-             <artifactId>jaxb-xjc</artifactId>
-             <version>2.2</version>
-         </dependency>
-     </dependencies>
-</plugin>
-            
-        </plugins>
-        
-       <resources> 
-            <resource> 
-                <directory>target</directory> 
-                <includes> 
-                    <include>META-INF/schemas/*.xsd</include> 
-                </includes> 
-            </resource> 
-        </resources>
+			<plugin>
+				<groupId>com.sun.tools.jxc.maven2</groupId>
+				<artifactId>maven-jaxb-schemagen-plugin</artifactId>
+				<version>1.2</version>
+				<executions>
+					<execution>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
 
-       <pluginManagement>
-       	<plugins>
-       		<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-       		<plugin>
-       			<groupId>org.eclipse.m2e</groupId>
-       			<artifactId>lifecycle-mapping</artifactId>
-       			<version>1.0.0</version>
-       			<configuration>
-       				<lifecycleMappingMetadata>
-       					<pluginExecutions>
-       						<pluginExecution>
-       							<pluginExecutionFilter>
-       								<groupId>
-       									com.sun.tools.jxc.maven2
-       								</groupId>
-       								<artifactId>
-       									maven-jaxb-schemagen-plugin
-       								</artifactId>
-       								<versionRange>
-       									[1.2,)
-       								</versionRange>
-       								<goals>
-       									<goal>generate</goal>
-       								</goals>
-       							</pluginExecutionFilter>
-       							<action>
-       								<ignore></ignore>
-       							</action>
-       						</pluginExecution>
-       					</pluginExecutions>
-       				</lifecycleMappingMetadata>
-       			</configuration>
-       		</plugin>
-       	</plugins>
-       </pluginManagement>
-   </build>
+				<configuration>
+					<project>
+						${project}
+					</project>
+					<destdir>${project.build.directory}/META-INF/schemas</destdir>
+					<srcdir>${project.build.sourceDirectory}</srcdir>
+					<includes>
+						<include>**/Order.java</include>
+						<include>**/OrderLine.java</include>
+						<include>**/OrderConfirmation.java</include>
+						<include>**/Product.java</include>
+						<include>**/Warehouse.java</include>
+						<include>**/Shipment.java</include>
+						<include>**/ShipmentLine.java</include>
+					</includes>
+					<schemas>
+						<schema>
+							<namespace>http://www.gv.demo/api</namespace>
+							<file>dw.xsd</file>
+						</schema>
+					</schemas>
+					<verbose>true</verbose>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>javax.xml.bind</groupId>
+						<artifactId>jaxb-api</artifactId>
+						<version>2.2</version>
+					</dependency>
+					<dependency>
+						<groupId>com.sun.xml.bind</groupId>
+						<artifactId>jaxb-xjc</artifactId>
+						<version>2.2</version>
+					</dependency>
+					<dependency>
+						<groupId>com.sun.xml.bind</groupId>
+						<artifactId>jaxb-impl</artifactId>
+						<version>2.2</version>
+					</dependency>
+					<dependency>
+						<groupId>com.sun.xml.bind</groupId>
+						<artifactId>jaxb-xjc</artifactId>
+						<version>2.2</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+
+		</plugins>
+
+		<resources>
+			<resource>
+				<directory>target</directory>
+				<includes>
+					<include>META-INF/schemas/*.xsd</include>
+				</includes>
+			</resource>
+		</resources>
+
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											com.sun.tools.jxc.maven2
+										</groupId>
+										<artifactId>
+											maven-jaxb-schemagen-plugin
+										</artifactId>
+										<versionRange>
+											[1.2,)
+										</versionRange>
+										<goals>
+											<goal>generate</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
 
 
 </project>

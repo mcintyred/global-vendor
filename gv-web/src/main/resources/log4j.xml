@@ -32,9 +32,14 @@
 		<level value="info" />
 	</logger>
 
-	<logger name="org.springframework.iontegration">
+	<logger name="org.springframework.integration">
 		<level value="debug" />
 	</logger>
+	
+	<logger name="XMLLogger">
+		<level value="debug" />
+	</logger>
+	
 
 	<!-- Root Logger -->
 	<root>

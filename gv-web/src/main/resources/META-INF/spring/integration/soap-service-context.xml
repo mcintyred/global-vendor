@@ -17,43 +17,46 @@
 		</int:interceptors>
 	</int:channel>
 	
+	<int:channel id="logXml"/>
+
+	<int-xml:xslt-transformer id="xmlConverter" 
+		input-channel="logXml" 
+		output-channel="logger" 
+		result-transformer="toString" 
+		xsl-resource="classpath:/META-INF/spring/integration/noop.xslt"
+	/>
+
+	<bean id="toString" class="org.springframework.integration.xml.transformer.ResultToStringTransformer"/>
+
+	<int:channel id="confirmations" />
 	
-	<int:channel id="orders">
+	<int:channel id="responses">
 		<int:interceptors>
 			<int:wire-tap channel="logXml" />
 		</int:interceptors>
 	</int:channel>
-
-	<int:channel id="confirmations" />
-	<int:channel id="responses" />
 	
-	<int:channel id="logXml"/>
-	
-	<int:channel id="dummy"/>
+	<int:channel id="orders"/>
 
-	<int:logging-channel-adapter id="logger" 
+	<int:logging-channel-adapter id="logger" logger-name="gv.logger"
 		level="DEBUG" />
 
 	<int-ws:inbound-gateway id="ws-inbound-gateway"
 		request-channel="input" reply-channel="responses" />
 
 	<int-xml:unmarshalling-transformer
-		unmarshaller="jaxb" input-channel="input" output-channel="dummy"/>
+		unmarshaller="jaxb" input-channel="input" output-channel="orders"/>
 
+	<int:service-activator input-channel="orders"
+		ref="orderServiceImpl" method="placeOrder" output-channel="confirmations" />
 
 	<int-xml:marshalling-transformer
 		marshaller="jaxb" input-channel="confirmations" output-channel="responses"
 		result-transformer="resultTx" />
 
-
-	<int:service-activator input-channel="dummy"
-		ref="orderServiceImpl" method="placeOrder" output-channel="confirmations" />
-
-	<int-xml:xslt-transformer id="xmlConverter" input-channel="logXml" output-channel="logger" result-transformer="toString" 
-		xsl-resource="classpath:/META-INF/spring/integration/noop.xslt"/>
-
-	<bean id="toString" class="org.springframework.integration.xml.transformer.ResultToStringTransformer"/>
-
+	<bean id="resultTx"
+		class="org.springframework.integration.xml.transformer.ResultToDocumentTransformer" />
+		
 	<!-- Beans -->
 
 	<oxm:jaxb2-marshaller id="jaxb">
@@ -76,8 +79,5 @@
 		class="org.springframework.ws.server.endpoint.mapping.UriEndpointMapping">
 		<property name="defaultEndpoint" ref="ws-inbound-gateway" />
 	</bean>
-
-	<bean id="resultTx"
-		class="org.springframework.integration.xml.transformer.ResultToDocumentTransformer" />
 
 </beans>

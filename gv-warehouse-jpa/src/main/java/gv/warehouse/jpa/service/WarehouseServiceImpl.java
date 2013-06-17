@@ -2,9 +2,11 @@ package gv.warehouse.jpa.service;
 
 import gv.api.Shipment;
 import gv.api.ShipmentLine;
+import gv.warehouse.api.DiscontinueProductRequest;
 import gv.warehouse.api.ShipmentConfirmation;
 import gv.warehouse.api.ShipmentRequest;
 import gv.warehouse.api.StockAlert;
+import gv.warehouse.api.StockAlertEventSource;
 import gv.warehouse.api.StockAlertListener;
 import gv.warehouse.api.StockChangeRequest;
 import gv.warehouse.api.StockQueryRequest;
@@ -14,13 +16,12 @@ import gv.warehouse.jpa.service.repository.StockLevelRepository;
 
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
-public class WarehouseServiceImpl implements WarehouseService {
+public class WarehouseServiceImpl implements WarehouseService, StockAlertEventSource {
 	
 	@Autowired
 	private final StockLevelRepository repository;
@@ -110,6 +111,14 @@ public class WarehouseServiceImpl implements WarehouseService {
 			return stockLevel.getQty();
 		}
 		return 0;
+	}
+	
+	@Override
+	public void discontinueProduct(DiscontinueProductRequest request) {
+		StockLevel stockLevel = repository.findByWarehouseIdAndProductId(request.getWarehouseId(), request.getProductId());
+		if(stockLevel != null) {
+			repository.delete(stockLevel);
+		}
 	}
 
 	@Override

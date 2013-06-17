@@ -19,13 +19,14 @@
 <!-- 		<level value="debug" /> -->
 <!-- 	</logger> -->
 
-	<logger name="gv">
-		<level value="info" />
+	<logger name="XMLLogger">
+		<level value="all" />
+		<appender-ref ref="console" />
 	</logger>
 
 	<!-- Root Logger -->
 	<root>
-		<priority value="info" />
+		<priority value="all" />
 		<appender-ref ref="console" />
 	</root>
 

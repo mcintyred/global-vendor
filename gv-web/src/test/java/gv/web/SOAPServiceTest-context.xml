@@ -9,18 +9,21 @@
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
 		http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
 
+	<context:component-scan base-package="gv"></context:component-scan>
 
-	<context:property-placeholder location="classpath:gv-web.properties"/>
+	<import resource="classpath:/hsql-data-context.xml"/>
+	
+	<import resource="classpath:/META-INF/spring/integration/soap-service-context.xml"/>
 
-	<import resource="classpath:/META-INF/spring/data-context.xml"/>
-
-	<import resource="classpath:/META-INF/spring/integration/remote-warehouse-context.xml"/>
-
+	<!-- Ensures that all incoming requests will be routed to the ws:inbound-gateway -->
+	<bean class="org.springframework.ws.server.endpoint.mapping.UriEndpointMapping">
+		<property name="defaultEndpoint" ref="ws-inbound-gateway"/>
+	</bean>
+	
 	<!-- Declare the list of WarehouseServices -->
 	<bean id="warehouseServiceList" class="gv.core.service.WarehouseServiceList">
 		<constructor-arg>
 			<list>
-				<ref bean="outboundGateway"/>
 				<ref bean="localWarehouseService"/>
 			</list>
 		</constructor-arg>

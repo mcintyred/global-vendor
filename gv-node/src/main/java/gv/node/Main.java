@@ -1,7 +1,5 @@
 package gv.node;
 
-import java.util.Scanner;
-
 import org.apache.log4j.Logger;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -18,7 +16,7 @@ public final class Main {
 	 *
 	 * @param args - command line arguments
 	 */
-	public static void main(final String... args) {
+	public static void main(String[] args) {
 
 		if (LOGGER.isInfoEnabled()) {
 			LOGGER.info("\n========================================================="
@@ -40,6 +38,5 @@ public final class Main {
 				System.exit(0);
 			}
 		}
-
 	}
 }

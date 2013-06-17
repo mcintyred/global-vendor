@@ -12,6 +12,8 @@ public interface WarehouseService {
 	
 	int getStock(StockQueryRequest request);
 	
+	void discontinueProduct(DiscontinueProductRequest request);
+	
 	/**
 	 * Request a shipment of at most the qty of the product given
 	 * @param order
@@ -20,8 +22,5 @@ public interface WarehouseService {
 	ShipmentConfirmation requestShipment(ShipmentRequest request);
 	
 	void cancelShipment(Shipment shipment);
-	
-	public void setStockAlertListener(StockAlertListener listener);
-	
-	public void setStockAlertThreshold(int threshold);
+
 }
