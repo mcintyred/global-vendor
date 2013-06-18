@@ -875,3 +875,9 @@
 2013-06-17T14:32:54,INFO,ComponentStateChangeEvent,instanceIdType=self|instanceId=self|timestamp=2013-06-17T14:32:46|state=on
 2013-06-17T14:32:54,INFO,UpdatedLicenseStateEvent,enforcement=soft|licenseType=local|expirationDate=2013-08-16T14:32:54|used=8|available=60|addons=vf.gf.evaluation
 2013-06-17T14:32:59,INFO,ComponentStateChangeEvent,instanceIdType=self|instanceId=self|timestamp=2013-06-17T14:32:59|state=off
+2013-06-17T17:13:37,INFO,EventManagerStartedEvent,
+2013-06-17T17:13:37,INFO,LicenseActivatedEvent,expirationDate=unset|expirationType=floating-eval|serialNumber=G04E0-MFK43-M8E1H-0ZARK-AV25A|allowedVersions=vf.gf.dmn-6+vf.gf.dmn-7|available=60
+2013-06-17T17:13:37,INFO,LicenseActivatedEvent,expirationDate=unset|expirationType=floating-eval|serialNumber=G04E0-MFK43-M8E1H-0ZARK-AV25A|allowedVersions=vf.gf.dmn-6+vf.gf.dmn-7|available=60
+2013-06-17T17:13:37,INFO,UpdatedLicenseStateEvent,enforcement=soft|licenseType=local|expirationDate=permanent|used=0|available=60|addons=vf.gf.evaluation
+2013-06-17T17:13:45,INFO,ComponentStateChangeEvent,instanceIdType=self|instanceId=self|timestamp=2013-06-17T17:13:37|state=on
+2013-06-17T17:13:45,INFO,UpdatedLicenseStateEvent,enforcement=soft|licenseType=local|expirationDate=2013-08-16T17:13:45|used=8|available=60|addons=vf.gf.evaluation

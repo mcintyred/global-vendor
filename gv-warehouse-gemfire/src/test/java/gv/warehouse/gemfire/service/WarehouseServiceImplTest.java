@@ -11,6 +11,7 @@ import gv.api.Product;
 import gv.api.Shipment;
 import gv.api.ShipmentLine;
 import gv.api.Warehouse;
+import gv.test.UnitTest;
 import gv.warehouse.api.ShipmentConfirmation;
 import gv.warehouse.api.ShipmentRequest;
 import gv.warehouse.api.StockAlert;
@@ -23,6 +24,7 @@ import gv.warehouse.gemfire.service.repository.StockLevelRepository;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -30,6 +32,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.google.common.collect.Lists;
 
 @RunWith(MockitoJUnitRunner.class)
+@Category(UnitTest.class)
 public class WarehouseServiceImplTest {
 	
 	private WarehouseServiceImpl service;

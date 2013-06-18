@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" version="1.0" targetNamespace="http://www.gv.demo/api" xmlns:tns="http://www.gv.demo/api" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="order" type="tns:order"/>
+
+  <xs:element name="orderConfirmation" type="tns:orderConfirmation"/>
+
+  <xs:complexType name="order">
+    <xs:sequence>
+      <xs:element name="lines" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="line" type="tns:orderLine" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="orderLine">
+    <xs:sequence/>
+    <xs:attribute name="productId" type="xs:long" use="required"/>
+    <xs:attribute name="qty" type="xs:int" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="orderConfirmation">
+    <xs:sequence>
+      <xs:element ref="tns:order" minOccurs="0"/>
+      <xs:element name="shipments" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="shipment" type="tns:shipment" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="shipment">
+    <xs:sequence>
+      <xs:element name="warehouse" type="tns:warehouse" minOccurs="0"/>
+      <xs:element name="lines" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="line" type="tns:shipmentLine" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="warehouse">
+    <xs:sequence/>
+    <xs:attribute name="id" type="xs:long"/>
+    <xs:attribute name="name" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="shipmentLine">
+    <xs:sequence>
+      <xs:element name="product" type="tns:product" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="shipDate" type="xs:string"/>
+    <xs:attribute name="qty" type="xs:int" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="product">
+    <xs:sequence>
+      <xs:element name="description" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:long"/>
+    <xs:attribute name="name" type="xs:string"/>
+  </xs:complexType>
+</xs:schema>
+

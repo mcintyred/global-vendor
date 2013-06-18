@@ -7,6 +7,7 @@ import gv.api.Product;
 import gv.api.Shipment;
 import gv.api.ShipmentLine;
 import gv.api.Warehouse;
+import gv.test.IntegrationTest;
 import gv.warehouse.api.ShipmentConfirmation;
 import gv.warehouse.api.ShipmentRequest;
 import gv.warehouse.api.StockAlert;
@@ -17,6 +18,7 @@ import gv.warehouse.gemfire.listener.StockChangeListener;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -26,6 +28,7 @@ import com.google.common.collect.Lists;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
+@Category(IntegrationTest.class)
 public class WarehouseServiceImplIntegrationTest {
 	
 	

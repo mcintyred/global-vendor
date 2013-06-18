@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:gfe="http://www.springframework.org/schema/gemfire"
+	xmlns:gfe-data="http://www.springframework.org/schema/data/gemfire"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/gemfire http://www.springframework.org/schema/gemfire/spring-gemfire-1.3.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/data/gemfire http://www.springframework.org/schema/data/gemfire/spring-data-gemfire-1.3.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+		
+	<gfe-data:repositories base-package="gv.warehouse.gemfire"></gfe-data:repositories>
+	
+	<gfe:pool id="clientPool" subscription-enabled="true">
+		<gfe:server host="localhost" port="40404"/>
+	</gfe:pool>
+	
+	<gfe:client-cache id="clientCache" pool-name="clientPool"/>
+	
+	<gfe:client-region id="stock_levels" key-constraint="gv.warehouse.gemfire.entity.StockLevel.Id" cache-ref="clientCache">
+	</gfe:client-region>
+	
+	<gfe:cq-listener-container id="cq-listener-container" cache="clientCache">
+		<gfe:listener ref="cqListener"
+			query="select * from /stock_levels" />
+	</gfe:cq-listener-container>
+
+	<bean id="cqListener" class="gv.warehouse.gemfire.listener.CQListener" />
+	
+	<task:executor id="taskExecutor" pool-size="10"/>
+		
+</beans>

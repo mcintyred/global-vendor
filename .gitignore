@@ -2,6 +2,8 @@ target
 .project
 .classpath
 .settings
+build
+.gradle
 
 # Compiled source #
 ###################

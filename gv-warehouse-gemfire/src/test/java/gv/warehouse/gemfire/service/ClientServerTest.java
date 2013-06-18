@@ -3,14 +3,11 @@ package gv.warehouse.gemfire.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
 import gv.api.Product;
 import gv.api.Shipment;
 import gv.api.ShipmentLine;
 import gv.api.Warehouse;
+import gv.test.IntegrationTest;
 import gv.warehouse.api.DiscontinueProductRequest;
 import gv.warehouse.api.ShipmentConfirmation;
 import gv.warehouse.api.ShipmentRequest;
@@ -19,13 +16,15 @@ import gv.warehouse.api.StockAlertEventSource;
 import gv.warehouse.api.StockAlertListener;
 import gv.warehouse.api.StockChangeRequest;
 import gv.warehouse.api.StockQueryRequest;
-import gv.warehouse.gemfire.listener.StockChangeListener;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.google.common.collect.Lists;

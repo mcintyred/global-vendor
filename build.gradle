@@ -1,0 +1,44 @@
+buildscript {
+    repositories {
+        maven { url 'http://repo.springsource.org/plugins-release' }
+    }
+    dependencies {
+        classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.1'
+    }
+}
+
+allprojects  {
+  apply plugin: 'maven'
+  apply plugin: 'eclipse'
+  apply plugin: 'propdeps'
+  apply plugin: 'propdeps-eclipse'
+
+
+  group = 'org.springframework.gv'
+  version = '1.0.0.CI-SNAPSHOT'
+  
+  repositories {
+    mavenCentral()
+    mavenLocal()
+  }
+}
+
+subprojects {
+  apply plugin: 'java'
+  apply plugin: 'maven'
+  apply plugin: 'eclipse'
+  apply plugin: 'propdeps'
+  apply plugin: 'propdeps-eclipse'
+  
+  sourceCompatibility = 1.6
+  targetCompatibility = 1.6
+
+	test {
+	
+	        useJUnit {
+	                includeCategories 'gv.test.UnitTest'
+	                excludeCategories 'gv.test.IntegrationTest'
+	        }
+	}
+  
+}

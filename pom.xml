@@ -27,11 +27,10 @@
 	</properties>
 
 	<modules>
-		<module>gv-jaxb-support</module>
 		<module>gv-api</module>
 		<module>gv-core</module>
 		<module>gv-web</module>
-		<module>gv-node</module>
+		<module>gv-warehouse-node</module>
 		<module>gv-products-jpa</module>
 		<module>gv-warehouse-jpa</module>
 	</modules>
