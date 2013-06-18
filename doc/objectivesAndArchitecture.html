@@ -1,59 +1,6 @@
 <html>
 <head>
-<style>
-
-	h1 {
-		background: #538228;
-		color: white;
-		padding-left: 4px;
-		text-shadow: 0 1px 0 #000;
-	}
-	
-	h2 {
-		margin-top: 0;
-		padding-top:0;
-		background: #9dd249;
-		padding-left: 4px;
-	}
-	
-	body {
-		background: #eaeaea;
-		font-family: Arial, sans-serif;
-		text-shadow: 0 1px 0 #fff;
-	}
-	
-	th, td {
-		border: 1px solid black;
-		padding: 4px;
-	}
-	
-	.widget {
-		margin-top: 0;
-		margin-left: 1em;
-		padding-top:0;
-		border: 1px inset #ababab;
-		padding-bottom: 20px;
-	}
-	
-	table, form {
-		padding-left: 1em;
-	}
-	
-	.name {
-		width: 64em;
-	}
-	
-	textarea {
-		width: 64em;
-		height: 10em;
-	}
-
-	a.ret {
-		display: block;
-		margin-top: 1em;
-		margin-left: 1em;
-	}
-</style>
+<link rel="stylesheet" type="text/css" href="docstyles.css"/>
 </head>
 <body>
 
@@ -73,7 +20,7 @@ You can check out the code for this project at github:
 
 </p>
 
-<h2>Objectives</h2>
+<h3>Objectives</h3>
 
 <p>
 The overall objective is to create a simple stock management system based on the idea of warehouses, start with a traditional implementation using a central database and then gradually evolve a distributed system. So the order will be more or less to describe:
@@ -91,9 +38,9 @@ The overall objective is to create a simple stock management system based on the
 Along the way I'll be using a variety of Spring projects and technologies in small bites, so if you haven't used them before I hope this will be a gentle introduction. Look out for Spring MVC, Spring Data JPA, Spring Data Gemfire, Spring Integration and Spring Batch.
 </p>
 
-<h2>
+<h3>
 The Business Model
-</h2>
+</h3>
 
 <p>
 So let's get started with a description of the 'business model' of our hypothetical Global Vendor (GV).
@@ -112,7 +59,7 @@ The rollout plan for the new system calls for a phased approach. In the first ph
 </p>
 
 
-<h2>Software Architecture</h2>
+<h3>Software Architecture</h3>
 <p>
 The overall architecture is shown in diagram 1. Interfaces of all the shaded components are specified in the gv-api project, whereas the DistributedWarehouseService is specified and implemented in the gv-core project.
 </p>
@@ -146,7 +93,7 @@ The SOAP Gateway provides distributors with a web-service which can be used to p
 Finally, the warehouses themselves may optionally provide StockAlerts which are received by the DistributedWarehouseService and logged in the local database for potential viewing by Administrators.
 </p>
 
-<h2>Systems Architecture</h2>
+<h3>Systems Architecture</h3>
 
 <p>
 The second diagram - "Systems Architecture" - shows how the various implementations of the WarehouseService and other components are deployed. As you can see, I've deliberately made it as complicated as possible. If you run the code yourself it is of course possible to deploy the components in other ways. For example during testing I run the Gemfire Client and Server on Host 1.

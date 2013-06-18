@@ -1,0 +1,77 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="docstyles.css"/>
+</head>
+<body>
+
+<h1>Global Vendor</h1>
+<h2>Core Implementation</h2>
+<p>
+In this post I will discuss the api in a bit more detail, and then talk about the implementation of the core services.
+</p>
+
+<h3>Prerequisites</h3>
+<p>
+Before we get started, you will need to download the project and setup your environment. Make sure you have all of the following installed:
+</p>
+
+<h4>Required</h4>
+<ul>
+<li>A Java1.6 VM</li>
+<li><a href="www.gradle.org">Gradle</a></li>
+<li><a href="https://github.com/mcintyred/global-vendor">The Global Vendor Project itself</a></li>
+</ul>
+
+<h4>Optional</h4>
+All the tests can be run from the command line, but you'll find it easier to use an IDE. The gradle scripts are set up
+with Eclipse/STS in mind, but should also work with Intellij.
+
+<ul>
+<li><a href="http://www.springsource.org/sts">Spring Tool Suite</a></li>
+<li><a href="http://git-scm.com/downloads">Git Source Code Control</a></li>
+</ul>
+
+<h4>Advanced</h4>
+You will need RabbitMQ for the more advanced configurations, but you don't need to install it just yet.
+<ul>
+<li><a href="http://www.rabbitmq.com/">RabbitMQ</a></li>
+</ul>
+
+The test deployments use the embedded H2 database, but you can opt to use any other database you choose provided you supply the driver. 
+The project comes with a configuration using MySQL.
+
+<h3>Project Structure</h3>
+Once you have downloaded the project you should see the following directory structure:
+<pre>
+   gv-parent/
+      gv-api/
+      gv-core/
+      gv-warehouse-gemfire/
+      gv-warehouse-jpa/
+      gv-warehouse-node/
+      gv-web/
+</pre>
+
+<p>In this post we will be discussing the <span class="project">gv-api</span> and <span class="project">gv-core</span> projects.
+</p>
+
+<h2>gv-api</h2>
+This project defines the service interfaces used by the other projects. It also defines the message formats used by the SOAP Gateway and Spring Batch for file processing.
+The main packages in this project are as follows:
+
+<table><tr><th>Package</th><th>Description</th></tr>
+<tr><td>gv.api</td><td>Contains the model objects (DTOs) Warehouse, Product, Order etc</td></tr>
+<tr><td>gv.distributor.api</td><td>The service interface for operations which can be performed by distributors</td></tr>
+<tr><td>gv.jaxb</td><td>Support classes to help with JAXB marshalling and unmarshalling</td></tr>
+<tr><td>gv.orders.api</td><td>The low-level interface to the order management system</td></tr>
+<tr><td>gv.products.api</td><td>The interface to the product management system</td></tr>
+<tr><td>gv.stock.api</td><td>A trivial StockService interface</td></tr>
+<tr><td>gv.test</td><td>Two marker interfaces (UnitTest and IntegrationTest) used with the @Category annotation to group JUnit tests</td></tr>
+<tr><td>gv.warehouse.api</td><td>The service interfaces which a warehouse must implement, including messaging DTOs</td></tr>
+</table>
+
+
+
+</body>
+
+</html>
