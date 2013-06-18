@@ -8,6 +8,15 @@ import gv.warehouse.gemfire.entity.StockLevel.Id;
 
 import com.gemstone.gemfire.cache.query.CqEvent;
 
+/**
+ * ContinuousQueries do not provide access to the old value of a cache entity,
+ * so instead the StockAlert entity itself is provided with an oldValue field
+ * which can be used in the event listener to determine when the stock threshold
+ * has been crossed.
+ * 
+ * @author mcintyred
+ *
+ */
 public class CQListener implements StockAlertEventSource {
 	
 	private StockAlertListener stockAlertListener;

@@ -9,6 +9,13 @@ import gv.warehouse.gemfire.entity.StockLevel.Id;
 import com.gemstone.gemfire.cache.EntryEvent;
 import com.gemstone.gemfire.cache.util.CacheListenerAdapter;
 
+/**
+ * This CacheListener demonstrates how the old and new cache values are available to be used
+ * in the event handlers.
+ * 
+ * @author mcintyred
+ *
+ */
 public class StockChangeListener extends CacheListenerAdapter<Id, StockLevel> implements StockAlertEventSource {
 
 	private StockAlertListener stockAlertListener;

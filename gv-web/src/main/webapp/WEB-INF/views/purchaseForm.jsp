@@ -3,22 +3,22 @@
 <html>
 <head>
 <title>Purchase A Product</title>
-<style>
-	th, td {
-		border: 1px solid black;
-	}
-</style>
+<link href="<%= request.getContextPath() %>/resources/styles.css" type="text/css" rel="stylesheet"/>
 </head>
 <body>
 
-	<fieldset>
-		<legend>Purchase ${ product.name }</legend>
+	<div class="widget">
+		<h2>Purchase ${ product.name }</h2>
 
 		<form method="post">
-		
-			Qty : <input name="qty"/> <input type="submit" value="Purchase"/>
-			
+
+			Qty : <input name="qty" /> <input type="submit" value="Purchase" />
+
 		</form>
-</fieldset>
+	
+		<a class="ret" href="<%= request.getContextPath() %>/index.html">Return to homepage</a>
+	
+	</div>
+	
 </body>
 </html>

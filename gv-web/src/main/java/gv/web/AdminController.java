@@ -53,7 +53,7 @@ public class AdminController {
 	@Autowired
 	private OrderService orderService;
 
-	@RequestMapping("/index.html")
+	@RequestMapping("/admin.html")
 	public String index(Model model) {
 		
 		List<WarehouseService> services = warehouseServiceLocator.listServices();
@@ -80,7 +80,7 @@ public class AdminController {
 		WarehouseForm bindingForm = new WarehouseForm();
 		model.addAttribute("warehouseForm", bindingForm);
 		
-		return "index";
+		return "admin";
 	}
 	
 	/**
@@ -91,13 +91,13 @@ public class AdminController {
 	public String createWarehouse(@ModelAttribute("warehouseForm") WarehouseForm bindingForm) {
 		Warehouse warehouse = new Warehouse(bindingForm.getName());
 		warehouseServiceLocator.bindWarehouseService(warehouse, bindingForm.getServiceName());
-		return "redirect:index.html";
+		return "redirect:admin.html";
 	}
 	
 	@RequestMapping(value="/createProduct.html", method=RequestMethod.POST)
 	public String createProduct(@RequestParam("name") String name, @RequestParam("description") String description, Model model) {
 		productService.saveProduct(new Product(name, description));
-		return "redirect:index.html";
+		return "redirect:admin.html";
 	}
 	
 	@RequestMapping(value="/product/{productId}/stock.html")
@@ -124,22 +124,7 @@ public class AdminController {
 			Integer stockLevel = stockForm.getStockLevels().get(warehouseId);
 			warehouseService.setStock(new StockChangeRequest(warehouseId, productId, stockLevel));
 		}
-		return "redirect:/index.html";
-	}
-	
-	@RequestMapping("/product/{productId}/purchase.html")
-	public String purchaseForm(@PathVariable("productId") Long productId, Model model) {
-		model.addAttribute("product", productService.getProductById(productId));
-		return "purchaseForm";
-	}
-	
-	@RequestMapping(value="/product/{productId}/purchase.html", method=RequestMethod.POST)
-	public String purchase(@PathVariable("productId") Long productId, @RequestParam("qty") Integer qty, Model model) {
-		OrderLine orderLine = new OrderLine(productId, qty);
-		Order order = new Order(Lists.newArrayList(orderLine));
-		OrderConfirmation confirmation = orderService.placeOrder(order);
-		model.addAttribute("confirmation", confirmation);
-		return "orderConfirmation";
+		return "redirect:admin.html";
 	}
 	
 	@RequestMapping("/stockAlerts.html")

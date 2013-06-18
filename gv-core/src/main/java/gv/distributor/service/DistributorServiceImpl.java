@@ -1,12 +1,12 @@
-package gv.store.service;
+package gv.distributor.service;
 
 import gv.api.Order;
 import gv.api.OrderConfirmation;
 import gv.api.Product;
+import gv.distributor.api.DistributorService;
 import gv.orders.api.OrderService;
 import gv.products.api.ProductService;
 import gv.stock.api.StockService;
-import gv.store.api.StoreService;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class StoreServiceImpl implements StoreService {
+public class DistributorServiceImpl implements DistributorService {
 	
 	@Autowired
 	private ProductService productService;

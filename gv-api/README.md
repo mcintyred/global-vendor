@@ -1,0 +1,1 @@
+This project declares the DTOs and service interfaces used by all the other projects

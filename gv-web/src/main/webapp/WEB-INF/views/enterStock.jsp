@@ -35,5 +35,7 @@
 		
 	</fieldset>
 
+	<a class="ret" href="<%= request.getContextPath() %>/admin.html">Return to admin page</a>
+
 </body>
 </html>

@@ -11,6 +11,7 @@
 
 
 	<context:property-placeholder location="classpath:gv-web.properties"/>
+	<context:component-scan base-package="gv"></context:component-scan>
 
 	<import resource="classpath:/META-INF/spring/data-context.xml"/>
 
