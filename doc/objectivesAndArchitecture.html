@@ -1,0 +1,163 @@
+<html>
+<head>
+<style>
+
+	h1 {
+		background: #538228;
+		color: white;
+		padding-left: 4px;
+		text-shadow: 0 1px 0 #000;
+	}
+	
+	h2 {
+		margin-top: 0;
+		padding-top:0;
+		background: #9dd249;
+		padding-left: 4px;
+	}
+	
+	body {
+		background: #eaeaea;
+		font-family: Arial, sans-serif;
+		text-shadow: 0 1px 0 #fff;
+	}
+	
+	th, td {
+		border: 1px solid black;
+		padding: 4px;
+	}
+	
+	.widget {
+		margin-top: 0;
+		margin-left: 1em;
+		padding-top:0;
+		border: 1px inset #ababab;
+		padding-bottom: 20px;
+	}
+	
+	table, form {
+		padding-left: 1em;
+	}
+	
+	.name {
+		width: 64em;
+	}
+	
+	textarea {
+		width: 64em;
+		height: 10em;
+	}
+
+	a.ret {
+		display: block;
+		margin-top: 1em;
+		margin-left: 1em;
+	}
+</style>
+</head>
+<body>
+
+<h1>Global Vendor</h1>
+<h2>Objectives and Architecture</h2>
+<p>
+In this and subsequent blog posts I will be presenting a small project with the aim of showing how Spring Integration can be used to transparently create a distributed system.
+</p>
+
+<p>
+This post describes the objectives of the project and the architectural design.
+</p>
+<p>
+You can check out the code for this project at github:
+
+<a href="https://github.com/mcintyred/global-vendor">Global Vendor</a>
+
+</p>
+
+<h2>Objectives</h2>
+
+<p>
+The overall objective is to create a simple stock management system based on the idea of warehouses, start with a traditional implementation using a central database and then gradually evolve a distributed system. So the order will be more or less to describe:
+</p>
+
+<ol>
+<li>the business model and high-level architecture</li>
+<li>an implementation using a local database</li>
+<li>how to use Spring Integration and RabbitMQ to connect a remote system</li>
+<li>implementing a remote system using Gemfire in both local-cache and client-server topologies</li>
+<li>how to use Spring Batch to automate processing</li>
+</ol>
+
+<p>
+Along the way I'll be using a variety of Spring projects and technologies in small bites, so if you haven't used them before I hope this will be a gentle introduction. Look out for Spring MVC, Spring Data JPA, Spring Data Gemfire, Spring Integration and Spring Batch.
+</p>
+
+<h2>
+The Business Model
+</h2>
+
+<p>
+So let's get started with a description of the 'business model' of our hypothetical Global Vendor (GV).
+</p>
+
+<p>
+GV sells a variety of products to distributors throughout the world, and they have a number of warehouses in different locations. The list of products they sell is centrally managed, and warehouses are not required to hold stock of all products.
+</p>
+
+<p>
+GV receives orders for products from their distributors and will fulfill an order by shipping product from one or more warehouses, starting with the warehouse with the most stock. The distributors are sent order confirmations which include a list of how many products are being shipped from each warehouse.
+</p>
+
+<p>
+The rollout plan for the new system calls for a phased approach. In the first phase, all stock information for all warehouses will be maintained in a central database, and warehouse managers will update their stock levels through a central website. Distributors will be able to enter their orders manually through the website or by making a web-services request. In the second phase warehouses will be able to maintain their own local stock database, and in the final phase distributors will be able to send batches of orders for offline processing by placing order files on an SFTP server.
+</p>
+
+
+<h2>Software Architecture</h2>
+<p>
+The overall architecture is shown in diagram 1. Interfaces of all the shaded components are specified in the gv-api project, whereas the DistributedWarehouseService is specified and implemented in the gv-core project.
+</p>
+
+<img src="softwareArchitecture.jpg" />
+
+<p>
+The Administrator has access to a web interface which provides functionality to:
+</p>
+
+<ol>
+<li>Register warehouses with the system.</li>
+<li>Create new products in the local database.</li>
+<li>Set stock levels for products across all registered warehouses.</li>
+<li>View pending stock alerts.</li>
+</ol>
+
+<p>
+Distributors have access to a web interface which allows them to:
+</p>
+
+<ol>
+<li>List all products in the database together with their total stock levels.</li>
+<li>Place an order for a product and receive an acknowledgement.</li>
+</ol>
+
+<p>
+The SOAP Gateway provides distributors with a web-service which can be used to place orders.
+</p>
+<p>
+Finally, the warehouses themselves may optionally provide StockAlerts which are received by the DistributedWarehouseService and logged in the local database for potential viewing by Administrators.
+</p>
+
+<h2>Systems Architecture</h2>
+
+<p>
+The second diagram - "Systems Architecture" - shows how the various implementations of the WarehouseService and other components are deployed. As you can see, I've deliberately made it as complicated as possible. If you run the code yourself it is of course possible to deploy the components in other ways. For example during testing I run the Gemfire Client and Server on Host 1.
+</p>
+
+<img src="systemsArchitecture.jpg" />
+
+<p>
+That's it for this post. In the next post I'll talk about the core code and show how to get a simple Host 1 only system up and running.
+</p>
+
+
+</body>
+</html>
