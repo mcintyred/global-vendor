@@ -7,7 +7,8 @@
 <h1>Global Vendor</h1>
 <h2>Objectives and Architecture</h2>
 <p>
-In this and subsequent blog posts I will be presenting a small project with the aim of showing how Spring Integration can be used to transparently create a distributed system.
+In this and subsequent blog posts I will be presenting a small project with the aim of showing how 
+Spring Integration can be used to transparently create a distributed system.
 </p>
 
 <p>
@@ -23,20 +24,25 @@ You can check out the code for this project at github:
 <h3>Objectives</h3>
 
 <p>
-The overall objective is to create a simple stock management system based on the idea of warehouses, start with a traditional implementation using a central database and then gradually evolve a distributed system. So the order will be more or less to describe:
+The overall objective is to explore the use of different Spring technologies to implement a WarehouseService,
+and use SpringIntegration to bind the different implementations into one distributed system.
 </p>
-
-<ol>
-<li>the business model and high-level architecture</li>
-<li>an implementation using a local database</li>
-<li>how to use Spring Integration and RabbitMQ to connect a remote system</li>
-<li>implementing a remote system using Gemfire in both local-cache and client-server topologies</li>
-<li>how to use Spring Batch to automate processing</li>
-</ol>
 
 <p>
-Along the way I'll be using a variety of Spring projects and technologies in small bites, so if you haven't used them before I hope this will be a gentle introduction. Look out for Spring MVC, Spring Data JPA, Spring Data Gemfire, Spring Integration and Spring Batch.
+To do this I will create a simple stock management system based on the idea of warehouses, 
+start with a traditional implementation using a central database and then gradually evolve 
+a distributed system.
 </p>
+
+<p>The implementation is described in a series of posts:</p>
+<ol>
+<li>The business model and high-level architecture</li>
+<li>An Spring Data JPA implementation using a local database</li>
+<li>How to use Spring Integration and RabbitMQ to connect a remote system</li>
+<li>Implementing a remote system using Gemfire in both local-cache and client-server topologies</li>
+<li>Creating a web-service which accepts orders using Spring Integration</li>
+<li>How to use Spring Batch to automate processing</li>
+</ol>
 
 <h3>
 The Business Model
@@ -113,10 +119,22 @@ The overall architecture is shown below. Points to note are:
 <li>The DistributedWarehouseService is responsible for directing calls to the appropriate WarehouseService; it must be aware of all the warehouses registered
 with the system. WarehouseServices themselves can be local to the DistributedWarehouseService or remote, and Spring Integration allows us to make remote services appear local</li>
 </ul>
+
+<h4>The WarehouseService</h4>
+<p>Please note that this is where the action really is! The main objective of this project is to
+create multiple implementations of this service using a variety of Spring technologies, and
+bind them to the core system using Spring Integration
+</p>
+
+
 </p>
 
 <a name="softwareArchitecture-diagram"/>
-<img src="softwareArchitecture.jpg" />
+
+<div class="diagram">
+	<div class="caption">Software Architecture</div>
+	<img src="softwareArchitecture.jpg" />
+</div>
 
 <h3>Systems Architecture</h3>
 
@@ -127,7 +145,10 @@ If you run the code yourself it is of course possible to deploy the components i
 For example during testing I run the Gemfire Client and Server on Host 1.
 </p>
 
-<img src="systemsArchitecture.jpg" />
+<div class="diagram">
+	<div class="caption">Systems Architecture</div>
+	<img src="systemsArchitecture.jpg" />
+</div>
 
 <p>
 That's it for this post. In the next post I'll talk about the core code and show how to get a simple Host 1 only system up and running.

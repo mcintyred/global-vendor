@@ -11,7 +11,7 @@ import gv.warehouse.api.StockAlertListener;
 import gv.warehouse.api.StockChangeRequest;
 import gv.warehouse.api.StockQueryRequest;
 import gv.warehouse.api.WarehouseService;
-import gv.warehouse.jpa.entity.StockLevel;
+import gv.warehouse.jpa.service.entity.StockLevel;
 import gv.warehouse.jpa.service.repository.StockLevelRepository;
 
 import org.joda.time.LocalDate;

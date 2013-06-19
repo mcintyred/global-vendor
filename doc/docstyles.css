@@ -70,11 +70,14 @@
 		color: #6a006b;
 	}
 	
-	.screengrab img {
+	.screengrab, .diagram {
+		margin-left:15%;
+	}
+	
+	.screengrab img, .diagram img {
 		width:70%;
 	}
 	
-	.screengrab .caption {
-	margin-top: 1em;
-		border-bottom: 2px inset menu;
+	.caption {
+		margin-top: 1em;
 	}

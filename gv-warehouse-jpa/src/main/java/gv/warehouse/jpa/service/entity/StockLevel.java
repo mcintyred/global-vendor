@@ -1,4 +1,4 @@
-package gv.warehouse.jpa.entity;
+package gv.warehouse.jpa.service.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

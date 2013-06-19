@@ -20,24 +20,4 @@
     <servlet-name>appServlet</servlet-name>
     <url-pattern>/</url-pattern>
   </servlet-mapping>
-  
-  	<servlet>
-		<servlet-name>gv-ws</servlet-name>
-		<servlet-class>org.springframework.ws.transport.http.MessageDispatcherServlet</servlet-class>
-		<init-param>
-			<param-name>contextConfigLocation</param-name>
-			<param-value>WEB-INF/gv-ws-config.xml</param-value>
-		</init-param>
-				    <init-param>
-        <param-name>transformWsdlLocations</param-name>
-        <param-value>true</param-value>
-    </init-param>
-    
-		<load-on-startup>1</load-on-startup>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>gv-ws</servlet-name>
-		<url-pattern>/orders/*</url-pattern>
-	</servlet-mapping>
 </web-app>

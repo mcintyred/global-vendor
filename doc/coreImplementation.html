@@ -13,8 +13,7 @@ implementation of the core services.
 
 <p>
 My objectives in implementing the core logic were
-to use Spring Data JPA for persistence, and use Spring Integration to provide the 
-SOAP Gateway. A minimal web front-end would be built (using Spring MVC) to provide
+to use Spring Data JPA for persistence, and build a minimal web front-end (using Spring MVC) to provide
 a basic implementation meeting the requirements. This would be enough to provide
 a system which could be extended using Spring Integration to talk to a variety
 of different implementations of the WarehouseService.
@@ -66,6 +65,7 @@ Once you have downloaded the project you should see the following directory stru
 <p>In this post we will be discussing the 
 <span class="project">gv-api</span>,
 <span class="project">gv-core</span> and
+<span class="project">gv-warehouse-jpa</span> and
 <span class="project">gv-web-standalone</span>
 projects.
 </p>
@@ -161,252 +161,276 @@ because the OrderService always takes stock from the warehouse with the most fir
 Finally, make a purchase of 15 and you should see 11 shipped from London and 4 from Paris.
 </p>
 
-
-<h4>gv-api</h4>
-This project defines the service interfaces used by the other projects. It also defines the message formats used by the SOAP Gateway and Spring Batch for file processing.
-The main packages in this project are as follows:
-
-<table><tr><th>Package</th><th>Description</th></tr>
-<tr><td>gv.api</td><td>Contains the model objects (DTOs) Warehouse, Product, Order etc</td></tr>
-<tr><td>gv.distributor.api</td><td>The service interface for operations which can be performed by distributors</td></tr>
-<tr><td>gv.jaxb</td><td>Support classes to help with JAXB marshalling and unmarshalling</td></tr>
-<tr><td>gv.orders.api</td><td>The low-level interface to the order management system</td></tr>
-<tr><td>gv.products.api</td><td>The interface to the product management system</td></tr>
-<tr><td>gv.test</td><td>Two marker interfaces (UnitTest and IntegrationTest) used with the @Category annotation to group JUnit tests</td></tr>
-<tr><td>gv.warehouse.api</td><td>The service interfaces which a warehouse must implement, including messaging DTOs</td></tr>
-</table>
-
-<h3>Design Approach</h3>
 <p>
-The way I designed the system was to use the requirements to drive a service-based architecture which embodies clear lines of responsibility.
-This led to the gross <a href="./objectivesAndArchitecture.html#softwareArchitecture-diagram">software architecture diagram</a> you have already seen.
+Congratulations! Now, let's move on to a discussion of the parts of the system which use the three technologies I
+wanted to introduce in this post: Spring Data JPA, Spring MVC and Spring Integration.
+</p>
+<p>
+If you want a more detailed discussion of the code, you can find it <a href="codeDiscussion.html">here</a>. 
+</p>
+
+<h2>Using Spring Data JPA</h2>
+<p>Most Java developers are used to using an ORM like Hibernate to take care of persistence. Using the JPA
+annotations makes it easy to indicate to the persistence provider which fields to persist, and what relationships to 
+manage. Even with all this help, there is often a need to write custom queries in a DAO class, and these queries are
+often quite simple - e.g. getWidgetByNameAndWidth().
 </p>
 
 <p>
-Once the overall shape of the system is laid-out, the next step is to define the interfaces which 
-capture the interactions between the actors and the system.
+The <a href="http://www.springsource.org/spring-data">Spring Data</a> Project is an umbrella project which makes it
+easy for developers to use a variety of different data-access technologies. The Spring Data JPA sub-project provides
+an easy and powerful way to implement common query and pagination logic, and means that for many use-cases you
+no longer have to write any code. Let's take a look at how I've used it in this project.
 </p>
 
-<h3>Distributors</h3>
-Recalling the requirements:
-<div class="quotation">
-	<p>
-	Distributors must have access to a web interface which allows them to:
-	</p>
-	
-	<ol>
-	<li>List all products in the database together with their total stock levels.</li>
-	<li>Place an order for a product and receive an acknowledgement.</li>
-	</ol>
+<p>I needed to persist four types of data:
+<ul>
+<li>Product information</li>
+<li>Stock alerts</li>
+<li>Data relating a warehouse name to a service implementation</li>
+<li>Stock data</li>
+</ul>
+If you expand the gv-core project you'll see the entities and repositories used for the first three items, the last is 
+in the gv-warehouse-jpa project:
+</p>
+<div class="screenshot">
+	<span class="caption">The gv-core and gv-warehouse-jpa Projects</span>
+	<div>
+	<img style="float:left" src="gvCore.jpg"/>
+	<img src="gvWarehouseJPA.jpg"/>
+	</div>
+	<div style="clear:both" />
 </div>
 
-leads to the DistributorService interface:
+<p>Using Spring Data JPA is easy. First, include the dependencies in your project. I use Gradle,
+so the relevant lines are:
+</p>
+
 <pre class="java">
-public interface DistributorService {
-	
-	public List<Product> listProducts();
-	public Product getProductById(Long productId);
-	public int getTotalStock(Long productId);
-	public OrderConfirmation placeOrder(Order order);
-}
+    // Spring-core for the Spring container and core support
+    compile group: 'org.springframework', name: 'spring-core', version:'3.2.0.RELEASE'
+    
+    // Spring-context for automatic configuration using &ltcontext:component-scan....
+    compile group: 'org.springframework', name: 'spring-context', version:'3.2.0.RELEASE'
+    
+    // Spring support for ORM frameworks. Needed to allow Spring to work with Hibernate
+    compile group: 'org.springframework', name: 'spring-orm', version:'3.2.0.RELEASE'
+    
+    // Transaction support
+    compile group: 'org.springframework', name: 'spring-tx', version:'3.2.0.RELEASE' 
+    
+    // Allows Spring to generate DAOs based on the JPA entity annotations
+    compile group: 'org.springframework.data', name: 'spring-data-jpa', version:'1.3.0.RELEASE'
+    
+    // Hibernate is the JPA persistence provider
+    compile group: 'org.hibernate.javax.persistence', name: 'hibernate-jpa-2.0-api', version:'1.0.0.Final'
+    compile group: 'org.hibernate', name: 'hibernate-entitymanager', version:'4.1.4.Final'
+    
+    compile( group: 'org.springframework', name: 'spring-aspects', version:'3.2.0.RELEASE' ) {
+      exclude( module: 'aspectjweaver')
+    }
+    
+    compile group: 'org.slf4j', name: 'slf4j-log4j12', version:'1.6.6'
+    compile group: 'org.aspectj', name: 'aspectjweaver', version:'1.6.12'
+    compile group: 'cglib', name: 'cglib', version:'2.2.2'
+    compile group: 'com.google.guava', name: 'guava', version:'14.0.1'
+
+    compile group: 'joda-time', name: 'joda-time', version:'2.1'
+
+    runtime group: 'org.hsqldb', name: 'hsqldb', version:'2.2.8'
 </pre>
 
-and the POJOs which go with it. I have deliberately kept these simple, so e.g. the Product class looks like this:
-<pre class="java">
+<p>
+Next, write your entity class and annotate with JPA:
+</p>
 
-public class Product {
+<pre class="java">
+package gv.products.service.entity;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name="products")
+public class ProductEntity {
 	
-	@XmlAttribute
+	@Id
+	@GeneratedValue
 	private Long id;
-	
-	@XmlAttribute
 	private String name;
-	
-	@XmlElement
 	private String description;
 	
+	public Long getId() {
+		return id;
+	}
+	
+	public void setId(Long id) {
+		this.id = id;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public String getDescription() {
+		return description;
+	}
+	
+	public void setDescription(String description) {
+		this.description = description;
+	}
+}
+</pre>
+
+<p>
+Now, write your repository:
+</p>
+<pre class="java">
+package gv.products.service.repository;
+import gv.products.service.entity.ProductEntity;
+import org.springframework.data.repository.CrudRepository;
+
+public interface ProductRepository extends CrudRepository&lt;ProductEntity, Long&gt; {
+}
+</pre>
+
+<p>
+Inject the repository into a service and use it. Notice how the repository comes with a number of methods
+for dealing with entities so you dont; have to write them: save(), findOne(), findAll() ... etc.
+</p>
+
+<pre class="java">
+@Service("productService")
+@Transactional
+public class ProductServiceImpl implements ProductService {
+	
+	@Autowired
+	private final ProductRepository repository;
+	
+	public ProductServiceImpl() {
+		this(null);
+	}
+	
+	public ProductServiceImpl(ProductRepository repository) {
+		this.repository = repository;
+	}
+
+	@Override
+	public void saveProduct(Product product) {
+		ProductEntity e = toEntity(product);
+		repository.save(e);
+		product.setId(e.getId());
+	}
+
+	@Override
+	public Product getProductById(Long productId) {
+		ProductEntity e = repository.findOne(productId);
+		if(e == null) {
+			return null;
+		}
+		
+		return toDto(e);
+	}
 	...
 	...
 	...
 </pre>
 
-Which leads to an Order class which is just a list of OrderLines, each line specifying the quantity needed of a
-productId:
-<pre class="java">
+That's it. Spring will detect all your repositories for you, create real implementations and inject
+them into any component which requires them. You just need to enable it in your application context. 
+For example, here is the ProductServiceImplTest-context.xml:
 
-@XmlRootElement()
-public class Order {
+<pre class="java">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+    xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+		http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd"&gt;
+
+	&lt;!-- Use an in-memory database for testing --&gt;
+	&lt;jdbc:embedded-database id="dataSource" type="HSQL" /&gt;
+
+	&lt;!-- Spring will scan the classpath for all classes annotated @Component, @Service etc --&gt;
+	&lt;context:component-scan base-package="gv.products.service" /&gt;
 	
-	@XmlElementWrapper(name = "lines")
-	@XmlElement(name="line", type = OrderLine.class)
-	private List<OrderLine> lines;
+	&lt;bean id="entityManagerFactory"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
+		&lt;property name="dataSource" ref="dataSource" /&gt;
+		&lt;property name="jpaVendorAdapter"&gt;
+			&lt;bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"&gt;
+				&lt;property name="generateDdl" value="true" /&gt;
+				&lt;property name="database" value="HSQL" /&gt;
+				&lt;property name="showSql" value="true"/&gt;
+			&lt;/bean&gt;
+		&lt;/property&gt;
+		
+		&lt;!-- Automatically scan for all classes annotated @Entity --&gt;
+		&lt;property name="packagesToScan" value="gv.products.service.entity"/&gt;
+	&lt;/bean&gt;
 	
-	...
-	...
-	...
+	&lt;bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"&gt;
+		&lt;property name="entityManagerFactory" ref="entityManagerFactory" /&gt;
+	&lt;/bean&gt;
 	
-	public class OrderLine {
+	&lt;tx:annotation-driven transaction-manager="transactionManager" /&gt;
 	
-	@XmlAttribute
+	&lt;!-- Enable Spring Data JPA to automatically find and create repositories --&gt;
+	&lt;jpa:repositories base-package="gv.products.service.repository" /&gt;
+
+&lt;/beans&gt;
+
+</pre>
+
+<h3>Magic Finder Methods</h3>
+<p>So far, so good. The standard repository implements all the methods we need to find, save and delete 
+entities. What if our querying needs are more extensive? Here is the StockAlertEntity and its repository:
+</p>
+
+<pre class="java">
+@Entity
+@Table(name="stockAlerts")
+public class StockAlertEntity {
+	
+	@Id
+	@GeneratedValue
+	private Long id;
+	
+	private long warehouseId;
 	private long productId;
-	
-	@XmlAttribute
-	private int qty;
-	
+	private int stockLevel;
+	private int threshold;
 	...
-	...
-	...
-</pre>
-
-<p>
-The OrderConfirmation is a bit more interesting since it contains some actual business logic to 
-indicate whether it is confirming full shipment of all the items ordered, or only partial:
-<pre class="java">
-
-@XmlRootElement()
-public class OrderConfirmation {
-	
-	@XmlElement
-	private Order order;
-	
-	@XmlElementWrapper(name = "shipments")
-	@XmlElement(name="shipment", type=Shipment.class)
-	private List<Shipment> shipments;
-	
-	public OrderConfirmation() {}
-	
-	public OrderConfirmation(Order order, List<Shipment> shipments) {
-		super();
-		this.order = order;
-		this.shipments = shipments;
-	}
-
-	public Order getOrder() {
-		return order;
-	}
-
-	public List<Shipment> getShipments() {
-		return shipments;
-	}
-	
-	public boolean isPartial() {
-		for(OrderLine line : order.getLines()) {
-			int missing = line.getQty();
-			for(Shipment s : shipments) {
-				missing -= s.getQty(line.getProductId());
-			}
-			
-			if(missing > 0) {
-				return true;
-			}
-		}
-		
-		return false;
-	}
-}
-</pre>
-</p>
-
-<h4>JAXB and SOAP</h4>
-<p>
-Note that JAXB annotations are present on all the POJOs which will be used for placing orders and receiving
-confirmations, and there is an XSD present in resources/META-INF/schemas/gv.xsd 
-which specifies the Order and OrderConfirmation document schemas. There are also unit tests checking
-that Orders and OrderConfirmations are serialized as expected.
-</p>
-
-<p>
-Now I have a confession to make. 
-Spring recommends that if you are building a web-service you should write the contract first: you should
-write the XSD and use it to generate the POJOs. Since I added the SOAP requirement after I had done a fair amount
-of development, I decided to use my existing POJOs, annotate them and use the 
-maven-jaxb-schemagen plugin to generate the XSD from the POJOs. The reason for this is that the POJOs generated
-by going in the reverse direction are a little bit clunky.
-</p>
-
-<p>
-What I should have done is to have the generated POJOs
-placed in a different package such as gv.api.xml, and write mappers to transform them between the existing
-POJOs. I chose not to to save time, but I wouldn't do it again.
-</p>
-
-<p>
-What do I mean by 'clunky' generated POJOs? Well imagine an XSD which specifies that an order looks like:
-<pre>
-&lt;order&gt;
-	&lt;lines&gt;
-		&lt;line qty="2" productId="33" /&gt;
-		&lt;line qty="4" productId="55"  /&gt;
-	&lt;/lines&gt;
-&lt;/order&gt;
-</pre>
-
-The generated code looks something like this:
-
-<pre class="java">
-class Order {
-	
-	private Lines lines;
-	
-	public Lines getLines() {
-		return lines;
-	}
-	
-	public class Lines {
-		private List&lt;Line&gt; line;
-		
-		public List&lt;Line&gt; getLine() {
-			return line;
-		}
-	}
-}
-</pre>
-
-So that the code for looping over the lines looks weird because getLine() returns a list, not a Line!
-
-<pre class="java">
-Order order = getOrderFromSomewhere();
-
-for(Line line : order.getLines().getLine()) {
 	...
 	...
 }
+
+
+public interface StockAlertEntityRepository extends CrudRepository&lt;StockAlertEntity, Long&gt; {
+
+	public List&lt;StockAlertEntity&gt; findByWarehouseIdAndProductId(long warehouseId, long productId);
+	
+}
 </pre>
 
-If anyone knows how to write the XSD or tweak the generator so that it produces more natural looking code, please let me know.
-</p>
-
-<h3>Administrators</h3>
-<p>Recall the requirements for Administrators:</p>
-<div class="quotation">
 <p>
-The Administrator must have access to a web interface which provides functionality to:
+The implementation of the method findByWarehouseIdAndProductId() is provided for us by Spring Data JPA!
+You can declare find methods on the repository using any combintation of the entity's properties,
+make them case insensitive, require that only one be returned (findOneBy...) etc. Consult the documents 
+for details.
 </p>
 
-<ol>
-<li>Register warehouses with the system.</li>
-<li>Create new products in the local database.</li>
-<li>Set stock levels for products across all registered warehouses.</li>
-<li>View pending stock alerts.</li>
-</ol>
-</div>
 
-<p>
-Bearing these in mind I sketched out the interfaces for the ProductService and the DistributedWarehouseService.
-</p>
-
-<h2>Implementation - gv-core</h2>
-<p>Once I had the overall architecture sketched out and defined the core interfaces I moved to 
-implementation using a Test Driven Development methodology. So the first thing to do was to write 
-a test for the DistributorService. You won't find that test in the project because once it 
-became clear that the DistributorServiceImpl was merely proxying requests to the other services,
-I refactored the tests into the tests for the individual services.
-</p>
-
-<p>
-I'll let you read the tests and the code to see how I implemented the core services. The important
-point for me was that I wrote absolutely no persistence code. Spring Data JPA took care of it all for me.
-</p>
 
 </body>
 

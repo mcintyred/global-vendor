@@ -25,8 +25,8 @@ import gv.warehouse.api.StockAlert;
 import gv.warehouse.api.StockAlertListener;
 import gv.warehouse.api.StockChangeRequest;
 import gv.warehouse.api.StockQueryRequest;
-import gv.warehouse.jpa.entity.StockLevel;
 import gv.warehouse.jpa.service.WarehouseServiceImpl;
+import gv.warehouse.jpa.service.entity.StockLevel;
 import gv.warehouse.jpa.service.repository.StockLevelRepository;
 
 @RunWith(MockitoJUnitRunner.class)

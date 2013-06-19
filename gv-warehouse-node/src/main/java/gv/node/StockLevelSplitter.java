@@ -6,7 +6,7 @@ import org.springframework.integration.annotation.Splitter;
 
 import com.google.common.collect.Lists;
 
-import gv.warehouse.jpa.entity.StockLevel;
+import gv.warehouse.jpa.service.entity.StockLevel;
 
 public class StockLevelSplitter {
 	

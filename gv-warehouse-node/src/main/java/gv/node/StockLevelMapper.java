@@ -4,7 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.springframework.jdbc.core.RowMapper;
 
-import gv.warehouse.jpa.entity.StockLevel;
+import gv.warehouse.jpa.service.entity.StockLevel;
 
 public class StockLevelMapper implements RowMapper<StockLevel>{
 	public StockLevel mapRow(ResultSet rs, int rowNum) throws SQLException {
