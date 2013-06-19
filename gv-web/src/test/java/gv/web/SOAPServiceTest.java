@@ -5,10 +5,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import gv.api.Product;
 import gv.api.Warehouse;
-import gv.core.service.DistributedWarehouseService;
 import gv.core.service.WarehouseServiceLocator;
 import gv.orders.api.OrderService;
 import gv.products.api.ProductService;
+import gv.warehouse.api.DistributedWarehouseService;
 import gv.warehouse.api.StockChangeRequest;
 import gv.warehouse.api.WarehouseService;
 

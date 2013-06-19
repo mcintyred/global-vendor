@@ -7,12 +7,12 @@ import gv.api.Product;
 import gv.api.Shipment;
 import gv.api.ShipmentLine;
 import gv.api.Warehouse;
-import gv.core.WarehouseStockData;
-import gv.core.service.DistributedWarehouseService;
 import gv.orders.api.OrderService;
 import gv.products.api.ProductService;
+import gv.warehouse.api.DistributedWarehouseService;
 import gv.warehouse.api.ShipmentConfirmation;
 import gv.warehouse.api.ShipmentRequest;
+import gv.warehouse.api.WarehouseStockData;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -7,9 +7,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import gv.AbstractWarehouseTest;
 import gv.api.Warehouse;
-import gv.core.StockAlertDetails;
 import gv.core.service.entity.StockAlertEntity;
 import gv.warehouse.api.StockAlert;
+import gv.warehouse.api.StockAlertDetails;
 import gv.warehouse.api.StockChangeRequest;
 import gv.warehouse.api.StockQueryRequest;
 

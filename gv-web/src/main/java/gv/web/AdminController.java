@@ -1,16 +1,12 @@
 package gv.web;
 
-import gv.api.Order;
-import gv.api.OrderConfirmation;
-import gv.api.OrderLine;
 import gv.api.Product;
 import gv.api.Warehouse;
-import gv.core.StockAlertDetails;
-import gv.core.service.DistributedWarehouseService;
 import gv.core.service.WarehouseServiceLocator;
 import gv.core.service.entity.WarehouseServiceBinding;
-import gv.orders.api.OrderService;
 import gv.products.api.ProductService;
+import gv.warehouse.api.DistributedWarehouseService;
+import gv.warehouse.api.StockAlertDetails;
 import gv.warehouse.api.StockChangeRequest;
 import gv.warehouse.api.StockQueryRequest;
 import gv.warehouse.api.WarehouseService;
@@ -49,9 +45,6 @@ public class AdminController {
 	
 	@Autowired
 	private WarehouseServiceLocator warehouseServiceLocator;
-	
-	@Autowired
-	private OrderService orderService;
 
 	@RequestMapping("/admin.html")
 	public String index(Model model) {

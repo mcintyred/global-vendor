@@ -2,19 +2,20 @@ package gv.core.service;
 
 import gv.api.Product;
 import gv.api.Warehouse;
-import gv.core.StockAlertDetails;
-import gv.core.WarehouseStockData;
 import gv.core.service.entity.StockAlertEntity;
 import gv.core.service.entity.WarehouseServiceBinding;
 import gv.core.service.repository.StockAlertEntityRepository;
 import gv.core.service.repository.WarehouseRepository;
 import gv.products.api.ProductService;
+import gv.warehouse.api.DistributedWarehouseService;
 import gv.warehouse.api.ShipmentConfirmation;
 import gv.warehouse.api.ShipmentRequest;
 import gv.warehouse.api.StockAlert;
+import gv.warehouse.api.StockAlertDetails;
 import gv.warehouse.api.StockChangeRequest;
 import gv.warehouse.api.StockQueryRequest;
 import gv.warehouse.api.WarehouseService;
+import gv.warehouse.api.WarehouseStockData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -160,5 +161,20 @@ public class DistributedWarehouseServiceImpl implements DistributedWarehouseServ
 		}
 		
 		return alerts;
+	}
+	
+	
+	@Override
+	public int getTotalStock(Long productId) {
+		
+		List<WarehouseStockData> stockData = getStockData(productId);
+		
+		int total = 0;
+		
+		for(WarehouseStockData data : stockData) {
+			total += data.getQty();
+		}
+		
+		return total;
 	}
 }
