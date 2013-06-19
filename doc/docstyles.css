@@ -69,3 +69,12 @@
 		background: #f2f2f2;
 		color: #6a006b;
 	}
+	
+	.screengrab img {
+		width:70%;
+	}
+	
+	.screengrab .caption {
+	margin-top: 1em;
+		border-bottom: 2px inset menu;
+	}

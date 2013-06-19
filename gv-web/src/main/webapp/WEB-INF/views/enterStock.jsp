@@ -3,18 +3,16 @@
 <%@ page session="false"%>
 <html>
 <head>
+
+<link href="<%= request.getContextPath() %>/resources/styles.css" type="text/css" rel="stylesheet"/>
+
 <title>Enter Stock Level</title>
-<style>
-	th, td {
-		border: 1px solid black;
-	}
-</style>
 </head>
 <body>
 
-	<fieldset>
-		<legend>Stock Levels For ${ product.name }</legend>
-		
+	
+	<div class="widget">
+		<h2>Stock Levels For ${ product.name }</h2>			
 		<form:form method="post" modelAttribute="stockForm">
 		
 			<table>
@@ -29,11 +27,11 @@
 				</c:forEach>
 			
 			</table>
-			
+			<br/>
 			<input type="submit" value="Save"/>
 		</form:form>
 		
-	</fieldset>
+	</div>
 
 	<a class="ret" href="<%= request.getContextPath() %>/admin.html">Return to admin page</a>
 

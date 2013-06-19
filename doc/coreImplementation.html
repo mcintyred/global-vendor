@@ -70,6 +70,98 @@ Once you have downloaded the project you should see the following directory stru
 projects.
 </p>
 
+<h3>Running The Code</h3>
+<p>
+The project gv-web-standalone uses an in-memory H2 database and should run in any web container.
+If you have imported the projects into STS, you can run it simply by right-clicking on the project root
+and selecting Run As/Run On Server.
+</p>
+
+<p>
+To generate a WAR file which can be deployed in e.g. Tomcat, use the <code>gradle war</code> command from the project root
+directory (my source code is installed at /home/duncan/src), and copy the generated WAR to your tomcat webapps directory:
+
+<pre>
+cd /home/duncan/src/global-vendor
+gradle war
+cp gv-web-standalone/build/libs/gv-web-standalone-1.0.0.CI-SNAPSHOT.war $TOMCAT_DIR/webapps/gv-web-standalone.war
+</pre>
+
+Once it is running open a browser and navigate to the admin page <a href="http://localhost:8080/gv-web-standalone/admin.html">http://localhost:8080/gv-web-standalone/admin.html</a>.
+<div class="screengrab">
+	<div class="caption">The Admin Window</div>
+	<img src="adminStart.jpg"/>
+</div>
+
+<p>You can see that the screen is divided into three sections:
+
+<ol>
+<li>A list of warehouses giving their name and type. For the moment the only type available is 'Local Database Service'</li>
+<li>A list of products and their stock levels at each warehouse</li>
+<li>A form to create a new product</li>
+</ol>
+
+<p>To start, let's add a couple of warehouses, London and Paris</p>
+<div class="screengrab">
+	<div class="caption">Added Warehouses</div>
+	<img src="addedWarehouses.jpg"/>
+</div>
+
+<p>Now add a product</p>
+<div class="screengrab">
+	<div class="caption">Added Product</div>
+	<img src="addedProduct.jpg"/>
+</div>
+
+<p>Now you can open another browser window as a distributor and see the list of products
+and their stock levels. Go to the distributor page <a href="http://localhost:8080/gv-web-standalone/index.html">http://localhost:8080/gv-web-standalone/index.html</a>.
+</p>
+<div class="screengrab">
+	<div class="caption">Distributor Page</div>
+	<img src="distributorPage.jpg"/>
+</div>
+
+<p>
+Go back to the admin page and click on 'Set Stock Levels', enter 33 for London and 55 for Paris, then save:
+</p>
+<div class="screengrab">
+	<div class="caption">Setting Stock Levels</div>
+	<img src="setFishStock.jpg"/>
+</div>
+
+<p>If you go back to the distributor page and click refresh, you should now see the total stock:
+</p>
+<div class="screengrab">
+	<div class="caption">Total Stock</div>
+	<img src="distributorPage88.jpg"/>
+</div>
+
+<p>
+Click on the Purchase link and get ready to buy 44:
+</p>
+<div class="screengrab">
+	<div class="caption">Buying 44 Halibut</div>
+	<img src="purchase44.jpg"/>
+</div>
+
+<p>Click 'Purchase' and the order confirmation page will show you where your fish will be shipped from:
+</p>
+<div class="screengrab">
+	<div class="caption">Order Confirmation</div>
+	<img src="confirm44.jpg"/>
+</div>
+
+<p>If you go back to the admin page you should see the stock levels now are London 33, and Paris 11.</p>
+<p>
+Now make another purchase of 22 and you should see that the order will be fulfilled from London. This is
+because the OrderService always takes stock from the warehouse with the most first.
+</p>
+
+<p>
+Finally, make a purchase of 15 and you should see 11 shipped from London and 4 from Paris.
+</p>
+
+
 <h4>gv-api</h4>
 This project defines the service interfaces used by the other projects. It also defines the message formats used by the SOAP Gateway and Spring Batch for file processing.
 The main packages in this project are as follows:
