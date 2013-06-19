@@ -54,20 +54,11 @@ GV sells a variety of products to distributors throughout the world, and they ha
 GV receives orders for products from their distributors and will fulfill an order by shipping product from one or more warehouses, starting with the warehouse with the most stock. The distributors are sent order confirmations which include a list of how many products are being shipped from each warehouse.
 </p>
 
-<p>
-The rollout plan for the new system calls for a phased approach. In the first phase, all stock information for all warehouses will be maintained in a central database, and warehouse managers will update their stock levels through a central website. Distributors will be able to enter their orders manually through the website or by making a web-services request. In the second phase warehouses will be able to maintain their own local stock database, and in the final phase distributors will be able to send batches of orders for offline processing by placing order files on an SFTP server.
-</p>
-
-
-<h3>Software Architecture</h3>
-<p>
-The overall architecture is shown in diagram 1. Interfaces of all the shaded components are specified in the gv-api project, whereas the DistributedWarehouseService is specified and implemented in the gv-core project.
-</p>
-
-<img src="softwareArchitecture.jpg" />
+<h3>Requirements</h3>
+<p>There will two users of the system - Administrators and Distributors.</p>
 
 <p>
-The Administrator has access to a web interface which provides functionality to:
+The Administrator must have access to a web interface which provides functionality to:
 </p>
 
 <ol>
@@ -78,7 +69,7 @@ The Administrator has access to a web interface which provides functionality to:
 </ol>
 
 <p>
-Distributors have access to a web interface which allows them to:
+Distributors must have access to a web interface which allows them to:
 </p>
 
 <ol>
@@ -87,11 +78,37 @@ Distributors have access to a web interface which allows them to:
 </ol>
 
 <p>
-The SOAP Gateway provides distributors with a web-service which can be used to place orders.
+Distributors must also be able to place orders using web-services or by placing an order file on an ftp server.
 </p>
+
 <p>
-Finally, the warehouses themselves may optionally provide StockAlerts which are received by the DistributedWarehouseService and logged in the local database for potential viewing by Administrators.
+Finally, it must be possible to set a stock alert threshold for warehouses such that when stock of an item falls below the threshold an alert is sent back to the Administrator,
+and when stock is replenished an update is sent back cancelling any previous alerts.
 </p>
+
+<p>
+The rollout plan for the new system calls for a phased approach. 
+<ul>
+
+<li>
+In the first phase, all stock information for all warehouses will be maintained in a central database, 
+
+Distributors will be able to enter their orders manually through the website or by making a web-services request. 
+</li>
+
+<li>In the second phase warehouses will be able to maintain their own local stock database.</li>
+
+<li>In the final phase distributors will be able to send batches of orders for offline processing by placing order files on an SFTP server.</li>
+</ul>
+</p>
+
+
+<h3>Software Architecture</h3>
+<p>
+The overall architecture is shown in diagram 1. Interfaces of all the shaded components are specified in the gv-api project, whereas the DistributedWarehouseService is specified and implemented in the gv-core project.
+</p>
+
+<img src="softwareArchitecture.jpg" />
 
 <h3>Systems Architecture</h3>
 

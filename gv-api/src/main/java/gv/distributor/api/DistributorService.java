@@ -19,5 +19,4 @@ public interface DistributorService {
 	public Product getProductById(Long productId);
 	public int getTotalStock(Long productId);
 	public OrderConfirmation placeOrder(Order order);
-
 }
