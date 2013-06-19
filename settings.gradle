@@ -1,9 +1,10 @@
 rootProject.name = 'gv-parent'
-include ':gv-api', ':gv-core', ':gv-web', ':gv-warehouse-node', ':gv-warehouse-jpa', ':gv-warehouse-gemfire'
+include ':gv-api', ':gv-core', ':gv-web', ':gv-warehouse-node', ':gv-warehouse-jpa', ':gv-warehouse-gemfire', ':gv-web-standalone'
 
 project(':gv-api').projectDir = "$rootDir/gv-api" as File
 project(':gv-core').projectDir = "$rootDir/gv-core" as File
 project(':gv-web').projectDir = "$rootDir/gv-web" as File
+project(':gv-web-standalone').projectDir = "$rootDir/gv-web-standalone" as File
 project(':gv-warehouse-node').projectDir = "$rootDir/gv-warehouse-node" as File
 project(':gv-warehouse-jpa').projectDir = "$rootDir/gv-warehouse-jpa" as File
 project(':gv-warehouse-gemfire').projectDir = "$rootDir/gv-warehouse-gemfire" as File

@@ -105,15 +105,26 @@ Distributors will be able to enter their orders manually through the website or 
 
 <h3>Software Architecture</h3>
 <p>
-The overall architecture is shown in diagram 1. Interfaces of all the shaded components are specified in the gv-api project, whereas the DistributedWarehouseService is specified and implemented in the gv-core project.
+The overall architecture is shown below. Points to note are:
+<ul>
+<li>The AdminController is responsible for managing the product catalog and the list of registered warehouses, as well as setting stock levels at warehouses and reading stock alerts</li>
+<li>The DistributorController talks directly to the DistributorService which is a facade hiding the details of the underlying services it delegates to.</li>
+<li>There is a separate OrderService which is called by the DistributorService, the SOAP Gateway and eventually by Spring Batch components</li>
+<li>The DistributedWarehouseService is responsible for directing calls to the appropriate WarehouseService; it must be aware of all the warehouses registered
+with the system. WarehouseServices themselves can be local to the DistributedWarehouseService or remote, and Spring Integration allows us to make remote services appear local</li>
+</ul>
 </p>
 
+<a name="softwareArchitecture-diagram"/>
 <img src="softwareArchitecture.jpg" />
 
 <h3>Systems Architecture</h3>
 
 <p>
-The second diagram - "Systems Architecture" - shows how the various implementations of the WarehouseService and other components are deployed. As you can see, I've deliberately made it as complicated as possible. If you run the code yourself it is of course possible to deploy the components in other ways. For example during testing I run the Gemfire Client and Server on Host 1.
+The second diagram - "Systems Architecture" - shows how the various implementations of the WarehouseService and other components are deployed. 
+As you can see, I've deliberately made it as complicated as possible. 
+If you run the code yourself it is of course possible to deploy the components in other ways. 
+For example during testing I run the Gemfire Client and Server on Host 1.
 </p>
 
 <img src="systemsArchitecture.jpg" />
