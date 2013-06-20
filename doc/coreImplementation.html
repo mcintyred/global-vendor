@@ -1,6 +1,6 @@
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="docstyles.css" />
+<link rel="stylesheet" type="text/css" href="styles/docstyles.css" />
 </head>
 <body>
 
@@ -92,7 +92,7 @@ cp gv-web-standalone/build/libs/gv-web-standalone-1.0.0.CI-SNAPSHOT.war $TOMCAT_
 Once it is running open a browser and navigate to the admin page <a href="http://localhost:8080/gv-web-standalone/admin.html">http://localhost:8080/gv-web-standalone/admin.html</a>.
 <div class="screengrab">
 	<div class="caption">The Admin Window</div>
-	<img src="adminStart.jpg"/>
+	<img src="images/adminStart.jpg"/>
 </div>
 
 <p>You can see that the screen is divided into three sections:
@@ -107,13 +107,13 @@ Once it is running open a browser and navigate to the admin page <a href="http:/
 <a name="adminPage-warehouses"/>
 <div class="screengrab">
 	<div class="caption">Added Warehouses</div>
-	<img src="addedWarehouses.jpg"/>
+	<img src="images/addedWarehouses.jpg"/>
 </div>
 
 <p>Now add a product</p>
 <div class="screengrab">
 	<div class="caption">Added Product</div>
-	<img src="addedProduct.jpg"/>
+	<img src="images/addedProduct.jpg"/>
 </div>
 
 <p>Now you can open another browser window as a distributor and see the list of products
@@ -121,7 +121,7 @@ and their stock levels. Go to the distributor page <a href="http://localhost:808
 </p>
 <div class="screengrab">
 	<div class="caption">Distributor Page</div>
-	<img src="distributorPage.jpg"/>
+	<img src="images/distributorPage.jpg"/>
 </div>
 
 <p>
@@ -129,14 +129,14 @@ Go back to the admin page and click on 'Set Stock Levels', enter 33 for London a
 </p>
 <div class="screengrab">
 	<div class="caption">Setting Stock Levels</div>
-	<img src="setFishStock.jpg"/>
+	<img src="images/setFishStock.jpg"/>
 </div>
 
 <p>If you go back to the distributor page and click refresh, you should now see the total stock:
 </p>
 <div class="screengrab">
 	<div class="caption">Total Stock</div>
-	<img src="distributorPage88.jpg"/>
+	<img src="images/distributorPage88.jpg"/>
 </div>
 
 <p>
@@ -144,14 +144,14 @@ Click on the Purchase link and get ready to buy 44:
 </p>
 <div class="screengrab">
 	<div class="caption">Buying 44 Halibut</div>
-	<img src="purchase44.jpg"/>
+	<img src="images/purchase44.jpg"/>
 </div>
 
 <p>Click 'Purchase' and the order confirmation page will show you where your fish will be shipped from:
 </p>
 <div class="screengrab">
 	<div class="caption">Order Confirmation</div>
-	<img src="confirm44.jpg"/>
+	<img src="images/confirm44.jpg"/>
 </div>
 
 <p>If you go back to the admin page you should see the stock levels now are London 33, and Paris 11.</p>
@@ -216,7 +216,7 @@ of the WarehouseService and uses Spring Data JPA to store stock data.
 </p>
 <div class="screengrab-small">
 	<div class="caption">The gv-warehouse-jpa Project</div>
-	<img src="gvWarehouseJPA.jpg"/>
+	<img src="images/gvWarehouseJPA.jpg"/>
 </div>
 
 <h3>Include the dependencies</h3>

@@ -28,16 +28,13 @@
 	</int:channel>
 	
 	<int:logging-channel-adapter id="logger" level="DEBUG" />	
-		
-	 <int:channel id="filtered"/>
+	
 	 <int:channel id="update-stock"/>
 	 <int:channel id="set-stock"/>
 	 <int:channel id="get-stock"/>
 	 <int:channel id="request-shipment"/>
 	 
-	 <int:chain input-channel="inbound">
-	 	<int:header-value-router header-name="GV_Method" />
- 	 </int:chain>
+ 	<int:header-value-router input-channel="inbound" header-name="GV_Method" />
  	 
  	<int:chain input-channel="set-stock">
  		<int:json-to-object-transformer type="gv.stock.api.StockChangeRequest"/>
@@ -57,6 +54,18 @@
  	<int:chain input-channel="request-shipment">
  		<int:json-to-object-transformer type="gv.stock.api.ShipmentRequest"/>
  		<int:service-activator expression="@warehouseService.requestShipment(payload)"/>
+ 		<int:object-to-json-transformer/>
+	</int:chain>
+
+ 	<int:chain input-channel="cancel-shipment">
+ 		<int:json-to-object-transformer type="gv.api.Shipment"/>
+ 		<int:service-activator expression="@warehouseService.cancelShipment(payload)"/>
+ 		<int:object-to-json-transformer/>
+	</int:chain>
+
+ 	<int:chain input-channel="discontinue-product">
+ 		<int:json-to-object-transformer type="gv.stock.api.DiscontinueProductRequest"/>
+ 		<int:service-activator expression="@warehouseService.discontinueProduct(payload)"/>
  		<int:object-to-json-transformer/>
 	</int:chain>
 

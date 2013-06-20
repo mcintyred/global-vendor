@@ -1,26 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rabbit="http://www.springframework.org/schema/rabbit"
 	xmlns:int-amqp="http://www.springframework.org/schema/integration/amqp"
 	xmlns:int="http://www.springframework.org/schema/integration"
 	xsi:schemaLocation="http://www.springframework.org/schema/integration/amqp http://www.springframework.org/schema/integration/amqp/spring-integration-amqp-2.2.xsd
 		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration-2.2.xsd
 		http://www.springframework.org/schema/rabbit http://www.springframework.org/schema/rabbit/spring-rabbit.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
-				
-	<int-amqp:inbound-gateway 
-		queue-names="warehouse_${gv.node.id}" 
-		request-channel="inbound" 
-		connection-factory="rabbitConnectionFactory"
-		mapped-request-headers="GV*"
-	/>
+		
 	
-	<int-amqp:outbound-channel-adapter
+	<!-- Requests from the central server go out through this gateway -->
+	<int-amqp:outbound-gateway 
 		amqp-template="amqpTemplate"
-		exchange-name="stockAlertsExchange"
-		channel="outbound-stock-alerts"
-		mapped-request-headers="GV*">
-	</int-amqp:outbound-channel-adapter>
+		exchange-name="stockExchange"
+		request-channel="outbound-rabbit-requests"
+		reply-channel="inbound-rabbit-responses"
+		mapped-request-headers="GV*" routing-key-expression="headers.GV_WarehouseId"
+	/>	
 	
-	</beans>
+	<!-- Stock alerts come in through this gateway -->
+	<int-amqp:inbound-channel-adapter
+		acknowledge-mode="AUTO"
+		channel="inbound-stock-alerts"
+		connection-factory="rabbitConnectionFactory"
+		queue-names="core-stock-alerts"
+	/>
+		
+</beans>
