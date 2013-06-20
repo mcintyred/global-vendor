@@ -4,13 +4,14 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.reset;
 import gv.api.Product;
 import gv.api.Warehouse;
-import gv.core.service.DistributedWarehouseServiceImpl;
 import gv.core.service.WarehouseServiceList;
 import gv.core.service.WarehouseServiceLocatorImpl;
 import gv.core.service.entity.WarehouseServiceBinding;
-import gv.core.service.repository.StockAlertEntityRepository;
 import gv.core.service.repository.WarehouseRepository;
 import gv.products.api.ProductService;
+import gv.stock.service.StockServiceImpl;
+import gv.stock.service.StockServiceImplTest;
+import gv.stock.service.repository.StockAlertEntityRepository;
 import gv.warehouse.api.WarehouseService;
 
 import java.util.ArrayList;
@@ -48,7 +49,7 @@ abstract public class AbstractWarehouseTest {
 	protected Warehouse paris;
 	protected Warehouse tokyo;
 
-	protected DistributedWarehouseServiceImpl warehouseService;
+	protected StockServiceImpl stockService;
 
 	@Mock
 	protected WarehouseRepository warehouseRepository;
@@ -97,12 +98,11 @@ abstract public class AbstractWarehouseTest {
 		given(warehouseRepository.findAll()).willReturn(
 				Lists.newArrayList(londonEntity, parisEntity, tokyoEntity));
 
-		warehouseService = new DistributedWarehouseServiceImpl();
-		warehouseService.setWarehouseRepository(warehouseRepository);
-		warehouseService.setWarehouseServiceLocator(locator);
+		stockService = new StockServiceImpl();
+		stockService.setWarehouseServiceLocator(locator);
 		
-		warehouseService.setProductService(productService);
-		warehouseService.setStockAlertEntityRepository(stockAlertRepository);
+		stockService.setProductService(productService);
+		stockService.setStockAlertEntityRepository(stockAlertRepository);
 		
 		ham = new Product(1L, "Ham", "A nice bit of ham");
 		cheese = new Product(2L, "Cheese", "A mature cheddar");

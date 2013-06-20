@@ -1,4 +1,4 @@
-package gv.core.service;
+package gv.stock.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -7,11 +7,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import gv.AbstractWarehouseTest;
 import gv.api.Warehouse;
-import gv.core.service.entity.StockAlertEntity;
-import gv.warehouse.api.StockAlert;
-import gv.warehouse.api.StockAlertDetails;
-import gv.warehouse.api.StockChangeRequest;
-import gv.warehouse.api.StockQueryRequest;
+import gv.stock.api.StockAlert;
+import gv.stock.api.StockAlertDetails;
+import gv.stock.api.StockChangeRequest;
+import gv.stock.api.StockQueryRequest;
+import gv.stock.service.entity.StockAlertEntity;
 
 import java.util.List;
 import java.util.Set;
@@ -24,12 +24,12 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.google.common.collect.Lists;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DistributedWarehouseServiceImplTest extends AbstractWarehouseTest {
+public class StockServiceImplTest extends AbstractWarehouseTest {
 	
 	@Test
 	public void shouldListWarehouses() {
 		// when
-		Set<Warehouse> warehouses = warehouseService.listWarehouses();
+		Set<Warehouse> warehouses = stockService.listWarehouses();
 		// then
 		assertEquals(warehouses.size(), 3);
 	}
@@ -37,15 +37,15 @@ public class DistributedWarehouseServiceImplTest extends AbstractWarehouseTest {
 	@Test
 	public void shouldGetWarehouseById() {
 		// when
-		Warehouse found = warehouseService.getWarehouseById(LONDON);
+		Warehouse found = stockService.getWarehouseById(LONDON);
 		// then
 		assertEquals(found, london);
 		// when
-		found = warehouseService.getWarehouseById(PARIS);
+		found = stockService.getWarehouseById(PARIS);
 		// then
 		assertEquals(found, paris);
 		// when
-		found = warehouseService.getWarehouseById(TOKYO);
+		found = stockService.getWarehouseById(TOKYO);
 		// then
 		assertEquals(found, tokyo);
 	}
@@ -53,7 +53,7 @@ public class DistributedWarehouseServiceImplTest extends AbstractWarehouseTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void shouldNotGetWarehouseByInvalidId() {
 		// when
-		warehouseService.getWarehouseById(13L);
+		stockService.getWarehouseById(13L);
 		// then
 		// exception expected
 	}
@@ -68,7 +68,7 @@ public class DistributedWarehouseServiceImplTest extends AbstractWarehouseTest {
 		given(londonService.updateStock(request)).willReturn(stockDelta + 5);
 		
 		// when
-		warehouseService.updateStock(request);
+		stockService.updateStock(request);
 		
 		// then
 		verify(londonService).updateStock(request);
@@ -84,7 +84,7 @@ public class DistributedWarehouseServiceImplTest extends AbstractWarehouseTest {
 		StockChangeRequest request = new StockChangeRequest(warehouseId, productId, stockLevel);
 		
 		// when
-		warehouseService.setStock(request);
+		stockService.setStock(request);
 		
 		// then
 		verify(londonService).setStock(request);
@@ -100,7 +100,7 @@ public class DistributedWarehouseServiceImplTest extends AbstractWarehouseTest {
 		StockQueryRequest request = new StockQueryRequest(warehouseId, productId);
 		given(londonService.getStock(request)).willReturn(stockLevel);
 		// when
-		int foundStockLevel = warehouseService.getStockInWarehouse(request);
+		int foundStockLevel = stockService.getStockInWarehouse(request);
 		
 		// then
 		verify(londonService).getStock(request);
@@ -116,7 +116,7 @@ public class DistributedWarehouseServiceImplTest extends AbstractWarehouseTest {
 		ArgumentCaptor<StockAlertEntity> captor = ArgumentCaptor.forClass(StockAlertEntity.class);
 		
 		// when
-		warehouseService.handleStockAlert(alert);
+		stockService.handleStockAlert(alert);
 		
 		// then
 		verify(stockAlertRepository).save(captor.capture());
@@ -144,7 +144,7 @@ public class DistributedWarehouseServiceImplTest extends AbstractWarehouseTest {
 		ArgumentCaptor<StockAlertEntity> captor = ArgumentCaptor.forClass(StockAlertEntity.class);
 		
 		// when
-		warehouseService.handleStockAlert(alert);
+		stockService.handleStockAlert(alert);
 		
 		// then
 		verify(stockAlertRepository).delete(captor.capture());
@@ -166,7 +166,7 @@ public class DistributedWarehouseServiceImplTest extends AbstractWarehouseTest {
 		given(stockAlertRepository.findAll()).willReturn(alerts);
 		
 		// when
-		List<StockAlertDetails> details = warehouseService.getStockAlerts();
+		List<StockAlertDetails> details = stockService.getStockAlerts();
 		
 		// then
 		assertNotNull(details);

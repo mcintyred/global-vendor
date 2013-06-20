@@ -24,9 +24,9 @@
 	<!-- connect to the local broker using the default user name and password -->
 	<bean id="rabbitConnectionFactory"
 		class="org.springframework.amqp.rabbit.connection.CachingConnectionFactory">
-		<constructor-arg value="${dw.rabbit.host}" />
-		<property name="username" value="${dw.rabbit.user}" />
-		<property name="password" value="${dw.rabbit.password}" />
+		<constructor-arg value="${gv.rabbit.host}" />
+		<property name="username" value="${gv.rabbit.user}" />
+		<property name="password" value="${gv.rabbit.password}" />
 	</bean>
 
 	<!-- Declare the exchange to which requests are sent. Each node will declare its own queue -->
@@ -69,19 +69,19 @@
 	>
 		<!-- Set the method header -->
 		<int:method name="setStock">
-			<int:header name="DW_Method" value="set-stock"/>
+			<int:header name="GV_Method" value="set-stock"/>
 		</int:method>
 		
 		<int:method name="updateStock">
-			<int:header name="DW_Method" value="update-stock"/>
+			<int:header name="GV_Method" value="update-stock"/>
 		</int:method>
 		
 		<int:method name="getStock">
-			<int:header name="DW_Method" value="get-stock"/>
+			<int:header name="GV_Method" value="get-stock"/>
 		</int:method>
 		
 		<int:method name="requestShipment">
-			<int:header name="DW_Method" value="request-shipment"/>
+			<int:header name="GV_Method" value="request-shipment"/>
 		</int:method>
 		
 		
@@ -98,7 +98,7 @@
 	<!-- Outbound requests go through this chain to set headers and map to json -->
 	<int:chain input-channel="outbound-requests" output-channel="outbound-rabbit-requests">
 		<int:header-enricher>
-			<int:header name="DW_WarehouseId" expression="'warehouse_' + payload.warehouseId"/>
+			<int:header name="GV_WarehouseId" expression="'warehouse_' + payload.warehouseId"/>
 		</int:header-enricher>
 		<int:object-to-json-transformer />
 	</int:chain>
@@ -110,17 +110,17 @@
 		exchange-name="stockExchange"
 		request-channel="outbound-rabbit-requests"
 		reply-channel="inbound-rabbit-responses"
-		mapped-request-headers="DW*" routing-key-expression="headers.DW_WarehouseId"
+		mapped-request-headers="GV*" routing-key-expression="headers.GV_WarehouseId"
 	/>
 	
-	<int:header-value-router header-name="DW_Method" input-channel="inbound-rabbit-responses">
+	<int:header-value-router header-name="GV_Method" input-channel="inbound-rabbit-responses">
 		<int:mapping value="request-shipment" channel="request-shipment-ack"/>	
 		<int:mapping value="set-stock" channel="inbound-responses"/>	
 		<int:mapping value="get-stock" channel="inbound-responses"/>	
 		<int:mapping value="update-stock" channel="inbound-responses"/>	
 	</int:header-value-router>	
 	
-	<int:json-to-object-transformer type="gv.warehouse.api.ShipmentConfirmation" input-channel="request-shipment-ack" output-channel="inbound-responses"/>
+	<int:json-to-object-transformer type="gv.stock.api.ShipmentConfirmation" input-channel="request-shipment-ack" output-channel="inbound-responses"/>
 	
 	<int:service-activator input-channel="inbound-responses" expression="payload"/>
 	
@@ -134,11 +134,11 @@
 	
 	<int:chain input-channel="inbound-stock-alerts">
 		<int:json-to-object-transformer 
-			type="gv.warehouse.api.StockAlert"
+			type="gv.stock.api.StockAlert"
 		/>
 		<int:service-activator
 			method="handleStockAlert"
-			ref="distributedWarehouseServiceImpl"
+			ref="distributeGVarehouseServiceImpl"
 		/>
 	</int:chain>
 </beans>

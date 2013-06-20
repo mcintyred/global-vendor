@@ -1,4 +1,4 @@
-package gv.jpa.service;
+package gv.warehouse.jpa.service;
 
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
@@ -19,12 +19,12 @@ import gv.api.Product;
 import gv.api.Shipment;
 import gv.api.ShipmentLine;
 import gv.api.Warehouse;
-import gv.warehouse.api.ShipmentConfirmation;
-import gv.warehouse.api.ShipmentRequest;
-import gv.warehouse.api.StockAlert;
-import gv.warehouse.api.StockAlertListener;
-import gv.warehouse.api.StockChangeRequest;
-import gv.warehouse.api.StockQueryRequest;
+import gv.stock.api.ShipmentConfirmation;
+import gv.stock.api.ShipmentRequest;
+import gv.stock.api.StockAlert;
+import gv.stock.api.StockAlertListener;
+import gv.stock.api.StockChangeRequest;
+import gv.stock.api.StockQueryRequest;
 import gv.warehouse.jpa.service.WarehouseServiceImpl;
 import gv.warehouse.jpa.service.entity.StockLevel;
 import gv.warehouse.jpa.service.repository.StockLevelRepository;

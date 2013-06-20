@@ -1,10 +1,11 @@
 package gv.node;
 
+import gv.warehouse.jpa.service.entity.StockLevel;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.springframework.jdbc.core.RowMapper;
 
-import gv.warehouse.jpa.service.entity.StockLevel;
+import org.springframework.jdbc.core.RowMapper;
 
 public class StockLevelMapper implements RowMapper<StockLevel>{
 	public StockLevel mapRow(ResultSet rs, int rowNum) throws SQLException {

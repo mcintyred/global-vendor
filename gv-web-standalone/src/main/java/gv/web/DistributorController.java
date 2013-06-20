@@ -10,10 +10,10 @@ import gv.core.service.entity.WarehouseServiceBinding;
 import gv.distributor.api.DistributorService;
 import gv.orders.api.OrderService;
 import gv.products.api.ProductService;
-import gv.warehouse.api.DistributedWarehouseService;
-import gv.warehouse.api.StockAlertDetails;
-import gv.warehouse.api.StockChangeRequest;
-import gv.warehouse.api.StockQueryRequest;
+import gv.stock.api.StockService;
+import gv.stock.api.StockAlertDetails;
+import gv.stock.api.StockChangeRequest;
+import gv.stock.api.StockQueryRequest;
 import gv.warehouse.api.WarehouseService;
 
 import java.util.HashMap;

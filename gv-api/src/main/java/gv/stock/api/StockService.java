@@ -1,11 +1,11 @@
-package gv.warehouse.api;
+package gv.stock.api;
 
 import gv.api.Warehouse;
 
 import java.util.List;
 import java.util.Set;
 
-public interface DistributedWarehouseService extends StockAlertListener {
+public interface StockService extends StockAlertListener {
 	
 	Set<Warehouse> listWarehouses();
 	Warehouse getWarehouseById(Long warehouseId);

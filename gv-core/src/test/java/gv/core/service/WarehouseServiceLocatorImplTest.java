@@ -19,7 +19,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class WarehouseServiceLocatorMapImplTest {
+public class WarehouseServiceLocatorImplTest {
 	
 	public static final long TOKYO = 21L;
 
@@ -80,7 +80,7 @@ public class WarehouseServiceLocatorMapImplTest {
 	
 	@Test
 	public void shouldLocateRepository() {
-		WarehouseService repo = locator.locateService(london);
+		WarehouseService repo = locator.locateService(london.getId());
 		assertEquals(londonService, repo);
 	}
 	
@@ -89,7 +89,7 @@ public class WarehouseServiceLocatorMapImplTest {
 		// given
 		Warehouse unknown = new Warehouse(999L, "Unknown");
 		// when
-		WarehouseService repo = locator.locateService(unknown);
+		WarehouseService repo = locator.locateService(unknown.getId());
 		// then
 		// exception expected
 		assertFalse("Exception expected", true);

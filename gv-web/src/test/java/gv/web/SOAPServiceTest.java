@@ -1,15 +1,13 @@
 package gv.web;
 
-import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import gv.api.Product;
 import gv.api.Warehouse;
 import gv.core.service.WarehouseServiceLocator;
 import gv.orders.api.OrderService;
 import gv.products.api.ProductService;
-import gv.warehouse.api.DistributedWarehouseService;
-import gv.warehouse.api.StockChangeRequest;
+import gv.stock.api.StockChangeRequest;
+import gv.stock.api.StockService;
 import gv.warehouse.api.WarehouseService;
 
 import java.io.StringReader;
@@ -49,7 +47,7 @@ public class SOAPServiceTest {
 	private SimpleWebServiceInboundGateway gateway;
 	
 	@Autowired
-	private DistributedWarehouseService warehouseService;
+	private StockService stockService;
 	
 	@Autowired
 	private ProductService productService;
@@ -77,8 +75,8 @@ public class SOAPServiceTest {
 		widget = new Product("Widget", "The new improved Widget2.0");
 		productService.saveProduct(widget);
 		
-		warehouseService.setStock(new StockChangeRequest(london.getId(), widget.getId(), 22));
-		warehouseService.setStock(new StockChangeRequest(paris.getId(), widget.getId(), 33));
+		stockService.setStock(new StockChangeRequest(london.getId(), widget.getId(), 22));
+		stockService.setStock(new StockChangeRequest(paris.getId(), widget.getId(), 33));
 	}
 
 	@Test

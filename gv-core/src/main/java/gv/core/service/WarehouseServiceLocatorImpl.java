@@ -7,6 +7,7 @@ import gv.warehouse.api.WarehouseService;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 @Service
 @Transactional
@@ -59,19 +61,19 @@ public class WarehouseServiceLocatorImpl implements WarehouseServiceLocator {
 	}
 
 	@Override
-	public WarehouseService locateService(Warehouse warehouse) {
+	public WarehouseService locateService(Long warehouseId) {
 		
-		WarehouseServiceBinding entity = repository.findOne(warehouse.getId());
+		WarehouseServiceBinding entity = repository.findOne(warehouseId);
 		
 		if(entity == null) {
-			throw new IllegalArgumentException("No such warehouse registered : " + warehouse);
+			throw new IllegalArgumentException("No such warehouse registered : " + warehouseId);
 		}
 		
 		if(getServiceNameMap().containsKey(entity.getServiceBindingName())) {
 			return getServiceNameMap().get(entity.getServiceBindingName());
 		}
 		
-		throw new IllegalArgumentException("No service registered for warehouse : " + warehouse);
+		throw new IllegalArgumentException("No service registered for warehouse : " + entity.getName());
 	}
 
 	@Override
@@ -108,5 +110,29 @@ public class WarehouseServiceLocatorImpl implements WarehouseServiceLocator {
 	@Override
 	public List<WarehouseServiceBinding> listBindings() {
 		return Lists.newArrayList(repository.findAll());
+	}
+	
+
+	@Override
+	public Set<Warehouse> listWarehouses() {
+		
+		Set<Warehouse> warehouses = Sets.newHashSet();
+		
+		for(WarehouseServiceBinding entity : repository.findAll()) {
+			warehouses.add(new Warehouse(entity.getId(), entity.getName()));
+		}
+		
+		return warehouses;
+	}
+
+	@Override
+	public Warehouse getWarehouseById(Long warehouseId) {
+		WarehouseServiceBinding entity = repository.findOne(warehouseId);
+		
+		if(entity == null) {
+			throw new IllegalArgumentException();
+		}
+		
+		return new Warehouse(entity.getId(), entity.getName());
 	}
 }

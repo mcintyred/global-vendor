@@ -53,11 +53,14 @@ So let's get started with a description of the 'business model' of our hypotheti
 </p>
 
 <p>
-GV sells a variety of products to distributors throughout the world, and they have a number of warehouses in different locations. The list of products they sell is centrally managed, and warehouses are not required to hold stock of all products.
+GV sells a variety of products to distributors throughout the world, and they have a number of warehouses in different locations. 
+The list of products they sell is centrally managed, and warehouses are not required to hold stock of all products.
 </p>
 
 <p>
-GV receives orders for products from their distributors and will fulfill an order by shipping product from one or more warehouses, starting with the warehouse with the most stock. The distributors are sent order confirmations which include a list of how many products are being shipped from each warehouse.
+GV receives orders for products from their distributors and will fulfill an order by shipping product from one or more warehouses, 
+starting with the warehouse with the most stock. The distributors are sent order confirmations which include a list of 
+how many products are being shipped from each warehouse.
 </p>
 
 <h3>Requirements</h3>
@@ -88,7 +91,8 @@ Distributors must also be able to place orders using web-services or by placing 
 </p>
 
 <p>
-Finally, it must be possible to set a stock alert threshold for warehouses such that when stock of an item falls below the threshold an alert is sent back to the Administrator,
+Finally, it must be possible to set a stock alert threshold for warehouses such that when stock of an item falls below 
+the threshold an alert is sent back to the Administrator,
 and when stock is replenished an update is sent back cancelling any previous alerts.
 </p>
 
@@ -116,8 +120,9 @@ The overall architecture is shown below. Points to note are:
 <li>The AdminController is responsible for managing the product catalog and the list of registered warehouses, as well as setting stock levels at warehouses and reading stock alerts</li>
 <li>The DistributorController talks directly to the DistributorService which is a facade hiding the details of the underlying services it delegates to.</li>
 <li>There is a separate OrderService which is called by the DistributorService, the SOAP Gateway and eventually by Spring Batch components</li>
-<li>The DistributedWarehouseService is responsible for directing calls to the appropriate WarehouseService; it must be aware of all the warehouses registered
-with the system. WarehouseServices themselves can be local to the DistributedWarehouseService or remote, and Spring Integration allows us to make remote services appear local</li>
+<li>The StockService is responsible for directing calls to the appropriate WarehouseService, it uses the WarehouseServiceLocator to
+obtain the appropriate service implementation to communicate with a particular warehouse. 
+WarehouseServices themselves can be local to the StockService or remote, and Spring Integration allows us to make remote services appear local</li>
 </ul>
 
 <h4>The WarehouseService</h4>

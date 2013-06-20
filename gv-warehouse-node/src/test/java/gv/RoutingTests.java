@@ -5,11 +5,11 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
+import gv.stock.api.ShipmentConfirmation;
+import gv.stock.api.ShipmentRequest;
+import gv.stock.api.StockChangeRequest;
+import gv.stock.api.StockQueryRequest;
 import gv.test.UnitTest;
-import gv.warehouse.api.ShipmentConfirmation;
-import gv.warehouse.api.ShipmentRequest;
-import gv.warehouse.api.StockChangeRequest;
-import gv.warehouse.api.StockQueryRequest;
 import gv.warehouse.api.WarehouseService;
 
 import java.util.concurrent.CountDownLatch;
@@ -21,13 +21,11 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.integration.Message;
 import org.springframework.integration.MessageChannel;
 import org.springframework.integration.MessageDeliveryException;
-import org.springframework.integration.MessageRejectedException;
 import org.springframework.integration.MessagingException;
 import org.springframework.integration.core.MessageHandler;
 import org.springframework.integration.core.SubscribableChannel;
@@ -58,7 +56,7 @@ public class RoutingTests {
 	@Test(expected = MessageDeliveryException.class)
 	public void shouldRejectInvalidWarehouseId() {
 		// given
-		Message<String> message = MessageBuilder.withPayload("").setHeader("DW_WarehouseId", 99).build();
+		Message<String> message = MessageBuilder.withPayload("").setHeader("GV_WarehouseId", 99).build();
 		
 		// when
 		inputChannel.send(message);
@@ -72,8 +70,8 @@ public class RoutingTests {
 	public void shouldRejectInvalidMethod() {
 		// given
 		Message<String> message = MessageBuilder.withPayload("")
-				.setHeader("DW_WarehouseId", 1)
-				.setHeader("DW_Method", "undefined")
+				.setHeader("GV_WarehouseId", 1)
+				.setHeader("GV_Method", "undefined")
 				.build();
 		
 		// when
@@ -89,8 +87,8 @@ public class RoutingTests {
 		// given
 		StockChangeRequest request = new StockChangeRequest(1L,3L,5);
 		Message<StockChangeRequest> message = MessageBuilder.withPayload(request)
-				.setHeader("DW_WarehouseId", 1)
-				.setHeader("DW_Method", "set-stock")
+				.setHeader("GV_WarehouseId", 1)
+				.setHeader("GV_Method", "set-stock")
 				.setReplyChannel(outputChannel)
 				.build();
 		
@@ -124,8 +122,8 @@ public class RoutingTests {
 		// given
 		StockChangeRequest request = new StockChangeRequest(1L,3L,5);
 		Message<StockChangeRequest> message = MessageBuilder.withPayload(request)
-				.setHeader("DW_WarehouseId", 1)
-				.setHeader("DW_Method", "update-stock")
+				.setHeader("GV_WarehouseId", 1)
+				.setHeader("GV_Method", "update-stock")
 				.setReplyChannel(outputChannel)
 				.build();
 		
@@ -158,8 +156,8 @@ public class RoutingTests {
 		StockQueryRequest request = new StockQueryRequest(1L, 3L);
 		
 		Message<StockQueryRequest> message = MessageBuilder.withPayload(request)
-				.setHeader("DW_WarehouseId", 1)
-				.setHeader("DW_Method", "get-stock")
+				.setHeader("GV_WarehouseId", 1)
+				.setHeader("GV_Method", "get-stock")
 				.setReplyChannel(outputChannel)
 				.build();
 		
@@ -194,8 +192,8 @@ public class RoutingTests {
 		ShipmentRequest request = new ShipmentRequest(warehouseId, productId, qty);
 		
 		Message<ShipmentRequest> message = MessageBuilder.withPayload(request)
-				.setHeader("DW_WarehouseId", warehouseId)
-				.setHeader("DW_Method", "request-shipment")
+				.setHeader("GV_WarehouseId", warehouseId)
+				.setHeader("GV_Method", "request-shipment")
 				.setReplyChannel(outputChannel)
 				.build();
 		

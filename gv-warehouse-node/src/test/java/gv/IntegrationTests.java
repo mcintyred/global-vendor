@@ -1,6 +1,12 @@
 package gv;
 
 import static org.junit.Assert.assertEquals;
+import gv.stock.api.ShipmentConfirmation;
+import gv.stock.api.ShipmentRequest;
+import gv.stock.api.StockChangeRequest;
+import gv.stock.api.StockQueryRequest;
+import gv.test.IntegrationTest;
+import gv.warehouse.api.WarehouseService;
 
 import java.io.IOException;
 
@@ -10,20 +16,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
-import org.springframework.amqp.core.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import gv.test.IntegrationTest;
-import gv.warehouse.api.ShipmentConfirmation;
-import gv.warehouse.api.ShipmentRequest;
-import gv.warehouse.api.StockChangeRequest;
-import gv.warehouse.api.StockQueryRequest;
-import gv.warehouse.api.WarehouseService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration()

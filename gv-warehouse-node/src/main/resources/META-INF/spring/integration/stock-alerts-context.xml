@@ -10,7 +10,7 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">	
 		
  	<!-- Creates an outbound gateway to be registered as a StockAlertsListener with the warehouse service -->
-	<int:gateway id="stockAlertsGateway" service-interface="gv.warehouse.api.StockAlertListener"
+	<int:gateway id="stockAlertsGateway" service-interface="gv.stock.api.StockAlertListener"
 		default-request-channel="stock-alerts">	
 	</int:gateway>
 	

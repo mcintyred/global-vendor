@@ -6,7 +6,7 @@ import gv.api.Product;
 import gv.distributor.api.DistributorService;
 import gv.orders.api.OrderService;
 import gv.products.api.ProductService;
-import gv.warehouse.api.DistributedWarehouseService;
+import gv.stock.api.StockService;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ public class DistributorServiceImpl implements DistributorService {
 	private ProductService productService;
 	
 	@Autowired
-	private DistributedWarehouseService distributedWarehouseService;
+	private StockService stockService;
 	
 	@Autowired
 	private OrderService orderService;
@@ -37,7 +37,7 @@ public class DistributorServiceImpl implements DistributorService {
 
 	@Override
 	public int getTotalStock(Long productId) {
-		return distributedWarehouseService.getTotalStock(productId);
+		return stockService.getTotalStock(productId);
 	}
 
 	@Override

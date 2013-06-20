@@ -1,4 +1,4 @@
-package gv.warehouse.api;
+package gv.stock.api;
 
 /**
  * A POJO to encapsulate the parameters needed to query a Warehouse for a Product's stock level

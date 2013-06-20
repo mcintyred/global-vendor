@@ -12,7 +12,7 @@
 	<!-- 
 	Messages are received on the inbound channel.
 	
-	Messages are routed to the appropriate ServiceActivator based on their DW_Method header:
+	Messages are routed to the appropriate ServiceActivator based on their GV_Method header:
 	
 	update-stock      - returns the new stock level as the payload
 	set-stock         - no return value
@@ -36,26 +36,26 @@
 	 <int:channel id="request-shipment"/>
 	 
 	 <int:chain input-channel="inbound">
-	 	<int:header-value-router header-name="DW_Method" />
+	 	<int:header-value-router header-name="GV_Method" />
  	 </int:chain>
  	 
  	<int:chain input-channel="set-stock">
- 		<int:json-to-object-transformer type="gv.warehouse.api.StockChangeRequest"/>
+ 		<int:json-to-object-transformer type="gv.stock.api.StockChangeRequest"/>
  		<int:service-activator expression="@warehouseService.setStock(payload)"/>
  	</int:chain>
 
  	<int:chain input-channel="update-stock">
- 		<int:json-to-object-transformer type="gv.warehouse.api.StockChangeRequest"/>
+ 		<int:json-to-object-transformer type="gv.stock.api.StockChangeRequest"/>
  		<int:service-activator expression="@warehouseService.updateStock(payload)"/>
  	</int:chain>
 
  	<int:chain input-channel="get-stock">
- 		<int:json-to-object-transformer type="gv.warehouse.api.StockQueryRequest"/>
+ 		<int:json-to-object-transformer type="gv.stock.api.StockQueryRequest"/>
  		<int:service-activator expression="@warehouseService.getStock(payload)"/>
  	</int:chain>
 	
  	<int:chain input-channel="request-shipment">
- 		<int:json-to-object-transformer type="gv.warehouse.api.ShipmentRequest"/>
+ 		<int:json-to-object-transformer type="gv.stock.api.ShipmentRequest"/>
  		<int:service-activator expression="@warehouseService.requestShipment(payload)"/>
  		<int:object-to-json-transformer/>
 	</int:chain>

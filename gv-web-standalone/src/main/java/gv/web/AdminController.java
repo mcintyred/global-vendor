@@ -5,10 +5,10 @@ import gv.api.Warehouse;
 import gv.core.service.WarehouseServiceLocator;
 import gv.core.service.entity.WarehouseServiceBinding;
 import gv.products.api.ProductService;
-import gv.warehouse.api.DistributedWarehouseService;
-import gv.warehouse.api.StockAlertDetails;
-import gv.warehouse.api.StockChangeRequest;
-import gv.warehouse.api.StockQueryRequest;
+import gv.stock.api.StockService;
+import gv.stock.api.StockAlertDetails;
+import gv.stock.api.StockChangeRequest;
+import gv.stock.api.StockQueryRequest;
 import gv.warehouse.api.WarehouseService;
 
 import java.util.HashMap;
@@ -38,7 +38,7 @@ import com.google.common.collect.Lists;
 public class AdminController {
 	
 	@Autowired
-	private DistributedWarehouseService warehouseService;
+	private StockService warehouseService;
 	
 	@Autowired
 	private ProductService productService;

@@ -30,7 +30,7 @@
 	</bean>
 	
 	<!-- Declare the distributed service -->
-	<bean id="distributedWarehouseServiceImpl" class="gv.core.service.DistributedWarehouseServiceImpl"></bean>
+	<bean id="distributedWarehouseServiceImpl" class="gv.core.service.StockServiceImpl"></bean>
 	
 	<!-- The local warehouse service -->
 	<bean id="localWarehouseService" class="gv.warehouse.jpa.service.WarehouseServiceImpl">

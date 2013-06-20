@@ -1,4 +1,4 @@
-package gv.warehouse.api;
+package gv.stock.api;
 
 public interface StockAlertListener {
 	

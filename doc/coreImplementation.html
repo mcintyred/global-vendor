@@ -1,48 +1,50 @@
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="docstyles.css"/>
+<link rel="stylesheet" type="text/css" href="docstyles.css" />
 </head>
 <body>
 
-<h1>Global Vendor Core Implementation</h1>
-<h2>Overview</h2>
-<p>
-In this post I will discuss the api in a bit more detail, and then talk about the 
-implementation of the core services. 
-</p>
+	<h1>Global Vendor Core Implementation</h1>
+	<h2>Overview</h2>
+	<p>In this post I will discuss the api in a bit more detail, and
+		then talk about the implementation of the core services.</p>
 
-<p>
-My objectives in implementing the core logic were
-to use Spring Data JPA for persistence, and build a minimal web front-end (using Spring MVC) to provide
-a basic implementation meeting the requirements. This would be enough to provide
-a system which could be extended using Spring Integration to talk to a variety
-of different implementations of the WarehouseService.
-</p>
+	<p>My objectives in implementing the core logic were to use Spring
+		Data JPA for persistence, and build a minimal web front-end (using
+		Spring MVC) to provide a basic implementation meeting the
+		requirements. This would be enough to provide a system which could be
+		extended using Spring Integration to talk to a variety of different
+		implementations of the WarehouseService.</p>
 
-<h3>Prerequisites</h3>
-<p>
-Before we get started, you will need to download the project and setup your environment. Make sure you have all of the following installed:
-</p>
+	<h3>Prerequisites</h3>
+	<p>Before we get started, you will need to download the project and
+		setup your environment. Make sure you have all of the following
+		installed:</p>
 
-<h4>Required</h4>
-<ul>
-<li>A Java1.6 VM</li>
-<li><a href="www.gradle.org">Gradle</a></li>
-<li><a href="https://github.com/mcintyred/global-vendor">The Global Vendor Project itself</a></li>
-</ul>
+	<h4>Required</h4>
+	<ul>
+		<li>A Java1.6 VM</li>
+		<li><a href="www.gradle.org">Gradle</a></li>
+		<li><a href="https://github.com/mcintyred/global-vendor">The
+				Global Vendor Project itself</a></li>
+	</ul>
 
-<h4>Optional</h4>
-All the tests can be run from the command line, but you'll find it easier to use an IDE. The gradle scripts are set up
-with Eclipse/STS in mind, but should also work with Intellij.
+	<h4>Optional</h4>
+	All the tests can be run from the command line, but you'll find it
+	easier to use an IDE. The gradle scripts are set up with Eclipse/STS in
+	mind, but should also work with Intellij.
 
-<ul>
-<li><a href="http://www.springsource.org/sts">Spring Tool Suite</a></li>
-<li><a href="http://git-scm.com/downloads">Git Source Code Control</a></li>
-</ul>
+	<ul>
+		<li><a href="http://www.springsource.org/sts">Spring Tool
+				Suite</a></li>
+		<li><a href="http://git-scm.com/downloads">Git Source Code
+				Control</a></li>
+	</ul>
 
-<h4>Advanced</h4>
-You will need RabbitMQ for the more advanced configurations, but you don't need to install it just yet.
-<ul>
+	<h4>Advanced</h4>
+	You will need RabbitMQ for the more advanced configurations, but you
+	don't need to install it just yet.
+	<ul>
 <li><a href="http://www.rabbitmq.com/">RabbitMQ</a></li>
 </ul>
 
@@ -102,6 +104,7 @@ Once it is running open a browser and navigate to the admin page <a href="http:/
 </ol>
 
 <p>To start, let's add a couple of warehouses, London and Paris</p>
+<a name="adminPage-warehouses"/>
 <div class="screengrab">
 	<div class="caption">Added Warehouses</div>
 	<img src="addedWarehouses.jpg"/>
@@ -183,34 +186,53 @@ an easy and powerful way to implement common query and pagination logic, and mea
 no longer have to write any code. Let's take a look at how I've used it in this project.
 </p>
 
-<p>I needed to persist four types of data:
+<p>I needed to persist four types of data:</p>
 <ul>
 <li>Product information</li>
 <li>Stock alerts</li>
 <li>Data relating a warehouse name to a service implementation</li>
 <li>Stock data</li>
 </ul>
-If you expand the gv-core project you'll see the entities and repositories used for the first three items, the last is 
-in the gv-warehouse-jpa project:
+
+<p>
+In the normal way of things I would write my entity classes, then write DAOs/repositoriest to help manage them.
+With Spring Data JPA you do much the same:
 </p>
-<div class="screenshot">
-	<span class="caption">The gv-core and gv-warehouse-jpa Projects</span>
-	<div>
-	<img style="float:left" src="gvCore.jpg"/>
+<ul>
+	<li>Include the relevant dependencies</li>
+	<li>Enable Spring Data JPA repository support in your application context</li>
+	<li>Write your JPA annotated entity classes</li>
+	<li>Declare your repositories by writing an <strong>interface</strong>. This is the clever bit where you may not need to write
+	any code.</li>
+</ul>
+<p>That's it. Spring will detect all your repositories for you, create real implementations and inject
+them into any component which requires them.
+</p>
+
+
+<p>
+Let's walk through an example using the gv-warehouse-jpa project. This project provides the first implementation
+of the WarehouseService and uses Spring Data JPA to store stock data.
+</p>
+<div class="screengrab-small">
+	<div class="caption">The gv-warehouse-jpa Project</div>
 	<img src="gvWarehouseJPA.jpg"/>
-	</div>
-	<div style="clear:both" />
 </div>
 
-<p>Using Spring Data JPA is easy. First, include the dependencies in your project. I use Gradle,
-so the relevant lines are:
+<h3>Include the dependencies</h3>
+<p>I use Gradle, so my build.gradle file looks like this:
 </p>
 
 <pre class="java">
-    // Spring-core for the Spring container and core support
-    compile group: 'org.springframework', name: 'spring-core', version:'3.2.0.RELEASE'
+description = 'Global Vendor JPA'
+
+dependencies {
+  compile project(':gv-api')
     
-    // Spring-context for automatic configuration using &ltcontext:component-scan....
+    // Spring-core for the Spring container and core support
+    //compile group: 'org.springframework', name: 'spring-core', version:'3.2.0.RELEASE'
+    
+    // Spring-context for automatic configuration using &lt;context:component-scan....
     compile group: 'org.springframework', name: 'spring-context', version:'3.2.0.RELEASE'
     
     // Spring support for ORM frameworks. Needed to allow Spring to work with Hibernate
@@ -238,113 +260,20 @@ so the relevant lines are:
     compile group: 'joda-time', name: 'joda-time', version:'2.1'
 
     runtime group: 'org.hsqldb', name: 'hsqldb', version:'2.2.8'
-</pre>
+    
+    
+    testCompile group: 'junit', name: 'junit', version:'4.11'
+    testCompile group: 'log4j', name: 'log4j', version:'1.2.16'
+    testCompile group: 'org.springframework', name: 'spring-test', version:'3.2.0.RELEASE'
+    testCompile group: 'org.hamcrest', name: 'hamcrest-all', version:'1.1'
+    testCompile group: 'org.mockito', name: 'mockito-all', version:'1.9.5'
 
-<p>
-Next, write your entity class and annotate with JPA:
-</p>
-
-<pre class="java">
-package gv.products.service.entity;
-
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
-@Entity
-@Table(name="products")
-public class ProductEntity {
-	
-	@Id
-	@GeneratedValue
-	private Long id;
-	private String name;
-	private String description;
-	
-	public Long getId() {
-		return id;
-	}
-	
-	public void setId(Long id) {
-		this.id = id;
-	}
-	
-	public String getName() {
-		return name;
-	}
-	
-	public void setName(String name) {
-		this.name = name;
-	}
-	
-	public String getDescription() {
-		return description;
-	}
-	
-	public void setDescription(String description) {
-		this.description = description;
-	}
 }
 </pre>
 
-<p>
-Now, write your repository:
-</p>
-<pre class="java">
-package gv.products.service.repository;
-import gv.products.service.entity.ProductEntity;
-import org.springframework.data.repository.CrudRepository;
+<h3>Enable Repository Support In The Application Context</h3>
 
-public interface ProductRepository extends CrudRepository&lt;ProductEntity, Long&gt; {
-}
-</pre>
-
-<p>
-Inject the repository into a service and use it. Notice how the repository comes with a number of methods
-for dealing with entities so you dont; have to write them: save(), findOne(), findAll() ... etc.
-</p>
-
-<pre class="java">
-@Service("productService")
-@Transactional
-public class ProductServiceImpl implements ProductService {
-	
-	@Autowired
-	private final ProductRepository repository;
-	
-	public ProductServiceImpl() {
-		this(null);
-	}
-	
-	public ProductServiceImpl(ProductRepository repository) {
-		this.repository = repository;
-	}
-
-	@Override
-	public void saveProduct(Product product) {
-		ProductEntity e = toEntity(product);
-		repository.save(e);
-		product.setId(e.getId());
-	}
-
-	@Override
-	public Product getProductById(Long productId) {
-		ProductEntity e = repository.findOne(productId);
-		if(e == null) {
-			return null;
-		}
-		
-		return toDto(e);
-	}
-	...
-	...
-	...
-</pre>
-
-That's it. Spring will detect all your repositories for you, create real implementations and inject
-them into any component which requires them. You just need to enable it in your application context. 
-For example, here is the ProductServiceImplTest-context.xml:
+For example, here is the WarehouseServiceImplRepositoryTest-context.xml:
 
 <pre class="java">
 &lt;?xml version="1.0" encoding="UTF-8"?&gt;
@@ -358,12 +287,16 @@ For example, here is the ProductServiceImplTest-context.xml:
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
 		http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd"&gt;
 
+	
+	&lt;!-- Spring will scan the classpath for all classes annotated @Component, @Service etc --&gt;
+	&lt;context:component-scan base-package="gv.warehouse.jpa.service" /&gt;
+	
+	&lt;!-- Enable Spring Data JPA to automatically find and create repositories --&gt;
+	&lt;jpa:repositories base-package="gv.warehouse.jpa.service.repository" /&gt;
+	
 	&lt;!-- Use an in-memory database for testing --&gt;
 	&lt;jdbc:embedded-database id="dataSource" type="HSQL" /&gt;
 
-	&lt;!-- Spring will scan the classpath for all classes annotated @Component, @Service etc --&gt;
-	&lt;context:component-scan base-package="gv.products.service" /&gt;
-	
 	&lt;bean id="entityManagerFactory"
 		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
 		&lt;property name="dataSource" ref="dataSource" /&gt;
@@ -376,7 +309,7 @@ For example, here is the ProductServiceImplTest-context.xml:
 		&lt;/property&gt;
 		
 		&lt;!-- Automatically scan for all classes annotated @Entity --&gt;
-		&lt;property name="packagesToScan" value="gv.products.service.entity"/&gt;
+		&lt;property name="packagesToScan" value="gv.warehouse.jpa.service.entity"/&gt;
 	&lt;/bean&gt;
 	
 	&lt;bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"&gt;
@@ -384,38 +317,110 @@ For example, here is the ProductServiceImplTest-context.xml:
 	&lt;/bean&gt;
 	
 	&lt;tx:annotation-driven transaction-manager="transactionManager" /&gt;
-	
-	&lt;!-- Enable Spring Data JPA to automatically find and create repositories --&gt;
-	&lt;jpa:repositories base-package="gv.products.service.repository" /&gt;
 
 &lt;/beans&gt;
 
 </pre>
 
-<h3>Magic Finder Methods</h3>
-<p>So far, so good. The standard repository implements all the methods we need to find, save and delete 
-entities. What if our querying needs are more extensive? Here is the StockAlertEntity and its repository:
-</p>
+<h3>Write Annotated Entity Classes</h3>
 
 <pre class="java">
+package gv.warehouse.jpa.service.entity;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
 @Entity
-@Table(name="stockAlerts")
-public class StockAlertEntity {
+@Table(name="stockLevels")
+public class StockLevel {
 	
 	@Id
 	@GeneratedValue
 	private Long id;
 	
-	private long warehouseId;
-	private long productId;
-	private int stockLevel;
-	private int threshold;
+	private Long warehouseId;
+	
+	private Long productId;
+	
+	private int qty;
+	
 	...
 	...
 	...
+</pre>
+
+<h3>Declare Repositories</h3>
+<pre class="java">
+public interface StockLevelRepository extends CrudRepository&lt;StockLevel, Long&gt; {
+	
+	public StockLevel findByWarehouseIdAndProductId(Long warehouseId, Long productId);
+
 }
+</pre>
+
+<p>
+Inject the repository into a service and use it. Here I use @Autowired so Spring will detect and inject the repository
+automatically. 
+</p>
+
+<pre class="java">
+
+@Service
+@Transactional
+public class WarehouseServiceImpl implements WarehouseService, StockAlertEventSource {
+	
+	@Autowired
+	private final StockLevelRepository repository;
+	
+	...
+	...
+	...
+	
+	@Override
+	public int updateStock(StockChangeRequest request) {
+		
+		Long warehouseId = request.getWarehouseId();
+		Long productId = request.getProductId();
+		int stockDelta = request.getQty();
+		int oldLevel = 0;
+		
+		StockLevel stockLevel = repository.findByWarehouseIdAndProductId(warehouseId, productId);
+		if(stockLevel == null) {
+			stockLevel = new StockLevel(warehouseId, productId, stockDelta);
+		} else { 
+			oldLevel = stockLevel.getQty();
+			stockLevel.addQty(stockDelta);
+		}
+		
+		repository.save(stockLevel);
+		
+		
+		raiseStockAlert(productId, warehouseId, oldLevel, stockLevel.getQty());
+		return stockLevel.getQty();
+	}
+	
+	...
+	...
+	...
+
+</pre>
 
 
+<p>
+Notice how the repository comes with a number of methods
+for dealing with entities so you dont; have to write them: save(), findOne(), findAll() ... etc.
+</p>
+
+
+
+<h3>Magic Finder Methods</h3>
+<p>So far, so good. The standard repository implements all the methods we need to find, save and delete 
+entities. What if our querying needs are more extensive? Remember the StockAlertEntityRepository:
+</p>
+
+<pre class="java">
 public interface StockAlertEntityRepository extends CrudRepository&lt;StockAlertEntity, Long&gt; {
 
 	public List&lt;StockAlertEntity&gt; findByWarehouseIdAndProductId(long warehouseId, long productId);
@@ -424,14 +429,75 @@ public interface StockAlertEntityRepository extends CrudRepository&lt;StockAlert
 </pre>
 
 <p>
-The implementation of the method findByWarehouseIdAndProductId() is provided for us by Spring Data JPA!
-You can declare find methods on the repository using any combintation of the entity's properties,
+The implementation of the method findByWarehouseIdAndProductId() is <strong>provided for us</strong> by Spring Data JPA!
+It knows how to generate the method base on the method name.
+</p>
+
+<p>
+You can declare find methods on the repository using any combination of the entity's properties,
 make them case insensitive, require that only one be returned (findOneBy...) etc. Consult the documents 
 for details.
 </p>
 
+<h2>Wiring It All Up</h2>
+<p>
+To end this post I just want to show how the JPA WarehouseService was wired into the application context.
+In subsequent posts we will be discussing different implementations of this service, and show how Spring Integration
+allows us to wire them into the context in a way which is transparent to the other components.
+</p>
+<p>
+Remember from the architecture diagram that the StockService calls the WarehouseServiceLocator to obtain an appropriate WarehouseService
+implementation for communicating with a Warehouse. This is the component which allows us to hide the fact that Spring Integration
+may be supplying us with a WarehouseService which is hosted on a remote machine.
+</p>
 
+<p>
+The WarehouseServiceLocator is configured with a list of WarehouseService implementations, and binds those implementations to particular
+warehouses via WarehouseServiceBindings stored in the database. Each binding just holds the name of a warehouse and the name of the service
+implementation which can talk to it. You use the Warehouses form on the <a href="#adminPage-warehouses">Administration Page</a> to 
+add bindings to the database.
+</p>
 
+<p>
+So, finally, we can see the piece of configuration which will be the point where we use Spring Integration to plug in other WarehouseService
+implementations. It is in gv-web-standalone/src/main/webapp/WEB-INF/spring/root-context.xml:
+</p>
+
+<pre class="java">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd"&gt;
+
+	&lt;context:component-scan base-package="gv"&gt;&lt;/context:component-scan&gt;
+
+	&lt;!-- The data context provides the JPA persistence --&gt;
+	&lt;import resource="classpath:/META-INF/spring/data-context.xml"/&gt;
+
+	&lt;!-- Declare the list of WarehouseServices --&gt;
+	&lt;!-- This will be auto-injected into the WarehouseServiceLocator --&gt;
+	&lt;bean id="warehouseServiceList" class="gv.core.service.WarehouseServiceList"&gt;
+		&lt;constructor-arg&gt;
+			&lt;list&gt;
+				&lt;ref bean="localWarehouseService"/&gt;
+			&lt;/list&gt;
+		&lt;/constructor-arg&gt;
+	&lt;/bean&gt;
+	
+	&lt;!-- The local warehouse service --&gt;
+	&lt;bean id="localWarehouseService" class="gv.warehouse.jpa.service.WarehouseServiceImpl"&gt;
+		&lt;property name="stockAlertListener" ref="stockServiceImpl"/&gt;
+		&lt;property name="stockAlertThreshold" value="10"/&gt;
+	&lt;/bean&gt;
+&lt;/beans&gt;
+</pre>
+
+<p>
+That's all for now. In subsequent posts I'll be presenting different WarehouseService implementations and
+showing how to use Spring Integration to wire them in.
+</p>
 </body>
 
 </html>

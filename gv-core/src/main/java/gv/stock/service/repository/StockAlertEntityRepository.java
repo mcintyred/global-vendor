@@ -1,6 +1,6 @@
-package gv.core.service.repository;
+package gv.stock.service.repository;
 
-import gv.core.service.entity.StockAlertEntity;
+import gv.stock.service.entity.StockAlertEntity;
 
 import java.util.List;
 

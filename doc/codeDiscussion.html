@@ -31,7 +31,8 @@ The main packages in this project are as follows:
 <tr><td>gv.orders.api</td><td>The low-level interface to the order management system</td></tr>
 <tr><td>gv.products.api</td><td>The interface to the product management system</td></tr>
 <tr><td>gv.test</td><td>Two marker interfaces (UnitTest and IntegrationTest) used with the @Category annotation to group JUnit tests</td></tr>
-<tr><td>gv.warehouse.api</td><td>The service interfaces which a warehouse must implement, including messaging DTOs</td></tr>
+<tr><td>gv.stock.api</td><td>The service interfaces which the StockService must implement, including messaging DTOs for communicating with Warehouses</td></tr>
+<tr><td>gv.warehouse.api</td><td>The service interface which a warehouse must implement</td></tr>
 </table>
 
 <h2>Design Approach</h2>
@@ -250,7 +251,7 @@ The Administrator must have access to a web interface which provides functionali
 </div>
 
 <p>
-Bearing these in mind I sketched out the interfaces for the ProductService and the DistributedWarehouseService.
+Bearing these in mind I sketched out the interfaces for the ProductService and the StockService.
 </p>
 
 <h2>Implementation - gv-core</h2>

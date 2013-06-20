@@ -78,6 +78,10 @@
 		width:70%;
 	}
 	
+	.screengrab-small img, .diagram-small img {
+		width:35%;
+	}
+	
 	.caption {
 		margin-top: 1em;
 	}

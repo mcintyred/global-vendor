@@ -1,21 +1,20 @@
-package gv.core.service;
+package gv.stock.service;
 
 import gv.api.Product;
 import gv.api.Warehouse;
-import gv.core.service.entity.StockAlertEntity;
-import gv.core.service.entity.WarehouseServiceBinding;
-import gv.core.service.repository.StockAlertEntityRepository;
-import gv.core.service.repository.WarehouseRepository;
+import gv.core.service.WarehouseServiceLocator;
 import gv.products.api.ProductService;
-import gv.warehouse.api.DistributedWarehouseService;
-import gv.warehouse.api.ShipmentConfirmation;
-import gv.warehouse.api.ShipmentRequest;
-import gv.warehouse.api.StockAlert;
-import gv.warehouse.api.StockAlertDetails;
-import gv.warehouse.api.StockChangeRequest;
-import gv.warehouse.api.StockQueryRequest;
+import gv.stock.api.ShipmentConfirmation;
+import gv.stock.api.ShipmentRequest;
+import gv.stock.api.StockAlert;
+import gv.stock.api.StockAlertDetails;
+import gv.stock.api.StockChangeRequest;
+import gv.stock.api.StockQueryRequest;
+import gv.stock.api.StockService;
+import gv.stock.api.WarehouseStockData;
+import gv.stock.service.entity.StockAlertEntity;
+import gv.stock.service.repository.StockAlertEntityRepository;
 import gv.warehouse.api.WarehouseService;
-import gv.warehouse.api.WarehouseStockData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,17 +25,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 @Service
 @Transactional
-public class DistributedWarehouseServiceImpl implements DistributedWarehouseService {
+public class StockServiceImpl implements StockService {
 	
 	@Autowired
 	private WarehouseServiceLocator warehouseServiceLocator;
-	
-	@Autowired
-	private WarehouseRepository repository;
 	
 	@Autowired
 	private ProductService productService;
@@ -48,10 +43,6 @@ public class DistributedWarehouseServiceImpl implements DistributedWarehouseServ
 	public void setWarehouseServiceLocator(
 			WarehouseServiceLocator warehouseServiceLocator) {
 		this.warehouseServiceLocator = warehouseServiceLocator;
-	}
-
-	public void setWarehouseRepository(WarehouseRepository repository) {
-		this.repository = repository;
 	}
 	
 	public void setProductService(ProductService productService) {
@@ -65,24 +56,12 @@ public class DistributedWarehouseServiceImpl implements DistributedWarehouseServ
 	@Override
 	public Set<Warehouse> listWarehouses() {
 		
-		Set<Warehouse> warehouses = Sets.newHashSet();
-		
-		for(WarehouseServiceBinding entity : repository.findAll()) {
-			warehouses.add(new Warehouse(entity.getId(), entity.getName()));
-		}
-		
-		return warehouses;
+		return warehouseServiceLocator.listWarehouses();
 	}
 
 	@Override
 	public Warehouse getWarehouseById(Long warehouseId) {
-		WarehouseServiceBinding entity = repository.findOne(warehouseId);
-		
-		if(entity == null) {
-			throw new IllegalArgumentException();
-		}
-		
-		return new Warehouse(entity.getId(), entity.getName());
+		return warehouseServiceLocator.getWarehouseById(warehouseId);
 	}
 
 
@@ -121,8 +100,7 @@ public class DistributedWarehouseServiceImpl implements DistributedWarehouseServ
 	}
 	
 	protected WarehouseService getWarehouseService(Long warehouseId) {
-		Warehouse warehouse = getWarehouseById(warehouseId);
-		return warehouseServiceLocator.locateService(warehouse);
+		return warehouseServiceLocator.locateService(warehouseId);
 	}
 	
 	@Override

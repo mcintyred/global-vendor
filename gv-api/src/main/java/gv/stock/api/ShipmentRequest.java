@@ -1,22 +1,22 @@
-package gv.warehouse.api;
+package gv.stock.api;
 /**
  * A POJO to encapsulate the parameters needed to issue a request to a
- * Warehouse to set or update the stock level for a Product
+ * Warehouse to ship a Product
  * 
  * @author mcintyred
  *
  */
-public class StockChangeRequest {
+public class ShipmentRequest {
 	
 	private Long warehouseId;
 	private Long productId;
 	private int qty;
 	
-	public StockChangeRequest() {
+	public ShipmentRequest() {
 		this(null, null, 0);
 	}
 	
-	public StockChangeRequest(Long warehouseId, Long productId, int qty) {
+	public ShipmentRequest(Long warehouseId, Long productId, int qty) {
 		this.warehouseId = warehouseId;
 		this.productId = productId;
 		this.qty = qty;

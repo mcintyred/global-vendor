@@ -13,9 +13,9 @@ import gv.api.Product;
 import gv.api.Shipment;
 import gv.api.ShipmentLine;
 import gv.products.api.ProductService;
-import gv.warehouse.api.ShipmentConfirmation;
-import gv.warehouse.api.ShipmentRequest;
-import gv.warehouse.api.StockQueryRequest;
+import gv.stock.api.ShipmentConfirmation;
+import gv.stock.api.ShipmentRequest;
+import gv.stock.api.StockQueryRequest;
 
 import org.joda.time.LocalDate;
 import org.junit.Before;
@@ -35,7 +35,7 @@ public class OrderServiceImplTest extends AbstractWarehouseTest {
 	public void setUp() {
 		super.setUp();
 		orderService = new OrderServiceImpl();
-		orderService.setDistributedWarehouseService(warehouseService);
+		orderService.setStockService(stockService);
 		orderService.setProductService(productService);
 	}
 	

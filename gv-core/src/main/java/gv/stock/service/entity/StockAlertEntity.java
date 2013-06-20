@@ -1,4 +1,4 @@
-package gv.core.service.entity;
+package gv.stock.service.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

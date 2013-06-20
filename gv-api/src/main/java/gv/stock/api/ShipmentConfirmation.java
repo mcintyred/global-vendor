@@ -1,4 +1,4 @@
-package gv.warehouse.api;
+package gv.stock.api;
 
 import org.joda.time.LocalDate;
 

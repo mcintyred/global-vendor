@@ -5,10 +5,10 @@ import gv.api.Warehouse;
 import gv.core.service.WarehouseServiceLocator;
 import gv.core.service.entity.WarehouseServiceBinding;
 import gv.products.api.ProductService;
-import gv.warehouse.api.DistributedWarehouseService;
-import gv.warehouse.api.StockAlertDetails;
-import gv.warehouse.api.StockChangeRequest;
-import gv.warehouse.api.StockQueryRequest;
+import gv.stock.api.StockAlertDetails;
+import gv.stock.api.StockChangeRequest;
+import gv.stock.api.StockQueryRequest;
+import gv.stock.api.StockService;
 import gv.warehouse.api.WarehouseService;
 
 import java.util.HashMap;
@@ -38,7 +38,7 @@ import com.google.common.collect.Lists;
 public class AdminController {
 	
 	@Autowired
-	private DistributedWarehouseService warehouseService;
+	private StockService stockService;
 	
 	@Autowired
 	private ProductService productService;
@@ -96,7 +96,7 @@ public class AdminController {
 	@RequestMapping(value="/product/{productId}/stock.html")
 	public String enterStock(@PathVariable("productId") Long productId, Model model) {
 
-		Set<Warehouse> warehouses = warehouseService.listWarehouses();
+		Set<Warehouse> warehouses = stockService.listWarehouses();
 		Map<Long, Warehouse> warehouseMap = new HashMap<Long, Warehouse>();
 		for(Warehouse w : warehouses) {
 			warehouseMap.put(w.getId(), w);
@@ -115,14 +115,14 @@ public class AdminController {
 	public String setStock(@ModelAttribute("stockForm") StockForm stockForm, @PathVariable("productId") Long productId) {
 		for(Long warehouseId : stockForm.getStockLevels().keySet()) {
 			Integer stockLevel = stockForm.getStockLevels().get(warehouseId);
-			warehouseService.setStock(new StockChangeRequest(warehouseId, productId, stockLevel));
+			stockService.setStock(new StockChangeRequest(warehouseId, productId, stockLevel));
 		}
 		return "redirect:/admin.html";
 	}
 	
 	@RequestMapping("/stockAlerts.html")
 	public String stockAlerts(Model model) {
-		List<StockAlertDetails> stockAlerts = warehouseService.getStockAlerts();
+		List<StockAlertDetails> stockAlerts = stockService.getStockAlerts();
 		model.addAttribute("stockAlerts", stockAlerts);
 		return "stockAlerts";
 	}
@@ -133,8 +133,8 @@ public class AdminController {
 	
 	public Map<Long, Integer> getStockLevels(Product product) {
 		Map<Long, Integer> productStock = new HashMap<Long, Integer>();
-		for(Warehouse w : warehouseService.listWarehouses()) {
-			productStock.put(w.getId(),  warehouseService.getStockInWarehouse(new StockQueryRequest(w.getId(), product.getId())));
+		for(Warehouse w : stockService.listWarehouses()) {
+			productStock.put(w.getId(),  stockService.getStockInWarehouse(new StockQueryRequest(w.getId(), product.getId())));
 		}
 		return productStock;
 	}

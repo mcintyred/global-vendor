@@ -10,17 +10,17 @@
 			http://www.springframework.org/schema/rabbit/spring-rabbit.xsd">
 				
 	<int-amqp:inbound-gateway 
-		queue-names="warehouse_${dw.node.id}" 
+		queue-names="warehouse_${gv.node.id}" 
 		request-channel="inbound" 
 		connection-factory="rabbitConnectionFactory"
-		mapped-request-headers="DW*"
+		mapped-request-headers="GV*"
 	/>
 	
 	<int-amqp:outbound-channel-adapter
 		amqp-template="amqpTemplate"
 		exchange-name="stockAlertsExchange"
 		channel="outbound-stock-alerts"
-		mapped-request-headers="DW*">
+		mapped-request-headers="GV*">
 	</int-amqp:outbound-channel-adapter>
 	
 	</beans>

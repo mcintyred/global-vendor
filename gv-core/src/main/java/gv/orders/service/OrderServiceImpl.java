@@ -9,10 +9,10 @@ import gv.api.ShipmentLine;
 import gv.api.Warehouse;
 import gv.orders.api.OrderService;
 import gv.products.api.ProductService;
-import gv.warehouse.api.DistributedWarehouseService;
-import gv.warehouse.api.ShipmentConfirmation;
-import gv.warehouse.api.ShipmentRequest;
-import gv.warehouse.api.WarehouseStockData;
+import gv.stock.api.ShipmentConfirmation;
+import gv.stock.api.ShipmentRequest;
+import gv.stock.api.StockService;
+import gv.stock.api.WarehouseStockData;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,7 +33,7 @@ public class OrderServiceImpl implements OrderService {
 	private ProductService productService;
 	
 	@Autowired
-	private DistributedWarehouseService distributedWarehouseService;
+	private StockService stockService;
 
 	public ProductService getProductService() {
 		return productService;
@@ -43,13 +43,12 @@ public class OrderServiceImpl implements OrderService {
 		this.productService = productService;
 	}
 
-	public DistributedWarehouseService getDistributedWarehouseService() {
-		return distributedWarehouseService;
+	public StockService getStockService() {
+		return stockService;
 	}
 
-	public void setDistributedWarehouseService(
-			DistributedWarehouseService distributedWarehouseService) {
-		this.distributedWarehouseService = distributedWarehouseService;
+	public void setStockService(StockService stockService) {
+		this.stockService = stockService;
 	}
 
 	/**
@@ -85,7 +84,7 @@ public class OrderServiceImpl implements OrderService {
 		
 		Product product = productService.getProductById(orderLine.getProductId());
 		
-		List<WarehouseStockData> availableStock = distributedWarehouseService.getStockData(orderLine.getProductId());
+		List<WarehouseStockData> availableStock = stockService.getStockData(orderLine.getProductId());
 		
 		// Sort the list of warehouses in descending order of stockAvailable
 		Collections.sort(availableStock, Collections.reverseOrder(new Comparator<WarehouseStockData>() {
@@ -102,7 +101,7 @@ public class OrderServiceImpl implements OrderService {
 		for(WarehouseStockData ws : availableStock) {
 			
 			ShipmentRequest request = new ShipmentRequest(ws.getWarehouse().getId(), orderLine.getProductId(), orderLine.getQty() - fulfilledQty);
-			ShipmentConfirmation shipmentConfirmation = distributedWarehouseService.requestShipment(request);
+			ShipmentConfirmation shipmentConfirmation = stockService.requestShipment(request);
 			if(shipmentConfirmation.getQty() > 0) {
 				fulfilledQty += shipmentConfirmation.getQty();
 				shipmentLines.put(ws.getWarehouse(), new ShipmentLine(shipmentConfirmation.getShipmentDate(), shipmentConfirmation.getQty(), product));
