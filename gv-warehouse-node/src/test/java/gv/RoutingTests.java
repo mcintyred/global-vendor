@@ -88,7 +88,8 @@ public class RoutingTests {
 	@Test
 	public void shouldSetStock() throws InterruptedException {
 		// given
-		StockChangeRequest request = new StockChangeRequest(1L,3L,5);
+		String warehouseName = "testWarehouse";
+		StockChangeRequest request = new StockChangeRequest(warehouseName,3L,5);
 		Message<StockChangeRequest> message = MessageBuilder.withPayload(request)
 				.setHeader("GV_WarehouseId", 1)
 				.setHeader("GV_Method", "set-stock")
@@ -115,7 +116,7 @@ public class RoutingTests {
 		
 		// then		
 		assertTrue("message not sent to expected output channel", sent);
-		assertEquals(request.getWarehouseId(), captor.getValue().getWarehouseId());
+		assertEquals(request.getWarehouseName(), captor.getValue().getWarehouseName());
 		assertEquals(request.getProductId(), captor.getValue().getProductId());
 		assertEquals(request.getQty(), captor.getValue().getQty());
 	}
@@ -123,7 +124,8 @@ public class RoutingTests {
 	@Test
 	public void shouldUpdateStock() throws InterruptedException {
 		// given
-		StockChangeRequest request = new StockChangeRequest(1L,3L,5);
+		String warehouseName = "testWarehouse";
+		StockChangeRequest request = new StockChangeRequest(warehouseName,3L,5);
 		Message<StockChangeRequest> message = MessageBuilder.withPayload(request)
 				.setHeader("GV_WarehouseId", 1)
 				.setHeader("GV_Method", "update-stock")
@@ -147,7 +149,7 @@ public class RoutingTests {
 		
 		// then
 		assertTrue("message not sent to expected output channel", sent);
-		assertEquals(request.getWarehouseId(), captor.getValue().getWarehouseId());
+		assertEquals(request.getWarehouseName(), captor.getValue().getWarehouseName());
 		assertEquals(request.getProductId(), captor.getValue().getProductId());
 		assertEquals(request.getQty(), captor.getValue().getQty());
 
@@ -156,7 +158,8 @@ public class RoutingTests {
 	@Test
 	public void shouldGetStock() throws InterruptedException {
 		// given
-		StockQueryRequest request = new StockQueryRequest(1L, 3L);
+		String warehouseName = "testWarehouse";
+		StockQueryRequest request = new StockQueryRequest(warehouseName, 3L);
 		
 		Message<StockQueryRequest> message = MessageBuilder.withPayload(request)
 				.setHeader("GV_WarehouseId", 1)
@@ -181,14 +184,15 @@ public class RoutingTests {
 		
 		// then
 		assertTrue("message not sent to expected output channel", sent);
-		assertEquals(request.getWarehouseId(), captor.getValue().getWarehouseId());
+		assertEquals(request.getWarehouseName(), captor.getValue().getWarehouseName());
 		assertEquals(request.getProductId(), captor.getValue().getProductId());
 	}
 	
 	@Test
 	public void shouldDiscontinueProduct() throws InterruptedException {
 		// given
-		StockQueryRequest request = new StockQueryRequest(1L, 3L);
+		String warehouseName = "testWarehouse";
+		StockQueryRequest request = new StockQueryRequest(warehouseName, 3L);
 		
 		Message<StockQueryRequest> message = MessageBuilder.withPayload(request)
 				.setHeader("GV_WarehouseId", 1)
@@ -229,10 +233,11 @@ public class RoutingTests {
 	public void shouldRequestShipment() throws InterruptedException {
 		// given
 		Long warehouseId = 1L;
+		String warehouseName = "testWarehouse";
 		Long productId = 3L;
 		int qty = 5;
 		
-		ShipmentRequest request = new ShipmentRequest(warehouseId, productId, qty);
+		ShipmentRequest request = new ShipmentRequest(warehouseName, productId, qty);
 		
 		Message<ShipmentRequest> message = MessageBuilder.withPayload(request)
 				.setHeader("GV_WarehouseId", warehouseId)

@@ -37,8 +37,24 @@ RabbitMQ at http://localhost:15672. You should see two exchanges:
 <li>stockExchange</li>
 </ul>
 
-and there should be one queue: warehouse_1.
+and there should be one queue: warehouse_london. Note that the name of the node is set in the properties file.
 </p>
+
+<p>
+Now start the gv-web project in the same way that you started gv-web-standalone in the previous post.
+This time, when the admin page comes up, you should be able to create new warehouses of type "Remote Warehouse":
+</p>
+
+<div class="screengrab">
+	<div class="caption">Adding A Remote Warehouse</div>
+	<img src="images/adminStartWithRemote.jpg"/>
+</div>
+
+<p>
+Go ahead and create 'Paris' as a local warehouse and 'London' as a remote warehouse, and create products, make purchases etc exactly as
+you did previously. The RemoteWarehouse appears to the system as if it were local due to Spring Integration.
+</p>
+
 
 <h3>Spring Integration</h3>
 <p>
@@ -321,6 +337,9 @@ Let's go back to Host 1 now and see how the reply messages are handled.
 	&lt;int:service-activator input-channel="inbound-responses" expression="payload"/&gt;
  </pre>
  
+ <p>
+ That's all for this post. In the next post I'm going to talk about writing a WarehouseService implementation using GemFire.
+ </p>
  
 
 </body>

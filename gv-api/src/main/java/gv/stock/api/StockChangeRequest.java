@@ -8,7 +8,7 @@ package gv.stock.api;
  */
 public class StockChangeRequest {
 	
-	private Long warehouseId;
+	private String warehouseName;
 	private Long productId;
 	private int qty;
 	
@@ -16,14 +16,14 @@ public class StockChangeRequest {
 		this(null, null, 0);
 	}
 	
-	public StockChangeRequest(Long warehouseId, Long productId, int qty) {
-		this.warehouseId = warehouseId;
+	public StockChangeRequest(String warehouseName, Long productId, int qty) {
+		this.warehouseName = warehouseName;
 		this.productId = productId;
 		this.qty = qty;
 	}
 
-	public Long getWarehouseId() {
-		return warehouseId;
+	public String getWarehouseName() {
+		return warehouseName;
 	}
 
 	public Long getProductId() {

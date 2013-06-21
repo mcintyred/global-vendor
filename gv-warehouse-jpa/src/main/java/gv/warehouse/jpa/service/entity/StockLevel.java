@@ -13,7 +13,7 @@ public class StockLevel {
 	@GeneratedValue
 	private Long id;
 	
-	private Long warehouseId;
+	private String warehouseName;
 	
 	private Long productId;
 	
@@ -23,8 +23,8 @@ public class StockLevel {
 		
 	}
 	
-	public StockLevel(Long warehouseId, Long productId, int qty) {
-		this.warehouseId = warehouseId;
+	public StockLevel(String warehouseId, Long productId, int qty) {
+		this.warehouseName = warehouseId;
 		this.productId = productId;
 		this.qty = qty;
 	}
@@ -37,12 +37,12 @@ public class StockLevel {
 		this.id = id;
 	}
 
-	public Long getWarehouseId() {
-		return warehouseId;
+	public String getWarehouseName() {
+		return warehouseName;
 	}
 
-	public void setWarehouseId(Long warehouseId) {
-		this.warehouseId = warehouseId;
+	public void setWarehouseName(String warehouseId) {
+		this.warehouseName = warehouseId;
 	}
 
 	public Long getProductId() {
@@ -74,7 +74,7 @@ public class StockLevel {
 				+ ((productId == null) ? 0 : productId.hashCode());
 		result = prime * result + qty;
 		result = prime * result
-				+ ((warehouseId == null) ? 0 : warehouseId.hashCode());
+				+ ((warehouseName == null) ? 0 : warehouseName.hashCode());
 		return result;
 	}
 
@@ -99,10 +99,10 @@ public class StockLevel {
 			return false;
 		if (qty != other.qty)
 			return false;
-		if (warehouseId == null) {
-			if (other.warehouseId != null)
+		if (warehouseName == null) {
+			if (other.warehouseName != null)
 				return false;
-		} else if (!warehouseId.equals(other.warehouseId))
+		} else if (!warehouseName.equals(other.warehouseName))
 			return false;
 		return true;
 	}

@@ -75,8 +75,8 @@ public class SOAPServiceTest {
 		widget = new Product("Widget", "The new improved Widget2.0");
 		productService.saveProduct(widget);
 		
-		stockService.setStock(new StockChangeRequest(london.getId(), widget.getId(), 22));
-		stockService.setStock(new StockChangeRequest(paris.getId(), widget.getId(), 33));
+		stockService.setStock(new StockChangeRequest(london.getName(), widget.getId(), 22));
+		stockService.setStock(new StockChangeRequest(paris.getName(), widget.getId(), 33));
 	}
 
 	@Test

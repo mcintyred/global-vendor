@@ -15,7 +15,7 @@
 		exchange-name="stockExchange"
 		request-channel="outbound-rabbit-requests"
 		reply-channel="inbound-rabbit-responses"
-		mapped-request-headers="GV*" routing-key-expression="headers.GV_WarehouseId"
+		mapped-request-headers="GV*" routing-key-expression="headers.GV_WarehouseName"
 	/>	
 	
 	<!-- Stock alerts come in through this gateway -->

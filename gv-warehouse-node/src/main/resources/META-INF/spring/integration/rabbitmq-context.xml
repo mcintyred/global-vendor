@@ -25,11 +25,11 @@
 
 	<rabbit:direct-exchange id="stockExchange" name="stockExchange">
 		<rabbit:bindings>
-			<rabbit:binding queue="inboundQueue" key="warehouse_${gv.node.id}"></rabbit:binding>
+			<rabbit:binding queue="inboundQueue" key="warehouse_${gv.node.name}"></rabbit:binding>
 		</rabbit:bindings>
 	</rabbit:direct-exchange>
 	
-	<rabbit:queue auto-delete="false" durable="true" id="inboundQueue" name="warehouse_${gv.node.id}"></rabbit:queue>
+	<rabbit:queue auto-delete="false" durable="true" id="inboundQueue" name="warehouse_${gv.node.name}"></rabbit:queue>
 	
 	<rabbit:fanout-exchange name="stockAlertsExchange"></rabbit:fanout-exchange>
 

@@ -9,6 +9,7 @@ public interface StockService extends StockAlertListener {
 	
 	Set<Warehouse> listWarehouses();
 	Warehouse getWarehouseById(Long warehouseId);
+	Warehouse getWarehouseByName(String warehouseName);
 	
 	/**
 	 * Request a Warehouse to update the stock level for the product specified in the request

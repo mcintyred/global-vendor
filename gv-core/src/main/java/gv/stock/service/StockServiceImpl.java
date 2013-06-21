@@ -64,27 +64,31 @@ public class StockServiceImpl implements StockService {
 		return warehouseServiceLocator.getWarehouseById(warehouseId);
 	}
 
+	@Override
+	public Warehouse getWarehouseByName(String warehouseName) {
+		return warehouseServiceLocator.getWarehouseByName(warehouseName);
+	}
 
 	@Override
 	public int updateStock(StockChangeRequest request) {
-		return getWarehouseService(request.getWarehouseId()).updateStock(request);
+		return getWarehouseService(request.getWarehouseName()).updateStock(request);
 	}
 
 	@Override
 	public void setStock(StockChangeRequest request) {
-		getWarehouseService(request.getWarehouseId()).setStock(request);
+		getWarehouseService(request.getWarehouseName()).setStock(request);
 	}
 
 	@Override
 	public int getStockInWarehouse(StockQueryRequest request) {
-		return getWarehouseService(request.getWarehouseId()).getStock(request);
+		return getWarehouseService(request.getWarehouseName()).getStock(request);
 	}
 	
 	@Override
 	public List<WarehouseStockData> getStockData(Long productId) {
 		List<WarehouseStockData> availableStock = new ArrayList<WarehouseStockData>();
 		for(Warehouse w : listWarehouses()) {
-			StockQueryRequest query = new StockQueryRequest(w.getId(), productId);
+			StockQueryRequest query = new StockQueryRequest(w.getName(), productId);
 			int stockAtWarehouse = getStockInWarehouse(query);
 			if(stockAtWarehouse > 0) {
 				availableStock.add(new WarehouseStockData(stockAtWarehouse, w));
@@ -96,11 +100,11 @@ public class StockServiceImpl implements StockService {
 	
 	@Override
 	public ShipmentConfirmation requestShipment(ShipmentRequest request) {
-		return getWarehouseService(request.getWarehouseId()).requestShipment(request);
+		return getWarehouseService(request.getWarehouseName()).requestShipment(request);
 	}
 	
-	protected WarehouseService getWarehouseService(Long warehouseId) {
-		return warehouseServiceLocator.locateService(warehouseId);
+	protected WarehouseService getWarehouseService(String warehouseName) {
+		return warehouseServiceLocator.locateService(warehouseName);
 	}
 	
 	@Override
@@ -108,20 +112,21 @@ public class StockServiceImpl implements StockService {
 		if(alert.getThreshold() >= alert.getStockLevel()) {
 			createStockAlert(alert);
 		} else {
-			deleteStockAlerts(alert.getWarehouseId(), alert.getProductId());
+			deleteStockAlerts(alert.getWarehouseName(), alert.getProductId());
 		}
 	}
 
 	protected void createStockAlert(StockAlert alert) {
 		StockAlertEntity ent = new StockAlertEntity();
-		ent.setWarehouseId(alert.getWarehouseId());
+		ent.setWarehouseId(getWarehouseByName(alert.getWarehouseName()).getId());
 		ent.setProductId(alert.getProductId());
 		ent.setStockLevel(alert.getStockLevel());
 		ent.setThreshold(alert.getThreshold());
 		stockAlertRepository.save(ent);
 	}
 
-	protected void deleteStockAlerts(long warehouseId, long productId) {
+	protected void deleteStockAlerts(String warehouseName, long productId) {
+		long warehouseId = getWarehouseByName(warehouseName).getId();
 		List<StockAlertEntity> ents = stockAlertRepository.findByWarehouseIdAndProductId(warehouseId, productId);
 		for(StockAlertEntity ent : ents) {
 			stockAlertRepository.delete(ent);

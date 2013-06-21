@@ -12,7 +12,7 @@
 
 	<!-- Loggers -->
 	<logger name="org.springframework.integration">
-		<level value="debug" />
+		<level value="info" />
 	</logger>
 
 <!-- 	<logger name="org.springframework.amqp"> -->
@@ -20,13 +20,13 @@
 <!-- 	</logger> -->
 
 	<logger name="XMLLogger">
-		<level value="all" />
+		<level value="info" />
 		<appender-ref ref="console" />
 	</logger>
 
 	<!-- Root Logger -->
 	<root>
-		<priority value="all" />
+		<priority value="info" />
 		<appender-ref ref="console" />
 	</root>
 

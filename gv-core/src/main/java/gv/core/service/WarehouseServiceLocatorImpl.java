@@ -77,6 +77,22 @@ public class WarehouseServiceLocatorImpl implements WarehouseServiceLocator {
 	}
 
 	@Override
+	public WarehouseService locateService(String warehouseName) {
+		
+		WarehouseServiceBinding entity = repository.findOneByName(warehouseName);
+		
+		if(entity == null) {
+			throw new IllegalArgumentException("No such warehouse registered : " + warehouseName);
+		}
+		
+		if(getServiceNameMap().containsKey(entity.getServiceBindingName())) {
+			return getServiceNameMap().get(entity.getServiceBindingName());
+		}
+		
+		throw new IllegalArgumentException("No service registered for warehouse : " + entity.getName());
+	}
+
+	@Override
 	public WarehouseServiceBinding bindWarehouseService(Warehouse warehouse, String serviceName) {
 		
 		if(!getServiceNameMap().containsKey(serviceName)) {
@@ -128,6 +144,17 @@ public class WarehouseServiceLocatorImpl implements WarehouseServiceLocator {
 	@Override
 	public Warehouse getWarehouseById(Long warehouseId) {
 		WarehouseServiceBinding entity = repository.findOne(warehouseId);
+		
+		if(entity == null) {
+			throw new IllegalArgumentException();
+		}
+		
+		return new Warehouse(entity.getId(), entity.getName());
+	}
+	
+	@Override
+	public Warehouse getWarehouseByName(String warehouseName) {
+		WarehouseServiceBinding entity = repository.findOneByName(warehouseName);
 		
 		if(entity == null) {
 			throw new IllegalArgumentException();

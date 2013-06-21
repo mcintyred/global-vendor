@@ -21,7 +21,7 @@
 				<c:forEach var="warehouse" items="${ warehouseMap.values() }">
 				<tr>
 					<td>${ warehouse.name }</td>
-					<td><form:input path="stockLevels[${warehouse.id }]" value="${ stockLevels[warehouse.id] }"/></td>
+					<td><form:input path="stockLevels[${warehouse.name }]" value="${ stockLevels[warehouse.name] }"/></td>
 				</tr>
 								
 				</c:forEach>

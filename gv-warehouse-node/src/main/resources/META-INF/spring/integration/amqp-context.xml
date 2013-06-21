@@ -10,7 +10,7 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 				
 	<int-amqp:inbound-gateway 
-		queue-names="warehouse_${gv.node.id}" 
+		queue-names="warehouse_${gv.node.name}" 
 		request-channel="inbound" 
 		connection-factory="rabbitConnectionFactory"
 		mapped-request-headers="GV*"

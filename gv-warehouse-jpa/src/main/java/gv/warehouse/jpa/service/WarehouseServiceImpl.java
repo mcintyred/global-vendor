@@ -56,14 +56,14 @@ public class WarehouseServiceImpl implements WarehouseService, StockAlertEventSo
 	@Override
 	public int updateStock(StockChangeRequest request) {
 		
-		Long warehouseId = request.getWarehouseId();
+		String warehouseName = request.getWarehouseName();
 		Long productId = request.getProductId();
 		int stockDelta = request.getQty();
 		int oldLevel = 0;
 		
-		StockLevel stockLevel = repository.findByWarehouseIdAndProductId(warehouseId, productId);
+		StockLevel stockLevel = repository.findByWarehouseNameAndProductId(warehouseName, productId);
 		if(stockLevel == null) {
-			stockLevel = new StockLevel(warehouseId, productId, stockDelta);
+			stockLevel = new StockLevel(warehouseName, productId, stockDelta);
 		} else { 
 			oldLevel = stockLevel.getQty();
 			stockLevel.addQty(stockDelta);
@@ -72,22 +72,22 @@ public class WarehouseServiceImpl implements WarehouseService, StockAlertEventSo
 		repository.save(stockLevel);
 		
 		
-		raiseStockAlert(productId, warehouseId, oldLevel, stockLevel.getQty());
+		raiseStockAlert(productId, warehouseName, oldLevel, stockLevel.getQty());
 		return stockLevel.getQty();
 	}
 
 	@Override
 	public int setStock(StockChangeRequest request) {
 		
-		Long warehouseId = request.getWarehouseId();
+		String warehouseName = request.getWarehouseName();
 		Long productId = request.getProductId();
 		int stockOnHand = request.getQty();
 		int oldLevel = 0;
 		
-		StockLevel stockLevel = repository.findByWarehouseIdAndProductId(warehouseId, productId);
+		StockLevel stockLevel = repository.findByWarehouseNameAndProductId(warehouseName, productId);
 		
 		if(stockLevel == null) {
-			stockLevel = new StockLevel(warehouseId, productId, stockOnHand);
+			stockLevel = new StockLevel(warehouseName, productId, stockOnHand);
 		} else { 
 			oldLevel = stockLevel.getQty();
 			stockLevel.setQty(stockOnHand);
@@ -95,7 +95,7 @@ public class WarehouseServiceImpl implements WarehouseService, StockAlertEventSo
 		
 		repository.save(stockLevel);
 		
-		raiseStockAlert(productId, warehouseId, oldLevel, stockLevel.getQty());
+		raiseStockAlert(productId, warehouseName, oldLevel, stockLevel.getQty());
 		
 		return stockLevel.getQty();
 	}
@@ -103,10 +103,10 @@ public class WarehouseServiceImpl implements WarehouseService, StockAlertEventSo
 	@Override
 	public int getStock(StockQueryRequest request) {
 		
-		Long warehouseId = request.getWarehouseId();
+		String warehouseName = request.getWarehouseName();
 		Long productId = request.getProductId();
 
-		StockLevel stockLevel = repository.findByWarehouseIdAndProductId(warehouseId, productId);
+		StockLevel stockLevel = repository.findByWarehouseNameAndProductId(warehouseName, productId);
 		if(stockLevel != null) {
 			return stockLevel.getQty();
 		}
@@ -115,7 +115,7 @@ public class WarehouseServiceImpl implements WarehouseService, StockAlertEventSo
 	
 	@Override
 	public void discontinueProduct(DiscontinueProductRequest request) {
-		StockLevel stockLevel = repository.findByWarehouseIdAndProductId(request.getWarehouseId(), request.getProductId());
+		StockLevel stockLevel = repository.findByWarehouseNameAndProductId(request.getWarehouseName(), request.getProductId());
 		if(stockLevel != null) {
 			repository.delete(stockLevel);
 		}
@@ -123,7 +123,7 @@ public class WarehouseServiceImpl implements WarehouseService, StockAlertEventSo
 
 	@Override
 	public ShipmentConfirmation requestShipment(ShipmentRequest request) {
-		StockLevel stockLevel = repository.findByWarehouseIdAndProductId(request.getWarehouseId(), request.getProductId());
+		StockLevel stockLevel = repository.findByWarehouseNameAndProductId(request.getWarehouseName(), request.getProductId());
 		int allocatedQty = 0;
 		
 		if(stockLevel == null) {
@@ -141,7 +141,7 @@ public class WarehouseServiceImpl implements WarehouseService, StockAlertEventSo
 		stockLevel.addQty(-allocatedQty);
 		repository.save(stockLevel);
 		
-		raiseStockAlert(request.getProductId(), request.getWarehouseId(), oldLevel, stockLevel.getQty());
+		raiseStockAlert(request.getProductId(), request.getWarehouseName(), oldLevel, stockLevel.getQty());
 		
 		return new ShipmentConfirmation(request.getProductId(), new LocalDate(), allocatedQty);
 	}
@@ -150,7 +150,7 @@ public class WarehouseServiceImpl implements WarehouseService, StockAlertEventSo
 	public void cancelShipment(Shipment shipment) {
 		for(ShipmentLine line : shipment.getLines()) {
 			
-			StockLevel stockLevel = repository.findByWarehouseIdAndProductId(shipment.getWarehouse().getId(), line.getProduct().getId());
+			StockLevel stockLevel = repository.findByWarehouseNameAndProductId(shipment.getWarehouse().getName(), line.getProduct().getId());
 			
 			if(stockLevel != null) {
 				
@@ -159,12 +159,12 @@ public class WarehouseServiceImpl implements WarehouseService, StockAlertEventSo
 				stockLevel.addQty(line.getQty());
 				repository.save(stockLevel);
 
-				raiseStockAlert(line.getProduct().getId(), shipment.getWarehouse().getId(), oldLevel, stockLevel.getQty());
+				raiseStockAlert(line.getProduct().getId(), shipment.getWarehouse().getName(), oldLevel, stockLevel.getQty());
 			}
 		}
 	}
 	
-	protected void raiseStockAlert(long productId, long warehouseId, int oldLevel, int newLevel) {
+	protected void raiseStockAlert(long productId, String warehouseName, int oldLevel, int newLevel) {
 		
 		if(oldLevel == newLevel || stockAlertListener == null) {
 			return;
@@ -181,7 +181,7 @@ public class WarehouseServiceImpl implements WarehouseService, StockAlertEventSo
 		}
 		
 		if(triggerAlert) {
-			stockAlertListener.handleStockAlert(new StockAlert(productId, warehouseId, newLevel, stockAlertThreshold));
+			stockAlertListener.handleStockAlert(new StockAlert(productId, warehouseName, newLevel, stockAlertThreshold));
 		}
 	}
 }

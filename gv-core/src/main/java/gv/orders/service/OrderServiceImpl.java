@@ -100,7 +100,7 @@ public class OrderServiceImpl implements OrderService {
 		Map<Warehouse, ShipmentLine> shipmentLines = new HashMap<Warehouse, ShipmentLine>();
 		for(WarehouseStockData ws : availableStock) {
 			
-			ShipmentRequest request = new ShipmentRequest(ws.getWarehouse().getId(), orderLine.getProductId(), orderLine.getQty() - fulfilledQty);
+			ShipmentRequest request = new ShipmentRequest(ws.getWarehouse().getName(), orderLine.getProductId(), orderLine.getQty() - fulfilledQty);
 			ShipmentConfirmation shipmentConfirmation = stockService.requestShipment(request);
 			if(shipmentConfirmation.getQty() > 0) {
 				fulfilledQty += shipmentConfirmation.getQty();

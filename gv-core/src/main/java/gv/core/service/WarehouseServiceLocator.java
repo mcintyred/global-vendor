@@ -10,6 +10,7 @@ import java.util.Set;
 public interface WarehouseServiceLocator {
 
 	WarehouseService locateService(Long warehouseId);
+	WarehouseService locateService(String warehouseName);
 	
 	List<WarehouseService> listServices();
 	
@@ -19,5 +20,6 @@ public interface WarehouseServiceLocator {
 	
 	Set<Warehouse> listWarehouses();
 	Warehouse getWarehouseById(Long warehouseId);
+	Warehouse getWarehouseByName(String warehouseName);
 	
 }

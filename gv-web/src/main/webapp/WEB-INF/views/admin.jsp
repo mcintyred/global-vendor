@@ -68,7 +68,7 @@
 					<td>${ product.description }</td>
 					
 					<c:forEach var="warehouse" items="${ warehouses }">
-						<td>${ stockLevels.get(product).get(warehouse.id) + 0}</td>
+						<td>${ stockLevels.get(product).get(warehouse.name) + 0}</td>
 					</c:forEach>
 					
 					<td>

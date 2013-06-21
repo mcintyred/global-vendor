@@ -9,30 +9,28 @@
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
 		http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
 
+	<jdbc:embedded-database id="dataSource" type="HSQL" />
 
-	<context:property-placeholder location="classpath:gv-web.properties"/>
-	<context:component-scan base-package="gv"></context:component-scan>
 
-	<import resource="classpath:/META-INF/spring/h2-data-context.xml"/>
-
-	<import resource="classpath:/META-INF/spring/integration/remote-warehouse-context.xml"/>
-
-	<!-- Declare the list of WarehouseServices -->
-	<bean id="warehouseServiceList" class="gv.core.service.WarehouseServiceList">
-		<constructor-arg>
-			<list>
-				<ref bean="outboundGateway"/>
-				<ref bean="localWarehouseService"/>
-			</list>
-		</constructor-arg>
+	<bean id="entityManagerFactory"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="jpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+				<property name="generateDdl" value="true" />
+				<property name="database" value="HSQL" />
+				<property name="showSql" value="true" />
+			</bean>
+		</property>
+		<property name="packagesToScan" value="gv" />
 	</bean>
-	
-	<!-- Declare the distributed service -->
-	<bean id="stockServiceImpl" class="gv.stock.service.StockServiceImpl"></bean>
-	
-	<!-- The local warehouse service -->
-	<bean id="localWarehouseService" class="gv.warehouse.jpa.service.WarehouseServiceImpl">
-		<property name="stockAlertListener" ref="stockServiceImpl"/>
-		<property name="stockAlertThreshold" value="10"/>
+
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
 	</bean>
+
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<jpa:repositories base-package="gv" />
+	
 </beans>

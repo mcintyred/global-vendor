@@ -65,7 +65,7 @@
 	<int:service-activator input-channel="get-name" expression="'Remote Warehouse'"/>
 	
 	<int:header-enricher input-channel="outbound-requests" output-channel="outbound-marshaller">
-		<int:header name="GV_WarehouseId" expression="'warehouse_' + payload.warehouseId"/>
+		<int:header name="GV_WarehouseName" expression="'warehouse_' + payload.warehouseName"/>
 	</int:header-enricher>
 
 	<int:object-to-json-transformer input-channel="outbound-marshaller" output-channel="outbound-rabbit-requests"/>

@@ -4,10 +4,12 @@
 	xmlns:rabbit="http://www.springframework.org/schema/rabbit"
 	xmlns:int-amqp="http://www.springframework.org/schema/integration/amqp"
 	xmlns:int="http://www.springframework.org/schema/integration"
+	xmlns:context="http://www.springframework.org/schema/context"
 	xsi:schemaLocation="http://www.springframework.org/schema/integration/amqp http://www.springframework.org/schema/integration/amqp/spring-integration-amqp-2.2.xsd
 		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration-2.2.xsd
 		http://www.springframework.org/schema/rabbit http://www.springframework.org/schema/rabbit/spring-rabbit.xsd
-		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd">
 			
 					
 	<!-- 
@@ -15,8 +17,19 @@
 	 -->	
 	 
 	 <!-- Import the node context first -->
-	 <import resource="classpath:META-INF/spring/root-context.xml" />
+	 <!-- 
+	 Service context for a standalone warehouse node using an HSQL database
+	 -->
+	 <context:component-scan base-package="gv" />
 	 
+	 <context:property-placeholder location="classpath:test.properties" />
+
+	 <import resource="classpath:META-INF/spring/integration/amqp-context.xml" />
+	 <import resource="classpath:META-INF/spring/integration/rabbitmq-context.xml" />
+	 <import resource="classpath:META-INF/spring/integration/warehouse-service-context.xml" />
+ 	 <import resource="classpath:META-INF/spring/integration/stock-alerts-context.xml" />
+	 <import resource="classpath:META-INF/spring/data-context.xml" />
+	 <import resource="classpath:META-INF/spring/service-context.xml" />	 
 	 
 	 <!-- Now set up the producer context -->
 	 
@@ -63,7 +76,7 @@
 	<!-- Outbound requests go through this chain to set headers and map to json -->
 	<int:chain input-channel="outbound-requests" output-channel="outbound-rabbit-requests">
 		<int:header-enricher>
-			<int:header name="GV_WarehouseId" expression="'warehouse_' + payload.warehouseId"/>
+			<int:header name="GV_WarehouseName" expression="'warehouse_' + payload.warehouseName"/>
 		</int:header-enricher>
 		<int:object-to-json-transformer />
 	</int:chain>
@@ -75,7 +88,7 @@
 		exchange-name="stockExchange"
 		request-channel="outbound-rabbit-requests"
 		reply-channel="inbound-rabbit-responses"
-		mapped-request-headers="GV*" routing-key-expression="headers.GV_WarehouseId"
+		mapped-request-headers="GV*" routing-key-expression="headers.GV_WarehouseName"
 	/>
 	
 	<int:header-value-router header-name="GV_Method" input-channel="inbound-rabbit-responses">

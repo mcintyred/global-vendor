@@ -52,7 +52,7 @@ public class IntegrationTests {
 	public void shouldSetAndGetStock() throws InterruptedException {
 		
 		// given
-		StockQueryRequest request = new StockQueryRequest(1L, 3L);
+		StockQueryRequest request = new StockQueryRequest("testWarehouse", 3L);
 				
 		// When
 		Integer response = service.getStock(request);
@@ -66,7 +66,7 @@ public class IntegrationTests {
 	public void shouldUpdateStock() throws InterruptedException {
 		
 		// given
-		StockChangeRequest request = new StockChangeRequest(1L, 3L, 19);
+		StockChangeRequest request = new StockChangeRequest("testWarehouse", 3L, 19);
 				
 		// When
 		Integer response = service.updateStock(request);
@@ -80,7 +80,7 @@ public class IntegrationTests {
 	public void shouldRequestShipment() throws InterruptedException, JsonParseException, JsonMappingException, IOException {
 		
 		// given
-		ShipmentRequest request = new ShipmentRequest(1L, 3L, 19);
+		ShipmentRequest request = new ShipmentRequest("testWarehouse", 3L, 19);
 				
 		// When
 		ShipmentConfirmation confirmation = service.requestShipment(request);
@@ -91,7 +91,7 @@ public class IntegrationTests {
 	}
 	
 	protected void setStock() {
-		StockChangeRequest request = new StockChangeRequest(1L, 3L, 5);
+		StockChangeRequest request = new StockChangeRequest("testWarehouse", 3L, 5);
 		service.setStock(request);
 	}
 }

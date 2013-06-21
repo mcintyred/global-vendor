@@ -5,24 +5,22 @@ import java.util.Map;
 
 public class StockForm {
 	
-	private Map<Long, Integer> stockLevels = new HashMap<Long,Integer>();
+	private Map<String, Integer> stockLevels = new HashMap<String,Integer>();
 	
 	public StockForm() {
 		
 	}
 	
-	public StockForm(Map<Long, Integer> stockLevels) {
+	public StockForm(Map<String, Integer> stockLevels) {
 		this.stockLevels = stockLevels;
 	}
 
-	public Map<Long, Integer> getStockLevels() {
+	public Map<String, Integer> getStockLevels() {
 		return stockLevels;
 	}
 
-	public void setStockLevels(Map<Long, Integer> stockLevels) {
+	public void setStockLevels(Map<String, Integer> stockLevels) {
 		this.stockLevels = stockLevels;
 	}
-	
-	
 
 }

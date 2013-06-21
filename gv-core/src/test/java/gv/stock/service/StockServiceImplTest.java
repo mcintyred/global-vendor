@@ -61,10 +61,9 @@ public class StockServiceImplTest extends AbstractWarehouseTest {
 	@Test
 	public void shouldUpdateStockInTheCorrectWarehouse() {
 		// given
-		Long warehouseId = LONDON;
 		Long productId = 127L;
 		int stockDelta = 55;
-		StockChangeRequest request = new StockChangeRequest(warehouseId, productId, stockDelta);
+		StockChangeRequest request = new StockChangeRequest(london.getName(), productId, stockDelta);
 		given(londonService.updateStock(request)).willReturn(stockDelta + 5);
 		
 		// when
@@ -78,10 +77,9 @@ public class StockServiceImplTest extends AbstractWarehouseTest {
 	@Test
 	public void shouldSetStockInTheCorrectWarehouse() {
 		// given
-		Long warehouseId = LONDON;
 		Long productId = 127L;
 		int stockLevel = 55;		
-		StockChangeRequest request = new StockChangeRequest(warehouseId, productId, stockLevel);
+		StockChangeRequest request = new StockChangeRequest(london.getName(), productId, stockLevel);
 		
 		// when
 		stockService.setStock(request);
@@ -94,10 +92,9 @@ public class StockServiceImplTest extends AbstractWarehouseTest {
 	@Test
 	public void shouldGetStockFromTheCorrectWarehouse() {
 		// given
-		Long warehouseId = LONDON;
 		Long productId = 127L;
 		int stockLevel = 55;	
-		StockQueryRequest request = new StockQueryRequest(warehouseId, productId);
+		StockQueryRequest request = new StockQueryRequest(london.getName(), productId);
 		given(londonService.getStock(request)).willReturn(stockLevel);
 		// when
 		int foundStockLevel = stockService.getStockInWarehouse(request);
@@ -111,7 +108,7 @@ public class StockServiceImplTest extends AbstractWarehouseTest {
 	@Test
 	public void shouldHandleDepletedStockAlert() {
 		// given
-		StockAlert alert = new StockAlert(ham.getId(), LONDON, 5, 10);
+		StockAlert alert = new StockAlert(ham.getId(), london.getName(), 5, 10);
 		
 		ArgumentCaptor<StockAlertEntity> captor = ArgumentCaptor.forClass(StockAlertEntity.class);
 		
@@ -130,7 +127,7 @@ public class StockServiceImplTest extends AbstractWarehouseTest {
 	@Test
 	public void shouldHandleReplenishedStockAlert() {
 		// given
-		StockAlert alert = new StockAlert(ham.getId(), LONDON, 15, 10);
+		StockAlert alert = new StockAlert(ham.getId(), london.getName(), 15, 10);
 		StockAlertEntity ent = new StockAlertEntity();
 		ent.setId(3L);
 		ent.setProductId(ham.getId());

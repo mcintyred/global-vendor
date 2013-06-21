@@ -8,21 +8,21 @@ package gv.stock.api;
  */
 public class StockQueryRequest {
 	
-	private Long warehouseId;
+	private String warehouseName;
 	private Long productId;
 	
 	public StockQueryRequest() {
 		this(null, null);
 	}
 	
-	public StockQueryRequest(Long warehouseId, Long productId) {
+	public StockQueryRequest(String warehouseName, Long productId) {
 		super();
-		this.warehouseId = warehouseId;
+		this.warehouseName = warehouseName;
 		this.productId = productId;
 	}
 	
-	public Long getWarehouseId() {
-		return warehouseId;
+	public String getWarehouseName() {
+		return warehouseName;
 	}
 	
 	public Long getProductId() {

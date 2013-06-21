@@ -66,6 +66,10 @@ public class WarehouseServiceLocatorImplTest {
 		given(parisService.getName()).willReturn("parisService");
 		given(tokyoService.getName()).willReturn("tokyoService");
 		
+		given(warehouseRepository.findOneByName(london.getName())).willReturn(londonEntity);
+		given(warehouseRepository.findOneByName(paris.getName())).willReturn(parisEntity);
+		given(warehouseRepository.findOneByName(tokyo.getName())).willReturn(tokyoEntity);
+		
 		locator = new WarehouseServiceLocatorImpl();
 		locator.setServiceList(new WarehouseServiceList(services));
 		locator.setRepository(warehouseRepository);
@@ -79,8 +83,14 @@ public class WarehouseServiceLocatorImplTest {
 	}
 	
 	@Test
-	public void shouldLocateRepository() {
+	public void shouldLocateRepositoryById() {
 		WarehouseService repo = locator.locateService(london.getId());
+		assertEquals(londonService, repo);
+	}
+	
+	@Test
+	public void shouldLocateRepositoryByName() {
+		WarehouseService repo = locator.locateService(london.getName());
 		assertEquals(londonService, repo);
 	}
 	

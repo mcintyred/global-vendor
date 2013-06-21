@@ -95,6 +95,11 @@ abstract public class AbstractWarehouseTest {
 		given(warehouseRepository.findOne(LONDON)).willReturn(londonEntity);
 		given(warehouseRepository.findOne(PARIS)).willReturn(parisEntity);
 		given(warehouseRepository.findOne(TOKYO)).willReturn(tokyoEntity);
+
+		given(warehouseRepository.findOneByName(london.getName())).willReturn(londonEntity);
+		given(warehouseRepository.findOneByName(paris.getName())).willReturn(parisEntity);
+		given(warehouseRepository.findOneByName(tokyo.getName())).willReturn(tokyoEntity);
+		
 		given(warehouseRepository.findAll()).willReturn(
 				Lists.newArrayList(londonEntity, parisEntity, tokyoEntity));
 

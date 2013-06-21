@@ -2,20 +2,20 @@ package gv.stock.api;
 
 public class DiscontinueProductRequest {
 	
-	private final long warehouseId;
+	private final String warehouseName;
 	private final long productId;
 	
 	public DiscontinueProductRequest() {
-		this(0, 0);
+		this(null, 0);
 	}
 	
-	public DiscontinueProductRequest(long warehouseId, long productId) {
-		this.warehouseId = warehouseId;
+	public DiscontinueProductRequest(String warehouseName, long productId) {
+		this.warehouseName = warehouseName;
 		this.productId = productId;
 	}
 	
-	public long getWarehouseId() {
-		return warehouseId;
+	public String getWarehouseName() {
+		return warehouseName;
 	}
 	
 	public long getProductId() {

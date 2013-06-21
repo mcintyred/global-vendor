@@ -62,7 +62,7 @@ public class AdminController {
 		model.addAttribute("warehouses", warehouses);
 		model.addAttribute("products", products);
 		
-		Map<Product, Map<Long, Integer>> stock = new HashMap<Product, Map<Long, Integer>>();
+		Map<Product, Map<String, Integer>> stock = new HashMap<Product, Map<String, Integer>>();
 		for(Product product : products) {
 
 			stock.put(product, getStockLevels(product));
@@ -113,9 +113,9 @@ public class AdminController {
 	
 	@RequestMapping(value="/product/{productId}/stock.html", method=RequestMethod.POST)
 	public String setStock(@ModelAttribute("stockForm") StockForm stockForm, @PathVariable("productId") Long productId) {
-		for(Long warehouseId : stockForm.getStockLevels().keySet()) {
-			Integer stockLevel = stockForm.getStockLevels().get(warehouseId);
-			stockService.setStock(new StockChangeRequest(warehouseId, productId, stockLevel));
+		for(String warehouseName : stockForm.getStockLevels().keySet()) {
+			Integer stockLevel = stockForm.getStockLevels().get(warehouseName);
+			stockService.setStock(new StockChangeRequest(warehouseName, productId, stockLevel));
 		}
 		return "redirect:/admin.html";
 	}
@@ -131,10 +131,10 @@ public class AdminController {
 		return new StockForm(getStockLevels(product));
 	}
 	
-	public Map<Long, Integer> getStockLevels(Product product) {
-		Map<Long, Integer> productStock = new HashMap<Long, Integer>();
+	public Map<String, Integer> getStockLevels(Product product) {
+		Map<String, Integer> productStock = new HashMap<String, Integer>();
 		for(Warehouse w : stockService.listWarehouses()) {
-			productStock.put(w.getId(),  stockService.getStockInWarehouse(new StockQueryRequest(w.getId(), product.getId())));
+			productStock.put(w.getName(),  stockService.getStockInWarehouse(new StockQueryRequest(w.getName(), product.getId())));
 		}
 		return productStock;
 	}

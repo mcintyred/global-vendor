@@ -6,6 +6,6 @@ import gv.warehouse.jpa.service.entity.StockLevel;
 
 public interface StockLevelRepository extends CrudRepository<StockLevel, Long> {
 	
-	public StockLevel findByWarehouseIdAndProductId(Long warehouseId, Long productId);
+	public StockLevel findByWarehouseNameAndProductId(String warehouseName, Long productId);
 
 }
