@@ -31,7 +31,7 @@ public class StockServiceImplTest extends AbstractWarehouseTest {
 		// when
 		Set<Warehouse> warehouses = stockService.listWarehouses();
 		// then
-		assertEquals(warehouses.size(), 3);
+		assertEquals(warehouses.size(), 2);
 	}
 	
 	@Test
@@ -40,10 +40,6 @@ public class StockServiceImplTest extends AbstractWarehouseTest {
 		Warehouse found = stockService.getWarehouseById(LONDON);
 		// then
 		assertEquals(found, london);
-		// when
-		found = stockService.getWarehouseById(PARIS);
-		// then
-		assertEquals(found, paris);
 		// when
 		found = stockService.getWarehouseById(TOKYO);
 		// then
@@ -64,14 +60,14 @@ public class StockServiceImplTest extends AbstractWarehouseTest {
 		Long productId = 127L;
 		int stockDelta = 55;
 		StockChangeRequest request = new StockChangeRequest(london.getName(), productId, stockDelta);
-		given(londonService.updateStock(request)).willReturn(stockDelta + 5);
+		given(localService.updateStock(request)).willReturn(stockDelta + 5);
 		
 		// when
 		stockService.updateStock(request);
 		
 		// then
-		verify(londonService).updateStock(request);
-		verifyZeroInteractions(parisService);
+		verify(localService).updateStock(request);
+		verifyZeroInteractions(remoteService);
 	}
 
 	@Test
@@ -85,8 +81,8 @@ public class StockServiceImplTest extends AbstractWarehouseTest {
 		stockService.setStock(request);
 		
 		// then
-		verify(londonService).setStock(request);
-		verifyZeroInteractions(parisService);
+		verify(localService).setStock(request);
+		verifyZeroInteractions(remoteService);
 	}
 
 	@Test
@@ -95,13 +91,13 @@ public class StockServiceImplTest extends AbstractWarehouseTest {
 		Long productId = 127L;
 		int stockLevel = 55;	
 		StockQueryRequest request = new StockQueryRequest(london.getName(), productId);
-		given(londonService.getStock(request)).willReturn(stockLevel);
+		given(localService.getStock(request)).willReturn(stockLevel);
 		// when
 		int foundStockLevel = stockService.getStockInWarehouse(request);
 		
 		// then
-		verify(londonService).getStock(request);
-		verifyZeroInteractions(parisService);
+		verify(localService).getStock(request);
+		verifyZeroInteractions(remoteService);
 		assertEquals(stockLevel, foundStockLevel);
 	}
 	

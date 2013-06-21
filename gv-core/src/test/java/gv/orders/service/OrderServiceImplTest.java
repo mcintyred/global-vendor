@@ -50,16 +50,14 @@ public class OrderServiceImplTest extends AbstractWarehouseTest {
 		
 		Order order = new Order(Lists.newArrayList(orderLine));
 		int londonStock = 23;
-		int parisStock = 22;
 		int tokyoStock = 3;
 		
-		given(londonService.getStock(any(StockQueryRequest.class))).willReturn(londonStock);
-		given(parisService.getStock(any(StockQueryRequest.class))).willReturn(parisStock);
-		given(tokyoService.getStock(any(StockQueryRequest.class))).willReturn(tokyoStock);
+		given(localService.getStock(any(StockQueryRequest.class))).willReturn(londonStock);
+		given(remoteService.getStock(any(StockQueryRequest.class))).willReturn(tokyoStock);
 		
 		given(productService.getProductById(productId)).willReturn(product);
 		
-		given(londonService.requestShipment(any(ShipmentRequest.class))).willReturn(new ShipmentConfirmation(productId, new LocalDate(), qty));
+		given(localService.requestShipment(any(ShipmentRequest.class))).willReturn(new ShipmentConfirmation(productId, new LocalDate(), qty));
 		
 		// when
 		OrderConfirmation confirmation = orderService.placeOrder(order);
@@ -87,23 +85,20 @@ public class OrderServiceImplTest extends AbstractWarehouseTest {
 		
 		Order order = new Order(Lists.newArrayList(orderLine));
 		int londonStock = 5;
-		int parisStock = 7;
 		int tokyoStock = 8;
 		
-		given(londonService.getStock(any(StockQueryRequest.class))).willReturn(londonStock);
-		given(parisService.getStock(any(StockQueryRequest.class))).willReturn(parisStock);
-		given(tokyoService.getStock(any(StockQueryRequest.class))).willReturn(tokyoStock);
+		given(localService.getStock(any(StockQueryRequest.class))).willReturn(londonStock);
+		given(remoteService.getStock(any(StockQueryRequest.class))).willReturn(tokyoStock);
 		
-		given(tokyoService.requestShipment(any(ShipmentRequest.class))).willReturn(new ShipmentConfirmation(productId, new LocalDate(), 8));
-		given(parisService.requestShipment(any(ShipmentRequest.class))).willReturn(new ShipmentConfirmation(productId, new LocalDate(), 7));
-		given(londonService.requestShipment(any(ShipmentRequest.class))).willReturn(new ShipmentConfirmation(productId, new LocalDate(), 3));
+		given(localService.requestShipment(any(ShipmentRequest.class))).willReturn(new ShipmentConfirmation(productId, new LocalDate(), 8));
+		given(remoteService.requestShipment(any(ShipmentRequest.class))).willReturn(new ShipmentConfirmation(productId, new LocalDate(), 3));
 		
 		// when
 		OrderConfirmation confirmation = orderService.placeOrder(order);
 		
 		// then
 		assertNotNull(confirmation);
-		assertEquals(confirmation.getShipments().size(), 3);
+		assertEquals(confirmation.getShipments().size(), 2);
 		
 	}
 }

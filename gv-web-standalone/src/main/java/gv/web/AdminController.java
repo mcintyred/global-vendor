@@ -49,14 +49,10 @@ public class AdminController {
 	@RequestMapping("/admin.html")
 	public String index(Model model) {
 		
-		List<WarehouseService> services = warehouseServiceLocator.listServices();
 		List<WarehouseServiceBinding> warehouses = warehouseServiceLocator.listBindings();
 		List<Product> products = productService.listProducts();
 		
-		List<String> serviceNames = Lists.newArrayList();
-		for(WarehouseService service : services) {
-			serviceNames.add(service.getName());
-		}
+		Set<String> serviceNames = warehouseServiceLocator.getServiceNameMap().keySet();
 		
 		model.addAttribute("serviceNames", serviceNames);
 		model.addAttribute("warehouses", warehouses);

@@ -10,7 +10,9 @@ import gv.core.service.repository.WarehouseRepository;
 import gv.warehouse.api.WarehouseService;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,17 +28,17 @@ public class WarehouseServiceLocatorImplTest {
 	public static final long PARIS = 17L;
 
 	public static final long LONDON = 3L;
+	
+	public static final String LOCAL = "local";
+	public static final String REMOTE = "remote";
 
 	private WarehouseServiceLocatorImpl locator;
 	
 	@Mock
-	private WarehouseService londonService;
+	private WarehouseService localService;
 	
 	@Mock
-	private WarehouseService parisService;
-	
-	@Mock
-	private WarehouseService tokyoService;
+	private WarehouseService remoteService;
 	
 	private Warehouse london;
 	private Warehouse paris;
@@ -49,29 +51,24 @@ public class WarehouseServiceLocatorImplTest {
 	@Before
 	public void setUp() {
 		// Create the Warehouse to StockDAO map and inject it into the service
-		List<WarehouseService> services = new ArrayList<WarehouseService>();
+		Map<String, WarehouseService> services = new HashMap<String, WarehouseService>();
 		london = new Warehouse(LONDON, "London");
 		paris = new Warehouse(PARIS, "Paris");
 		tokyo = new Warehouse(TOKYO, "Tokyo");
 		
-		WarehouseServiceBinding londonEntity = new WarehouseServiceBinding(LONDON, "London", "londonService");
-		WarehouseServiceBinding parisEntity = new WarehouseServiceBinding(PARIS, "Paris", "parisService");
-		WarehouseServiceBinding tokyoEntity = new WarehouseServiceBinding(TOKYO, "Tokyo", "tokyoService");
+		WarehouseServiceBinding londonEntity = new WarehouseServiceBinding(LONDON, "London", LOCAL);
+		WarehouseServiceBinding parisEntity = new WarehouseServiceBinding(PARIS, "Paris", LOCAL);
+		WarehouseServiceBinding tokyoEntity = new WarehouseServiceBinding(TOKYO, "Tokyo", REMOTE);
 		
-		services.add(londonService);
-		services.add(parisService);
-		services.add(tokyoService);
-		
-		given(londonService.getName()).willReturn("londonService");
-		given(parisService.getName()).willReturn("parisService");
-		given(tokyoService.getName()).willReturn("tokyoService");
+		services.put(LOCAL, localService);
+		services.put(REMOTE, remoteService);
 		
 		given(warehouseRepository.findOneByName(london.getName())).willReturn(londonEntity);
 		given(warehouseRepository.findOneByName(paris.getName())).willReturn(parisEntity);
 		given(warehouseRepository.findOneByName(tokyo.getName())).willReturn(tokyoEntity);
 		
 		locator = new WarehouseServiceLocatorImpl();
-		locator.setServiceList(new WarehouseServiceList(services));
+		locator.setServiceMap(new WarehouseServiceMap(services));
 		locator.setRepository(warehouseRepository);
 		
 		locator.getServiceNameMap();
@@ -79,19 +76,22 @@ public class WarehouseServiceLocatorImplTest {
 		given(warehouseRepository.findOne(LONDON)).willReturn(londonEntity);
 		given(warehouseRepository.findOne(PARIS)).willReturn(parisEntity);
 		given(warehouseRepository.findOne(TOKYO)).willReturn(tokyoEntity);
-		reset(londonService, parisService, tokyoService);
 	}
 	
 	@Test
 	public void shouldLocateRepositoryById() {
 		WarehouseService repo = locator.locateService(london.getId());
-		assertEquals(londonService, repo);
+		assertEquals(localService, repo);
+		repo = locator.locateService(tokyo.getId());
+		assertEquals(remoteService, repo);
 	}
 	
 	@Test
 	public void shouldLocateRepositoryByName() {
 		WarehouseService repo = locator.locateService(london.getName());
-		assertEquals(londonService, repo);
+		assertEquals(localService, repo);
+		repo = locator.locateService(tokyo.getName());
+		assertEquals(remoteService, repo);
 	}
 	
 	@Test(expected = IllegalArgumentException.class)

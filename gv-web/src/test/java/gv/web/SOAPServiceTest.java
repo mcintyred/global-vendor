@@ -69,8 +69,8 @@ public class SOAPServiceTest {
 	public void setup() {
 		london = new Warehouse(1L, "London");
 		paris = new Warehouse(2L, "Paris");
-		warehouseServiceLocator.bindWarehouseService(london, localWarehouseService.getName());
-		warehouseServiceLocator.bindWarehouseService(paris, localWarehouseService.getName());
+		warehouseServiceLocator.bindWarehouseService(london, "local");
+		warehouseServiceLocator.bindWarehouseService(paris, "local");
 		
 		widget = new Product("Widget", "The new improved Widget2.0");
 		productService.saveProduct(widget);

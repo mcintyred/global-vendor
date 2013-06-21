@@ -4,7 +4,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.reset;
 import gv.api.Product;
 import gv.api.Warehouse;
-import gv.core.service.WarehouseServiceList;
+import gv.core.service.WarehouseServiceMap;
 import gv.core.service.WarehouseServiceLocatorImpl;
 import gv.core.service.entity.WarehouseServiceBinding;
 import gv.core.service.repository.WarehouseRepository;
@@ -15,7 +15,9 @@ import gv.stock.service.repository.StockAlertEntityRepository;
 import gv.warehouse.api.WarehouseService;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -30,23 +32,20 @@ abstract public class AbstractWarehouseTest {
 
 	public static final long TOKYO = 21L;
 
-	public static final long PARIS = 17L;
-
 	public static final long LONDON = 3L;
+
+	public static final String LOCAL = "local";
+	public static final String REMOTE = "remote";
 
 	protected WarehouseServiceLocatorImpl locator;
 
 	@Mock
-	protected WarehouseService londonService;
+	protected WarehouseService localService;
 
 	@Mock
-	protected WarehouseService parisService;
-
-	@Mock
-	protected WarehouseService tokyoService;
+	protected WarehouseService remoteService;
 
 	protected Warehouse london;
-	protected Warehouse paris;
 	protected Warehouse tokyo;
 
 	protected StockServiceImpl stockService;
@@ -67,41 +66,31 @@ abstract public class AbstractWarehouseTest {
 	@Before
 	public void setUp() {
 		// Create the Warehouse to StockDAO map and inject it into the service
-		List<WarehouseService> services = new ArrayList<WarehouseService>();
+		Map<String, WarehouseService> services = new HashMap<String, WarehouseService>();
 		london = new Warehouse(LONDON, "London");
-		paris = new Warehouse(PARIS, "Paris");
 		tokyo = new Warehouse(TOKYO, "Tokyo");
 
 		WarehouseServiceBinding londonEntity = new WarehouseServiceBinding(
-				LONDON, "London", "londonService");
-		WarehouseServiceBinding parisEntity = new WarehouseServiceBinding(
-				PARIS, "Paris", "parisService");
+				LONDON, "London", LOCAL);
 		WarehouseServiceBinding tokyoEntity = new WarehouseServiceBinding(
-				TOKYO, "Tokyo", "tokyoService");
+				TOKYO, "Tokyo", REMOTE);
 
-		given(londonService.getName()).willReturn("londonService");
-		given(parisService.getName()).willReturn("parisService");
-		given(tokyoService.getName()).willReturn("tokyoService");
-
-		services.add(londonService);
-		services.add(parisService);
-		services.add(tokyoService);
+		services.put(LOCAL, localService);
+		services.put(REMOTE, remoteService);
 
 		locator = new WarehouseServiceLocatorImpl();
-		locator.setServiceList(new WarehouseServiceList(services));
+		locator.setServiceMap(new WarehouseServiceMap(services));
 		locator.setRepository(warehouseRepository);
 		locator.getServiceNameMap();
 		
 		given(warehouseRepository.findOne(LONDON)).willReturn(londonEntity);
-		given(warehouseRepository.findOne(PARIS)).willReturn(parisEntity);
 		given(warehouseRepository.findOne(TOKYO)).willReturn(tokyoEntity);
 
 		given(warehouseRepository.findOneByName(london.getName())).willReturn(londonEntity);
-		given(warehouseRepository.findOneByName(paris.getName())).willReturn(parisEntity);
 		given(warehouseRepository.findOneByName(tokyo.getName())).willReturn(tokyoEntity);
 		
 		given(warehouseRepository.findAll()).willReturn(
-				Lists.newArrayList(londonEntity, parisEntity, tokyoEntity));
+				Lists.newArrayList(londonEntity, tokyoEntity));
 
 		stockService = new StockServiceImpl();
 		stockService.setWarehouseServiceLocator(locator);
@@ -114,8 +103,6 @@ abstract public class AbstractWarehouseTest {
 		
 		given(productService.getProductById(1L)).willReturn(ham);
 		given(productService.getProductById(2L)).willReturn(cheese);
-		
-		reset(londonService, parisService, tokyoService);
 
 	}
 }

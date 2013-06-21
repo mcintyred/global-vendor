@@ -2,7 +2,6 @@ package gv.warehouse.gemfire.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -11,13 +10,11 @@ import gv.api.Product;
 import gv.api.Shipment;
 import gv.api.ShipmentLine;
 import gv.api.Warehouse;
+import gv.stock.api.ShipmentConfirmation;
+import gv.stock.api.ShipmentRequest;
+import gv.stock.api.StockChangeRequest;
+import gv.stock.api.StockQueryRequest;
 import gv.test.UnitTest;
-import gv.warehouse.api.ShipmentConfirmation;
-import gv.warehouse.api.ShipmentRequest;
-import gv.warehouse.api.StockAlert;
-import gv.warehouse.api.StockAlertListener;
-import gv.warehouse.api.StockChangeRequest;
-import gv.warehouse.api.StockQueryRequest;
 import gv.warehouse.gemfire.entity.StockLevel;
 import gv.warehouse.gemfire.entity.StockLevel.Id;
 import gv.warehouse.gemfire.service.repository.StockLevelRepository;
@@ -49,15 +46,15 @@ public class WarehouseServiceImplTest {
 	public void shouldUpdateStockLevelForNonExistentProduct() {
 		// given
 		long productId = 3L;
-		long warehouseId = 5L;
+		String warehouseName = "testWarehouse";
 		int stockDelta = 26;
-		given(repository.findOne(new Id(warehouseId, productId))).willReturn(null);
+		given(repository.findOne(new Id(warehouseName, productId))).willReturn(null);
 		
 		// when
-		int newStockLevel = service.updateStock(new StockChangeRequest(warehouseId, productId, stockDelta));
+		int newStockLevel = service.updateStock(new StockChangeRequest(warehouseName, productId, stockDelta));
 		
 		// then
-		verify(repository).findOne(new Id(warehouseId, productId));
+		verify(repository).findOne(new Id(warehouseName, productId));
 		verify(repository).save(any(StockLevel.class));
 		assertEquals(stockDelta, newStockLevel);
 	}
@@ -66,14 +63,14 @@ public class WarehouseServiceImplTest {
 	public void shouldUpdateStockLevelForExistingProduct() {
 		// given
 		long productId = 3L;
-		long warehouseId = 5L;
+		String warehouseName = "testWarehouse";
 		int currentStock = 3;
 		int stockDelta = 26;
-		StockLevel existingStock = new StockLevel(warehouseId, productId, currentStock);
-		given(repository.findOne(new Id(warehouseId, productId))).willReturn(existingStock);
+		StockLevel existingStock = new StockLevel(warehouseName, productId, currentStock);
+		given(repository.findOne(new Id(warehouseName, productId))).willReturn(existingStock);
 		
 		// when
-		int newStockLevel = service.updateStock(new StockChangeRequest(warehouseId, productId, stockDelta));
+		int newStockLevel = service.updateStock(new StockChangeRequest(warehouseName, productId, stockDelta));
 		
 		// then
 		verify(repository).save(any(StockLevel.class));
@@ -84,15 +81,15 @@ public class WarehouseServiceImplTest {
 	public void shouldSetStockLevelForNonExistentProduct() {
 		// given
 		long productId = 3L;
-		long warehouseId = 5L;
+		String warehouseName = "testWarehouse";
 		int qty = 26;
-		given(repository.findOne(new Id(warehouseId, productId))).willReturn(null);
+		given(repository.findOne(new Id(warehouseName, productId))).willReturn(null);
 		
 		// when
-		service.setStock(new StockChangeRequest(warehouseId, productId, qty));
+		service.setStock(new StockChangeRequest(warehouseName, productId, qty));
 		
 		// then
-		StockLevel expectedNewStockLevel = new StockLevel(warehouseId, productId, qty);
+		StockLevel expectedNewStockLevel = new StockLevel(warehouseName, productId, qty);
 		verify(repository).save(eq(expectedNewStockLevel));
 	}
 
@@ -100,17 +97,17 @@ public class WarehouseServiceImplTest {
 	public void shouldSetStockLevelForExistingProduct() {
 		// given
 		long productId = 3L;
-		long warehouseId = 5L;
+		String warehouseName = "testWarehouse";
 		int qty = 26;
-		StockLevel existingStockLevel = new StockLevel(warehouseId, productId, 2);
+		StockLevel existingStockLevel = new StockLevel(warehouseName, productId, 2);
 		
-		given(repository.findOne(new Id(warehouseId, productId))).willReturn(existingStockLevel);
+		given(repository.findOne(new Id(warehouseName, productId))).willReturn(existingStockLevel);
 		
 		// when
-		service.setStock(new StockChangeRequest(warehouseId, productId, qty));
+		service.setStock(new StockChangeRequest(warehouseName, productId, qty));
 		
 		// then
-		StockLevel expectedNewStockLevel = new StockLevel(warehouseId, productId, qty);
+		StockLevel expectedNewStockLevel = new StockLevel(warehouseName, productId, qty);
 		verify(repository).save(eq(expectedNewStockLevel));
 	}
 	
@@ -118,12 +115,12 @@ public class WarehouseServiceImplTest {
 	public void shouldReturnZeroStockForNonExistentProduct() {
 		// given 
 		Long productId = 3L;
-		Long warehouseId = 5L;
-		given(repository.findOne(new Id(warehouseId, productId))).willReturn(null);
+		String warehouseName = "testWarehouse";
+		given(repository.findOne(new Id(warehouseName, productId))).willReturn(null);
 		
 		// when
-		int stockLevel = service.getStock(new StockQueryRequest(warehouseId, productId));
-		verify(repository).findOne(new Id(warehouseId, productId));
+		int stockLevel = service.getStock(new StockQueryRequest(warehouseName, productId));
+		verify(repository).findOne(new Id(warehouseName, productId));
 		assertEquals(0,  stockLevel);
 	}
 
@@ -131,15 +128,15 @@ public class WarehouseServiceImplTest {
 	public void shouldReturnCurrentStockForExistingProduct() {
 		// given 
 		Long productId = 3L;
-		Long warehouseId = 5L;
+		String warehouseName = "testWarehouse";
 		int qty = 26;
-		StockLevel existingStockLevel = new StockLevel(warehouseId, productId, qty);
+		StockLevel existingStockLevel = new StockLevel(warehouseName, productId, qty);
 		
-		given(repository.findOne(new Id(warehouseId, productId))).willReturn(existingStockLevel);
+		given(repository.findOne(new Id(warehouseName, productId))).willReturn(existingStockLevel);
 		
 		// when
-		int stockLevel = service.getStock(new StockQueryRequest(warehouseId, productId));
-		verify(repository).findOne(new Id(warehouseId, productId));
+		int stockLevel = service.getStock(new StockQueryRequest(warehouseName, productId));
+		verify(repository).findOne(new Id(warehouseName, productId));
 		assertEquals(qty,  stockLevel);
 	}
 	
@@ -147,13 +144,13 @@ public class WarehouseServiceImplTest {
 	public void shouldConfirmShipmentRequest() {
 		// given
 		long productId = 3L;
-		long warehouseId = 5L;
+		String warehouseName = "testWarehouse";
 		int qty = 3;
-		StockLevel existingStockLevel = new StockLevel(warehouseId, productId, 15);
+		StockLevel existingStockLevel = new StockLevel(warehouseName, productId, 15);
 		
-		given(repository.findOne(new Id(warehouseId, productId))).willReturn(existingStockLevel);
+		given(repository.findOne(new Id(warehouseName, productId))).willReturn(existingStockLevel);
 		
-		ShipmentRequest request = new ShipmentRequest(warehouseId, productId, qty);
+		ShipmentRequest request = new ShipmentRequest(warehouseName, productId, qty);
 		
 		// when
 		ShipmentConfirmation confirmation = service.requestShipment(request);
@@ -167,14 +164,14 @@ public class WarehouseServiceImplTest {
 	public void shouldCancelShipmentRequest() {
 		// given
 		long productId = 3L;
-		long warehouseId = 5L;
-		StockLevel existingStockLevel = new StockLevel(warehouseId, productId, 15);
+		String warehouseName = "testWarehouse";
+		StockLevel existingStockLevel = new StockLevel(warehouseName, productId, 15);
 		
-		given(repository.findOne(new Id(warehouseId, productId))).willReturn(existingStockLevel);
+		given(repository.findOne(new Id(warehouseName, productId))).willReturn(existingStockLevel);
 		
 		ShipmentLine line = new ShipmentLine(null, 1, new Product(productId, "", ""));
 		Shipment shipment = new Shipment(
-				new Warehouse(warehouseId, ""),
+				new Warehouse(13L, warehouseName),
 				Lists.newArrayList(line));
 		
 		// when

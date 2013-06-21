@@ -18,12 +18,12 @@
 	<import resource="classpath:/META-INF/spring/integration/remote-warehouse-context.xml"/>
 
 	<!-- Declare the list of WarehouseServices -->
-	<bean id="warehouseServiceList" class="gv.core.service.WarehouseServiceList">
+	<bean id="warehouseServiceList" class="gv.core.service.WarehouseServiceMap">
 		<constructor-arg>
-			<list>
-				<ref bean="outboundGateway"/>
-				<ref bean="localWarehouseService"/>
-			</list>
+			<map>
+				<entry key="Local Database Service" value-ref="localWarehouseService"/>		
+				<entry key="Remote Service" value-ref="outboundGateway"/>		
+			</map>
 		</constructor-arg>
 	</bean>
 	

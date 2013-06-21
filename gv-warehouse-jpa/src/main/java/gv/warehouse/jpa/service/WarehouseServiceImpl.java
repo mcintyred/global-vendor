@@ -49,11 +49,6 @@ public class WarehouseServiceImpl implements WarehouseService, StockAlertEventSo
 	}
 
 	@Override
-	public String getName() {
-		return "Local Database Service";
-	}
-
-	@Override
 	public int updateStock(StockChangeRequest request) {
 		
 		String warehouseName = request.getWarehouseName();

@@ -37,16 +37,6 @@ public class IntegrationTests {
 	public void setup() {
 		setStock();
 	}
-	
-	@Test
-	public void shouldReturnName() {
-		// when
-		String name = service.getName();
-		
-		// then
-		assertEquals("Remote Warehouse", name);
-	}
-	
 
 	@Test
 	public void shouldSetAndGetStock() throws InterruptedException {

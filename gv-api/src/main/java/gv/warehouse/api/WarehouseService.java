@@ -9,8 +9,6 @@ import gv.stock.api.StockQueryRequest;
 
 public interface WarehouseService {
 	
-	public String getName();
-	
 	int updateStock(StockChangeRequest request);
 	
 	int setStock(StockChangeRequest request);

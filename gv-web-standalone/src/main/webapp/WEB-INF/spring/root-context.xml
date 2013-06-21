@@ -12,11 +12,11 @@
 
 	<!-- Declare the list of WarehouseServices -->
 	<!-- This will be auto-injected into the WarehouseServiceLocator -->
-	<bean id="warehouseServiceList" class="gv.core.service.WarehouseServiceList">
+	<bean id="warehouseServiceList" class="gv.core.service.WarehouseServiceMap">
 		<constructor-arg>
-			<list>
-				<ref bean="localWarehouseService"/>
-			</list>
+			<map>
+				<entry key="Local Database Service" value-ref="localWarehouseService"/>		
+			</map>
 		</constructor-arg>
 	</bean>
 	

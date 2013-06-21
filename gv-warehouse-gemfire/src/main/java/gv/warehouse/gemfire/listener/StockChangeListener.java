@@ -1,8 +1,8 @@
 package gv.warehouse.gemfire.listener;
 
-import gv.warehouse.api.StockAlert;
-import gv.warehouse.api.StockAlertEventSource;
-import gv.warehouse.api.StockAlertListener;
+import gv.stock.api.StockAlert;
+import gv.stock.api.StockAlertEventSource;
+import gv.stock.api.StockAlertListener;
 import gv.warehouse.gemfire.entity.StockLevel;
 import gv.warehouse.gemfire.entity.StockLevel.Id;
 

@@ -21,11 +21,11 @@
 	</bean>
 	
 	<!-- Declare the list of WarehouseServices -->
-	<bean id="warehouseServiceList" class="gv.core.service.WarehouseServiceList">
+	<bean id="warehouseServiceList" class="gv.core.service.WarehouseServiceMap">
 		<constructor-arg>
-			<list>
-				<ref bean="localWarehouseService"/>
-			</list>
+			<map>
+				<entry key="local" value-ref="localWarehouseService"/>
+			</map>
 		</constructor-arg>
 	</bean>
 	

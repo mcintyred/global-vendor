@@ -7,22 +7,20 @@ import gv.api.Product;
 import gv.api.Shipment;
 import gv.api.ShipmentLine;
 import gv.api.Warehouse;
-import gv.test.IntegrationTest;
-import gv.warehouse.api.DiscontinueProductRequest;
-import gv.warehouse.api.ShipmentConfirmation;
-import gv.warehouse.api.ShipmentRequest;
-import gv.warehouse.api.StockAlert;
-import gv.warehouse.api.StockAlertEventSource;
-import gv.warehouse.api.StockAlertListener;
-import gv.warehouse.api.StockChangeRequest;
-import gv.warehouse.api.StockQueryRequest;
+import gv.stock.api.DiscontinueProductRequest;
+import gv.stock.api.ShipmentConfirmation;
+import gv.stock.api.ShipmentRequest;
+import gv.stock.api.StockAlert;
+import gv.stock.api.StockAlertEventSource;
+import gv.stock.api.StockAlertListener;
+import gv.stock.api.StockChangeRequest;
+import gv.stock.api.StockQueryRequest;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -69,7 +67,7 @@ abstract public class ClientServerTest {
 	
 	private Captor captor = new Captor();
 	
-	public static final long WAREHOUSE_ID = 3;
+	public static final String WAREHOUSE_NAME = "testWarehouse";
 	public static final long PRODUCT_ID = 5;
 	
 	
@@ -78,7 +76,7 @@ abstract public class ClientServerTest {
 		
 		captor.expect();
 		
-		DiscontinueProductRequest request = new DiscontinueProductRequest(WAREHOUSE_ID, PRODUCT_ID);
+		DiscontinueProductRequest request = new DiscontinueProductRequest(WAREHOUSE_NAME, PRODUCT_ID);
 		service.discontinueProduct(request);
 		
 		eventSource.setStockAlertListener(captor);
@@ -93,7 +91,7 @@ abstract public class ClientServerTest {
 		captor.expect();
 		
 		// when
-		int newStockLevel = service.updateStock(new StockChangeRequest(WAREHOUSE_ID, PRODUCT_ID, stockDelta));
+		int newStockLevel = service.updateStock(new StockChangeRequest(WAREHOUSE_NAME, PRODUCT_ID, stockDelta));
 		
 		// then
 		assertEquals(stockDelta, newStockLevel);
@@ -101,7 +99,7 @@ abstract public class ClientServerTest {
 		assertNotNull(captor.getAlert());
 		StockAlert alert = captor.getAlert();
 		assertEquals(PRODUCT_ID, alert.getProductId());
-		assertEquals(WAREHOUSE_ID, alert.getWarehouseId());
+		assertEquals(WAREHOUSE_NAME, alert.getWarehouseName());
 		assertEquals(stockDelta, alert.getStockLevel());
 		assertEquals(5, alert.getThreshold());
 	}
@@ -113,13 +111,13 @@ abstract public class ClientServerTest {
 		int stockDelta = 26;
 		
 		captor.expect();
-		StockChangeRequest existingStock = new StockChangeRequest(WAREHOUSE_ID, PRODUCT_ID, currentStock);
+		StockChangeRequest existingStock = new StockChangeRequest(WAREHOUSE_NAME, PRODUCT_ID, currentStock);
 		service.setStock(existingStock);
 		captor.clear();
 		captor.expect();
 
 		// when
-		int newStockLevel = service.updateStock(new StockChangeRequest(WAREHOUSE_ID, PRODUCT_ID, stockDelta));
+		int newStockLevel = service.updateStock(new StockChangeRequest(WAREHOUSE_NAME, PRODUCT_ID, stockDelta));
 		
 		// then
 		assertEquals(currentStock + stockDelta, newStockLevel);
@@ -127,7 +125,7 @@ abstract public class ClientServerTest {
 		assertNotNull(captor.getAlert());
 		StockAlert alert = captor.getAlert();
 		assertEquals(PRODUCT_ID, alert.getProductId());
-		assertEquals(WAREHOUSE_ID, alert.getWarehouseId());
+		assertEquals(WAREHOUSE_NAME, alert.getWarehouseName());
 		assertEquals(newStockLevel, alert.getStockLevel());
 		assertEquals(5, alert.getThreshold());
 	}
@@ -139,7 +137,7 @@ abstract public class ClientServerTest {
 		captor.expect();
 
 		// when
-		int newLevel = service.setStock(new StockChangeRequest(WAREHOUSE_ID, PRODUCT_ID, qty));
+		int newLevel = service.setStock(new StockChangeRequest(WAREHOUSE_NAME, PRODUCT_ID, qty));
 		
 		// then
 		assertEquals(qty, newLevel);
@@ -147,7 +145,7 @@ abstract public class ClientServerTest {
 		assertNotNull(captor.getAlert());
 		StockAlert alert = captor.getAlert();
 		assertEquals(PRODUCT_ID, alert.getProductId());
-		assertEquals(WAREHOUSE_ID, alert.getWarehouseId());
+		assertEquals(WAREHOUSE_NAME, alert.getWarehouseName());
 		assertEquals(qty, alert.getStockLevel());
 		assertEquals(5, alert.getThreshold());
 	}
@@ -158,20 +156,20 @@ abstract public class ClientServerTest {
 		int qty = 26;
 		
 		captor.expect();
-		StockChangeRequest existingStock = new StockChangeRequest(WAREHOUSE_ID, PRODUCT_ID, 3);
+		StockChangeRequest existingStock = new StockChangeRequest(WAREHOUSE_NAME, PRODUCT_ID, 3);
 		service.setStock(existingStock);
 		captor.clear();
 		captor.expect();
 		
 		// when
-		service.setStock(new StockChangeRequest(WAREHOUSE_ID, PRODUCT_ID, qty));
+		service.setStock(new StockChangeRequest(WAREHOUSE_NAME, PRODUCT_ID, qty));
 		
 		// then
 		
 		assertNotNull(captor.getAlert());
 		StockAlert alert = captor.getAlert();
 		assertEquals(PRODUCT_ID, alert.getProductId());
-		assertEquals(WAREHOUSE_ID, alert.getWarehouseId());
+		assertEquals(WAREHOUSE_NAME, alert.getWarehouseName());
 		assertEquals(qty, alert.getStockLevel());
 		assertEquals(5, alert.getThreshold());
 	}
@@ -179,7 +177,7 @@ abstract public class ClientServerTest {
 	@Test
 	public void shouldReturnZeroStockForNonExistentProduct() {
 		// given 
-		StockQueryRequest request = new StockQueryRequest(WAREHOUSE_ID, PRODUCT_ID);
+		StockQueryRequest request = new StockQueryRequest(WAREHOUSE_NAME, PRODUCT_ID);
 
 		// when
 		int stockLevel = service.getStock(request);
@@ -192,12 +190,12 @@ abstract public class ClientServerTest {
 		int qty = 26;
 		
 		captor.expect();
-		StockChangeRequest existingStock = new StockChangeRequest(WAREHOUSE_ID, PRODUCT_ID, qty);
+		StockChangeRequest existingStock = new StockChangeRequest(WAREHOUSE_NAME, PRODUCT_ID, qty);
 		service.setStock(existingStock);
 		captor.clear();
 		
 		// when
-		int stockLevel = service.getStock(new StockQueryRequest(WAREHOUSE_ID, PRODUCT_ID));
+		int stockLevel = service.getStock(new StockQueryRequest(WAREHOUSE_NAME, PRODUCT_ID));
 		assertEquals(qty,  stockLevel);
 	}
 	
@@ -207,11 +205,11 @@ abstract public class ClientServerTest {
 		int qty = 3;
 		
 		captor.expect();
-		StockChangeRequest existingStock = new StockChangeRequest(WAREHOUSE_ID, PRODUCT_ID, 4);
+		StockChangeRequest existingStock = new StockChangeRequest(WAREHOUSE_NAME, PRODUCT_ID, 4);
 		service.setStock(existingStock);
 		captor.clear();
 		
-		ShipmentRequest request = new ShipmentRequest(WAREHOUSE_ID, PRODUCT_ID, qty);
+		ShipmentRequest request = new ShipmentRequest(WAREHOUSE_NAME, PRODUCT_ID, qty);
 		captor.expect();
 		
 		// when
@@ -231,11 +229,11 @@ abstract public class ClientServerTest {
 		int qty = 12;
 		
 		captor.expect();
-		StockChangeRequest existingStock = new StockChangeRequest(WAREHOUSE_ID, PRODUCT_ID, stockLevel);
+		StockChangeRequest existingStock = new StockChangeRequest(WAREHOUSE_NAME, PRODUCT_ID, stockLevel);
 		service.setStock(existingStock);
 		captor.clear();
 		
-		ShipmentRequest request = new ShipmentRequest(WAREHOUSE_ID, PRODUCT_ID, qty);
+		ShipmentRequest request = new ShipmentRequest(WAREHOUSE_NAME, PRODUCT_ID, qty);
 		captor.expect();
 		
 		// when
@@ -249,7 +247,7 @@ abstract public class ClientServerTest {
 		StockAlert alert = captor.getAlert();
 		
 		assertEquals(PRODUCT_ID, alert.getProductId());
-		assertEquals(WAREHOUSE_ID, alert.getWarehouseId());
+		assertEquals(WAREHOUSE_NAME, alert.getWarehouseName());
 		assertEquals(stockLevel - qty, alert.getStockLevel());
 		assertEquals(5, alert.getThreshold());
 	}
@@ -260,14 +258,14 @@ abstract public class ClientServerTest {
 		int qty = 15;
 		
 		captor.expect();
-		StockChangeRequest existingStock = new StockChangeRequest(WAREHOUSE_ID, PRODUCT_ID, qty);
+		StockChangeRequest existingStock = new StockChangeRequest(WAREHOUSE_NAME, PRODUCT_ID, qty);
 		service.setStock(existingStock);
 		captor.clear();
 		
 		
 		ShipmentLine line = new ShipmentLine(null, 1, new Product(PRODUCT_ID, "", ""));
 		Shipment shipment = new Shipment(
-				new Warehouse(WAREHOUSE_ID, ""),
+				new Warehouse(13L, WAREHOUSE_NAME),
 				Lists.newArrayList(line));
 		captor.expect();
 		// when
@@ -283,14 +281,14 @@ abstract public class ClientServerTest {
 		int qty = 3;
 		
 		captor.expect();
-		StockChangeRequest existingStock = new StockChangeRequest(WAREHOUSE_ID, PRODUCT_ID, qty);
+		StockChangeRequest existingStock = new StockChangeRequest(WAREHOUSE_NAME, PRODUCT_ID, qty);
 		service.setStock(existingStock);
 		captor.clear();
 		
 		
 		ShipmentLine line = new ShipmentLine(null, 13, new Product(PRODUCT_ID, "", ""));
 		Shipment shipment = new Shipment(
-				new Warehouse(WAREHOUSE_ID, ""),
+				new Warehouse(13L, WAREHOUSE_NAME),
 				Lists.newArrayList(line));
 		captor.expect();
 		// when
@@ -300,7 +298,7 @@ abstract public class ClientServerTest {
 		assertNotNull(captor.getAlert());
 		StockAlert alert = captor.getAlert();
 		assertEquals(PRODUCT_ID, alert.getProductId());
-		assertEquals(WAREHOUSE_ID, alert.getWarehouseId());
+		assertEquals(WAREHOUSE_NAME, alert.getWarehouseName());
 		assertEquals(16, alert.getStockLevel());
 		assertEquals(5, alert.getThreshold());
 	}

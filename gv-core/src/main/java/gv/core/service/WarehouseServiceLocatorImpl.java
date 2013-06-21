@@ -24,37 +24,17 @@ public class WarehouseServiceLocatorImpl implements WarehouseServiceLocator {
 	@Autowired
 	private WarehouseRepository repository;
 	
-	private Map<String, WarehouseService> serviceNameMap;
-	
-	private WarehouseServiceList serviceList;
+	private WarehouseServiceMap serviceMap;
 	
 	@Autowired
-	public void setServiceList(WarehouseServiceList list) {
+	public void setServiceMap(WarehouseServiceMap map) {
 		
-		serviceList = list;
+		serviceMap = map;
 	}
 	
 	public Map<String, WarehouseService> getServiceNameMap() {
-		
-		if(serviceNameMap == null) {
-			
-			List<WarehouseService> services = serviceList.getList();
-			
-			serviceNameMap = Maps.newHashMap();
-			
-			for(WarehouseService service : services) {
-				
-				if(serviceNameMap.containsKey(service.getName())) {
-					throw new IllegalArgumentException("Attempt to register two WarehouseServices with the same name : " + service.getName());
-				}
-				
-				serviceNameMap.put(service.getName(),  service);
-			}
-		}
-		return serviceNameMap;
+		return serviceMap.getMap();
 	}
-	
-	
 	
 	public void setRepository(WarehouseRepository repository) {
 		this.repository = repository;
@@ -118,11 +98,6 @@ public class WarehouseServiceLocatorImpl implements WarehouseServiceLocator {
 		return entity;
 	}
 
-	@Override
-	public List<WarehouseService> listServices() {
-		return Lists.newArrayList(getServiceNameMap().values());
-	}
-	
 	@Override
 	public List<WarehouseServiceBinding> listBindings() {
 		return Lists.newArrayList(repository.findAll());

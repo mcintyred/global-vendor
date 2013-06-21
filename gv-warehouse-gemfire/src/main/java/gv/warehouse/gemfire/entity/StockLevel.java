@@ -35,14 +35,14 @@ public class StockLevel implements Serializable {
 		this.oldQty = oldQty;
 	}
 	
-	public StockLevel(Long warehouseId, Long productId, int qty) {
-		this.id = new Id(warehouseId, productId);
+	public StockLevel(String warehouseName, Long productId, int qty) {
+		this.id = new Id(warehouseName, productId);
 		this.qty = qty;
 		this.oldQty = 0;
 	}
 
-	public StockLevel(Long warehouseId, Long productId, int oldQty, int newQty) {
-		this.id = new Id(warehouseId, productId);
+	public StockLevel(String warehouseName, Long productId, int oldQty, int newQty) {
+		this.id = new Id(warehouseName, productId);
 		this.qty = newQty;
 		this.oldQty = oldQty;
 	}
@@ -96,21 +96,21 @@ public class StockLevel implements Serializable {
 
 	public static class Id implements Serializable {
 		
-		private Long warehouseId;
+		private String warehouseName;
 		
 		private Long productId;
 		
-		public Id(Long warehouseId, Long productId) {
-			this.warehouseId = warehouseId;
+		public Id(String warehouseName, Long productId) {
+			this.warehouseName = warehouseName;
 			this.productId = productId;
 		}
 		
-		public Long getWarehouseId() {
-			return warehouseId;
+		public String getWarehouseId() {
+			return warehouseName;
 		}
 
-		public void setWarehouseId(Long warehouseId) {
-			this.warehouseId = warehouseId;
+		public void setWarehouseId(String warehouseName) {
+			this.warehouseName = warehouseName;
 		}
 
 		public Long getProductId() {
@@ -122,7 +122,7 @@ public class StockLevel implements Serializable {
 		}
 		
 		public String toString() {
-			return warehouseId+"_"+productId;
+			return warehouseName+"_"+productId;
 		}
 
 		@Override
@@ -132,7 +132,7 @@ public class StockLevel implements Serializable {
 			result = prime * result
 					+ ((productId == null) ? 0 : productId.hashCode());
 			result = prime * result
-					+ ((warehouseId == null) ? 0 : warehouseId.hashCode());
+					+ ((warehouseName == null) ? 0 : warehouseName.hashCode());
 			return result;
 		}
 
@@ -150,10 +150,10 @@ public class StockLevel implements Serializable {
 					return false;
 			} else if (!productId.equals(other.productId))
 				return false;
-			if (warehouseId == null) {
-				if (other.warehouseId != null)
+			if (warehouseName == null) {
+				if (other.warehouseName != null)
 					return false;
-			} else if (!warehouseId.equals(other.warehouseId))
+			} else if (!warehouseName.equals(other.warehouseName))
 				return false;
 			return true;
 		}

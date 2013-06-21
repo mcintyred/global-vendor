@@ -7,13 +7,13 @@ import gv.api.Product;
 import gv.api.Shipment;
 import gv.api.ShipmentLine;
 import gv.api.Warehouse;
+import gv.stock.api.ShipmentConfirmation;
+import gv.stock.api.ShipmentRequest;
+import gv.stock.api.StockAlert;
+import gv.stock.api.StockAlertListener;
+import gv.stock.api.StockChangeRequest;
+import gv.stock.api.StockQueryRequest;
 import gv.test.IntegrationTest;
-import gv.warehouse.api.ShipmentConfirmation;
-import gv.warehouse.api.ShipmentRequest;
-import gv.warehouse.api.StockAlert;
-import gv.warehouse.api.StockAlertListener;
-import gv.warehouse.api.StockChangeRequest;
-import gv.warehouse.api.StockQueryRequest;
 import gv.warehouse.gemfire.listener.StockChangeListener;
 
 import org.junit.Before;
@@ -74,11 +74,11 @@ public class WarehouseServiceImplIntegrationTest {
 	public void shouldUpdateStockLevelForNonExistentProduct() {
 		// given
 		long productId = 3L;
-		long warehouseId = 5L;
+		String warehouseName = "testWarehouse";
 		int stockDelta = 26;
 		
 		// when
-		int newStockLevel = service.updateStock(new StockChangeRequest(warehouseId, productId, stockDelta));
+		int newStockLevel = service.updateStock(new StockChangeRequest(warehouseName, productId, stockDelta));
 		
 		// then
 		assertEquals(stockDelta, newStockLevel);
@@ -86,7 +86,7 @@ public class WarehouseServiceImplIntegrationTest {
 		assertNotNull(captor.getAlert());
 		StockAlert alert = captor.getAlert();
 		assertEquals(productId, alert.getProductId());
-		assertEquals(warehouseId, alert.getWarehouseId());
+		assertEquals(warehouseName, alert.getWarehouseName());
 		assertEquals(stockDelta, alert.getStockLevel());
 		assertEquals(5, alert.getThreshold());
 	}
@@ -95,15 +95,15 @@ public class WarehouseServiceImplIntegrationTest {
 	public void shouldUpdateStockLevelForExistingProduct() {
 		// given
 		long productId = 3L;
-		long warehouseId = 5L;
+		String warehouseName = "testWarehouse";
 		int currentStock = 3;
 		int stockDelta = 26;
-		StockChangeRequest existingStock = new StockChangeRequest(warehouseId, productId, currentStock);
+		StockChangeRequest existingStock = new StockChangeRequest(warehouseName, productId, currentStock);
 		service.setStock(existingStock);
 		captor.clear();
 		
 		// when
-		int newStockLevel = service.updateStock(new StockChangeRequest(warehouseId, productId, stockDelta));
+		int newStockLevel = service.updateStock(new StockChangeRequest(warehouseName, productId, stockDelta));
 		
 		// then
 		assertEquals(currentStock + stockDelta, newStockLevel);
@@ -111,7 +111,7 @@ public class WarehouseServiceImplIntegrationTest {
 		assertNotNull(captor.getAlert());
 		StockAlert alert = captor.getAlert();
 		assertEquals(productId, alert.getProductId());
-		assertEquals(warehouseId, alert.getWarehouseId());
+		assertEquals(warehouseName, alert.getWarehouseName());
 		assertEquals(newStockLevel, alert.getStockLevel());
 		assertEquals(5, alert.getThreshold());
 	}
@@ -120,11 +120,11 @@ public class WarehouseServiceImplIntegrationTest {
 	public void shouldSetStockLevelForNonExistentProduct() throws InterruptedException {
 		// given
 		long productId = 3L;
-		long warehouseId = 5L;
+		String warehouseName = "testWarehouse";
 		int qty = 26;
 		
 		// when
-		int newLevel = service.setStock(new StockChangeRequest(warehouseId, productId, qty));
+		int newLevel = service.setStock(new StockChangeRequest(warehouseName, productId, qty));
 		
 		// then
 		assertEquals(qty, newLevel);
@@ -132,7 +132,7 @@ public class WarehouseServiceImplIntegrationTest {
 		assertNotNull(captor.getAlert());
 		StockAlert alert = captor.getAlert();
 		assertEquals(productId, alert.getProductId());
-		assertEquals(warehouseId, alert.getWarehouseId());
+		assertEquals(warehouseName, alert.getWarehouseName());
 		assertEquals(qty, alert.getStockLevel());
 		assertEquals(5, alert.getThreshold());
 	}
@@ -141,21 +141,21 @@ public class WarehouseServiceImplIntegrationTest {
 	public void shouldSetStockLevelForExistingProduct() {
 		// given
 		long productId = 3L;
-		long warehouseId = 5L;
+		String warehouseName = "testWarehouse";
 		int qty = 26;
-		StockChangeRequest existingStock = new StockChangeRequest(warehouseId, productId, 3);
+		StockChangeRequest existingStock = new StockChangeRequest(warehouseName, productId, 3);
 		service.setStock(existingStock);
 		captor.clear();
 		
 		// when
-		service.setStock(new StockChangeRequest(warehouseId, productId, qty));
+		service.setStock(new StockChangeRequest(warehouseName, productId, qty));
 		
 		// then
 		
 		assertNotNull(captor.getAlert());
 		StockAlert alert = captor.getAlert();
 		assertEquals(productId, alert.getProductId());
-		assertEquals(warehouseId, alert.getWarehouseId());
+		assertEquals(warehouseName, alert.getWarehouseName());
 		assertEquals(qty, alert.getStockLevel());
 		assertEquals(5, alert.getThreshold());
 	}
@@ -164,10 +164,10 @@ public class WarehouseServiceImplIntegrationTest {
 	public void shouldReturnZeroStockForNonExistentProduct() {
 		// given 
 		Long productId = 3L;
-		Long warehouseId = 5L;
+		String warehouseName = "testWarehouse";
 		
 		// when
-		int stockLevel = service.getStock(new StockQueryRequest(warehouseId, productId));
+		int stockLevel = service.getStock(new StockQueryRequest(warehouseName, productId));
 		assertEquals(0,  stockLevel);
 	}
 
@@ -175,14 +175,14 @@ public class WarehouseServiceImplIntegrationTest {
 	public void shouldReturnCurrentStockForExistingProduct() {
 		// given 
 		Long productId = 3L;
-		Long warehouseId = 5L;
+		String warehouseName = "testWarehouse";
 		int qty = 26;
-		StockChangeRequest existingStock = new StockChangeRequest(warehouseId, productId, qty);
+		StockChangeRequest existingStock = new StockChangeRequest(warehouseName, productId, qty);
 		service.setStock(existingStock);
 		captor.clear();
 		
 		// when
-		int stockLevel = service.getStock(new StockQueryRequest(warehouseId, productId));
+		int stockLevel = service.getStock(new StockQueryRequest(warehouseName, productId));
 		assertEquals(qty,  stockLevel);
 	}
 	
@@ -190,13 +190,13 @@ public class WarehouseServiceImplIntegrationTest {
 	public void shouldConfirmShipmentRequestAndNotTriggerAnAlert() {
 		// given
 		long productId = 3L;
-		long warehouseId = 5L;
+		String warehouseName = "testWarehouse";
 		int qty = 3;
-		StockChangeRequest existingStock = new StockChangeRequest(warehouseId, productId, 4);
+		StockChangeRequest existingStock = new StockChangeRequest(warehouseName, productId, 4);
 		service.setStock(existingStock);
 		captor.clear();
 		
-		ShipmentRequest request = new ShipmentRequest(warehouseId, productId, qty);
+		ShipmentRequest request = new ShipmentRequest(warehouseName, productId, qty);
 		
 		// when
 		ShipmentConfirmation confirmation = service.requestShipment(request);
@@ -212,13 +212,13 @@ public class WarehouseServiceImplIntegrationTest {
 	public void shouldConfirmShipmentRequestAndTriggerAnAlert() {
 		// given
 		long productId = 3L;
-		long warehouseId = 5L;
+		String warehouseName = "testWarehouse";
 		int qty = 12;
-		StockChangeRequest existingStock = new StockChangeRequest(warehouseId, productId, 15);
+		StockChangeRequest existingStock = new StockChangeRequest(warehouseName, productId, 15);
 		service.setStock(existingStock);
 		captor.clear();
 		
-		ShipmentRequest request = new ShipmentRequest(warehouseId, productId, qty);
+		ShipmentRequest request = new ShipmentRequest(warehouseName, productId, qty);
 		
 		// when
 		ShipmentConfirmation confirmation = service.requestShipment(request);
@@ -229,7 +229,7 @@ public class WarehouseServiceImplIntegrationTest {
 		assertNotNull(captor.getAlert());
 		StockAlert alert = captor.getAlert();
 		assertEquals(productId, alert.getProductId());
-		assertEquals(warehouseId, alert.getWarehouseId());
+		assertEquals(warehouseName, alert.getWarehouseName());
 		assertEquals(3, alert.getStockLevel());
 		assertEquals(5, alert.getThreshold());
 	}
@@ -238,17 +238,17 @@ public class WarehouseServiceImplIntegrationTest {
 	public void shouldCancelShipmentRequestAndNotTriggerAnAlert() {
 		// given
 		long productId = 3L;
-		long warehouseId = 5L;
+		String warehouseName = "testWarehouse";
 		int qty = 15;
 		
-		StockChangeRequest existingStock = new StockChangeRequest(warehouseId, productId, qty);
+		StockChangeRequest existingStock = new StockChangeRequest(warehouseName, productId, qty);
 		service.setStock(existingStock);
 		captor.clear();
 		
 		
 		ShipmentLine line = new ShipmentLine(null, 1, new Product(productId, "", ""));
 		Shipment shipment = new Shipment(
-				new Warehouse(warehouseId, ""),
+				new Warehouse(13L, warehouseName),
 				Lists.newArrayList(line));
 		
 		// when
@@ -262,17 +262,17 @@ public class WarehouseServiceImplIntegrationTest {
 	public void shouldCancelShipmentRequestAndTriggerAnAlert() {
 		// given
 		long productId = 3L;
-		long warehouseId = 5L;
+		String warehouseName = "testWarehouse";
 		int qty = 3;
 		
-		StockChangeRequest existingStock = new StockChangeRequest(warehouseId, productId, qty);
+		StockChangeRequest existingStock = new StockChangeRequest(warehouseName, productId, qty);
 		service.setStock(existingStock);
 		captor.clear();
 		
 		
 		ShipmentLine line = new ShipmentLine(null, 13, new Product(productId, "", ""));
 		Shipment shipment = new Shipment(
-				new Warehouse(warehouseId, ""),
+				new Warehouse(13L, warehouseName),
 				Lists.newArrayList(line));
 		
 		// when
@@ -282,7 +282,7 @@ public class WarehouseServiceImplIntegrationTest {
 		assertNotNull(captor.getAlert());
 		StockAlert alert = captor.getAlert();
 		assertEquals(productId, alert.getProductId());
-		assertEquals(warehouseId, alert.getWarehouseId());
+		assertEquals(warehouseName, alert.getWarehouseName());
 		assertEquals(16, alert.getStockLevel());
 		assertEquals(5, alert.getThreshold());
 	}

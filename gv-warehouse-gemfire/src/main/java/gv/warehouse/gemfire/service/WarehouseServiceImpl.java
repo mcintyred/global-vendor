@@ -2,13 +2,11 @@ package gv.warehouse.gemfire.service;
 
 import gv.api.Shipment;
 import gv.api.ShipmentLine;
-import gv.warehouse.api.DiscontinueProductRequest;
-import gv.warehouse.api.ShipmentConfirmation;
-import gv.warehouse.api.ShipmentRequest;
-import gv.warehouse.api.StockAlert;
-import gv.warehouse.api.StockAlertListener;
-import gv.warehouse.api.StockChangeRequest;
-import gv.warehouse.api.StockQueryRequest;
+import gv.stock.api.DiscontinueProductRequest;
+import gv.stock.api.ShipmentConfirmation;
+import gv.stock.api.ShipmentRequest;
+import gv.stock.api.StockChangeRequest;
+import gv.stock.api.StockQueryRequest;
 import gv.warehouse.api.WarehouseService;
 import gv.warehouse.gemfire.entity.StockLevel;
 import gv.warehouse.gemfire.entity.StockLevel.Id;
@@ -35,23 +33,18 @@ public class WarehouseServiceImpl implements WarehouseService {
 	}
 
 	@Override
-	public String getName() {
-		return "Local Database Service";
-	}
-
-	@Override
 	public int updateStock(StockChangeRequest request) {
 		
-		Long warehouseId = request.getWarehouseId();
+		String warehouseName = request.getWarehouseName();
 		Long productId = request.getProductId();
 		int stockDelta = request.getQty();
 		
-		StockLevel stockLevel = repository.findOne(new Id(warehouseId, productId));
+		StockLevel stockLevel = repository.findOne(new Id(warehouseName, productId));
 
 		if(stockLevel == null) {
-			stockLevel = new StockLevel(warehouseId, productId, stockDelta);
+			stockLevel = new StockLevel(warehouseName, productId, stockDelta);
 		} else { 
-			stockLevel = new StockLevel(warehouseId, productId, stockLevel.getQty(), stockLevel.getQty() + stockDelta);
+			stockLevel = new StockLevel(warehouseName, productId, stockLevel.getQty(), stockLevel.getQty() + stockDelta);
 		}
 		
 		repository.save(stockLevel);
@@ -61,11 +54,11 @@ public class WarehouseServiceImpl implements WarehouseService {
 	@Override
 	public int setStock(StockChangeRequest request) {
 		
-		Long warehouseId = request.getWarehouseId();
+		String warehouseName = request.getWarehouseName();
 		Long productId = request.getProductId();
 		int stockOnHand = request.getQty();
 		
-		StockLevel stockLevel = new StockLevel(warehouseId, productId, stockOnHand);
+		StockLevel stockLevel = new StockLevel(warehouseName, productId, stockOnHand);
 		
 		repository.save(stockLevel);
 		return stockLevel.getQty();
@@ -74,10 +67,10 @@ public class WarehouseServiceImpl implements WarehouseService {
 	@Override
 	public int getStock(StockQueryRequest request) {
 		
-		Long warehouseId = request.getWarehouseId();
+		String warehouseName = request.getWarehouseName();
 		Long productId = request.getProductId();
 
-		StockLevel stockLevel = repository.findOne(new Id(warehouseId, productId));
+		StockLevel stockLevel = repository.findOne(new Id(warehouseName, productId));
 		if(stockLevel != null) {
 			return stockLevel.getQty();
 		}
@@ -86,7 +79,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 	
 	@Override
 	public void discontinueProduct(DiscontinueProductRequest request) {
-		StockLevel stockLevel = repository.findOne(new Id(request.getWarehouseId(), request.getProductId()));
+		StockLevel stockLevel = repository.findOne(new Id(request.getWarehouseName(), request.getProductId()));
 		if(stockLevel != null) {
 			repository.delete(stockLevel);
 		}
@@ -94,10 +87,10 @@ public class WarehouseServiceImpl implements WarehouseService {
 
 	@Override
 	public ShipmentConfirmation requestShipment(ShipmentRequest request) {
-		Long warehouseId = request.getWarehouseId();
+		String warehouseName = request.getWarehouseName();
 		Long productId = request.getProductId();
 
-		StockLevel stockLevel = repository.findOne(new Id(warehouseId, productId));
+		StockLevel stockLevel = repository.findOne(new Id(warehouseName, productId));
 		int allocatedQty = 0;
 		
 		if(stockLevel == null) {
@@ -110,7 +103,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 			allocatedQty = request.getQty();
 		}			
 		
-		stockLevel = new StockLevel(warehouseId, productId, stockLevel.getQty(), stockLevel.getQty() - allocatedQty);
+		stockLevel = new StockLevel(warehouseName, productId, stockLevel.getQty(), stockLevel.getQty() - allocatedQty);
 
 		repository.save(stockLevel);
 		
@@ -121,7 +114,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 	public void cancelShipment(Shipment shipment) {
 		for(ShipmentLine line : shipment.getLines()) {
 			
-			Id id = new Id(shipment.getWarehouse().getId(), line.getProduct().getId());
+			Id id = new Id(shipment.getWarehouse().getName(), line.getProduct().getId());
 			
 			StockLevel stockLevel = repository.findOne(id);
 			
