@@ -102,13 +102,13 @@ If the method being called returns a value, Spring Integration will construct a 
 receive it.
 </p>
 
-<h4>Configuration</h4>
+<h3>Configuration</h3>
 
 <p>
 Remember that the StockService calls the WarehouseServiceLocator to get the right WarehouseService to talk to a Warehouse.
 The WarehouseServiceLocator is initialised with a list of service in the application context:
 </p>
-<pre class="java">
+<pre class="xml">
 
 	&lt;!-- Declare the list of WarehouseServices --&gt;
 	&lt;!-- This will be auto-injected into the WarehouseServiceLocator --&gt;
@@ -124,7 +124,7 @@ The WarehouseServiceLocator is initialised with a list of service in the applica
 We are going to add to the list of services by getting Spring Integration to create a gateway for us which implements
 the WarehouseService interface:
 </p>
-<pre class="java">
+<pre class="xml">
 
 	&lt;!-- Declare the list of WarehouseServices --&gt;
 	&lt;!-- This will be auto-injected into the WarehouseServiceLocator --&gt;
@@ -159,11 +159,14 @@ view the integration graph and you will see something like this:
 </div>
 
 <p>The top half of the diagram corresponds to the method call to the remote
-server, and the bottom half handles the return values. Let's look at the
+server, and the bottom half handles the return values.</p>
+
+<h4>Outbound Messages</h4>
+<p>Starting with the top of the integration graph, let's look at the
 actual XML so we can understand exactly what is happening. First, the configuration of
 the gateway itself:
 
-<pre class="java">
+<pre class="xml">
 	&lt;int:gateway id="outboundGateway" service-interface="gv.warehouse.api.WarehouseService"
 		default-request-channel="outbound-requests"
 	&gt;
@@ -183,6 +186,14 @@ the gateway itself:
 		&lt;int:method name="requestShipment"&gt;
 			&lt;int:header name="GV_Method" value="request-shipment"/&gt;
 		&lt;/int:method&gt;
+				
+		&lt;int:method name="cancelShipment"&gt;
+			&lt;int:header name="GV_Method" value="cancel-shipment"/&gt;
+		&lt;/int:method&gt;
+		
+		&lt;int:method name="discontinueProduct"&gt;
+			&lt;int:header name="GV_Method" value="discontinue-product"/&gt;
+		&lt;/int:method&gt;
 		
 		&lt;!-- Implement the getName() method --&gt;
 		&lt;int:method name="getName" request-channel="get-name" payload-expression="'null'"/&gt;
@@ -201,8 +212,116 @@ public interface WarehouseService {
 	void discontinueProduct(DiscontinueProductRequest request);
 	ShipmentConfirmation requestShipment(ShipmentRequest request);
 	void cancelShipment(Shipment shipment);
+}
+</pre>
 
-}</pre>
+<p>
+For all the methods except getName(), the GV_Method header is set and the message 
+continues to the default request channel "outbound-requests".
+</p>
+
+<p>
+The getName() method is special, because it is just supposed to return the name of the
+service used for binding. I.e. we want it to return 'Remote Warehouse'. This is implemented
+using a ServiceActivator which just evaluates and expression:
+</p>
+
+<pre class="xml">
+	&lt;int:channel id="get-name"/&gt;
+	&lt;int:service-activator input-channel="get-name" expression="'Remote Warehouse'"/&gt;
+</pre>
+
+<p>
+All the other methods result in a message being routed to the "outbound-requests" channel,
+this is connected to a HeaderEnricher which adds the 'GV_WarehouseId' header:
+</p>
+
+<pre class="xml">
+	&lt;int:header-enricher input-channel="outbound-requests" output-channel="outbound-marshaller"&gt;
+		&lt;int:header name="GV_WarehouseId" expression="'warehouse_' + payload.warehouseId"/&gt;
+	&lt;/int:header-enricher&gt;
+</pre>
+
+<p>
+The next step is to convert the body of the message from a Java object to a string
+by serializing it to JSON. This is needed since AMQP is language-neutral, and we can't
+in general know what the implementation of message receivers will be:
+</p>
+
+<pre class="xml">
+	&lt;int:object-to-json-transformer input-channel="outbound-marshaller" output-channel="outbound-rabbit-requests"/&gt;
+</pre>
+
+<p>
+From here the message is sent on to the "outbound-rabbit-requests" channel, where it goes through a gateway
+which converts it from a Spring Integration message to an AMQP message and sends it to RabbitMQ.
+Passing through RabbitMQ, it arrives on a warehouse queue, where it is picked up by a system running
+gv-warehouse-node.
+
+<h4>Inbound Messages On a Node</h4>
+<p>
+Let's take a look now at the configuration on a node, to see how the message is received, converted
+and used to call the appropriate method on the node's WarehouseService.
+Here's part of the configuration in gv-warehouse-node/src/main/resources/META-INF/spring/integration/warehouse-service-context.xml:
+</p>
+<div class="screengrab">
+	<div class="caption">Spring Integration Graph For A Node</div>
+	<img src="images/jpaNodeFromCore.jpg"/>
+</div>
+
+<p>
+The flow is actually pretty simple:
+</p>
+<ul>
+	<li>Messages arrive on the "inbound" channel</li>
+	<li>A HeaderValue router forwards the message on based on the value of the GV_Method header</li>
+	<li>Each method channel deserializes the message payload from JSON back to the appropriate Java object</li>
+	<li>A ServiceActivator calls a method on the WarehouseService</li>
+	<li>Any return value from the method is sent back along the reply channel which was
+	set up anonymously. Scalar values such as <strong>ints</strong> are serialized automatically.</li>
+	<li>The requestShipment() method returns an object (<strong>ShipmentConfirmation</strong>),
+	so an object-to-json-transformer is used to serialize it to a string</li>
+</ul>
+
+<p>
+Let's go back to Host 1 now and see how the reply messages are handled.
+</p>
+
+<div class="screengrab">
+	<div class="caption">Response Handling</div>
+	<img src="images/coreFromJPANodeInboundResponses.jpg"/>
+</div>
+
+<ul>
+<li>Messages arrive back on the "inbound-rabbit-responses" channel</li>
+<li>A HeaderValue router forwards the messages based on the value of the GV_Method header</li>
+<li>Responses to all methods other than "request-shipment" are forwarded on as-is, since they can be
+  automatically deserialized back to Java (they are all Integer values)</li>
+ <li>Responses to the "request-shipment" method are sent through a json-to-objet-transformer to deserialize them
+ before begin sent on</li>
+ <li>The messages finish at a ServiceActivator which just returns the value of the payload.
+ This return value then is sent back automatically to the original gateway, where it is returned to
+ the caller</li>
+ </ul>
+ 
+ <p>
+ Here is the corresponding configuration:
+ </p>
+ 
+ <pre class="xml">
+ 	&lt;int:header-value-router header-name="GV_Method" input-channel="inbound-rabbit-responses"&gt;
+		&lt;int:mapping value="request-shipment" channel="request-shipment-ack"/&gt;	
+		&lt;int:mapping value="set-stock" channel="inbound-responses"/&gt;	
+		&lt;int:mapping value="get-stock" channel="inbound-responses"/&gt;	
+		&lt;int:mapping value="update-stock" channel="inbound-responses"/&gt;	
+	&lt;/int:header-value-router&gt;	
+	
+	&lt;int:json-to-object-transformer type="gv.stock.api.ShipmentConfirmation" input-channel="request-shipment-ack" output-channel="inbound-responses"/&gt;
+	
+	&lt;int:service-activator input-channel="inbound-responses" expression="payload"/&gt;
+ </pre>
+ 
+ 
 
 </body>
 

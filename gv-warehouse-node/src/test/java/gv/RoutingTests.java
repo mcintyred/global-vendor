@@ -4,7 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
+import gv.api.Shipment;
+import gv.stock.api.DiscontinueProductRequest;
 import gv.stock.api.ShipmentConfirmation;
 import gv.stock.api.ShipmentRequest;
 import gv.stock.api.StockChangeRequest;
@@ -183,6 +186,46 @@ public class RoutingTests {
 	}
 	
 	@Test
+	public void shouldDiscontinueProduct() throws InterruptedException {
+		// given
+		StockQueryRequest request = new StockQueryRequest(1L, 3L);
+		
+		Message<StockQueryRequest> message = MessageBuilder.withPayload(request)
+				.setHeader("GV_WarehouseId", 1)
+				.setHeader("GV_Method", "discontinue-product")
+				.setReplyChannel(outputChannel)
+				.build();
+		
+		ArgumentCaptor<DiscontinueProductRequest> captor = ArgumentCaptor.forClass(DiscontinueProductRequest.class);
+		
+		// when
+		send(message);
+		
+		// then
+		verify(warehouseService, times(1)).discontinueProduct(captor.capture());
+	}
+	
+	@Test
+	public void shouldCancelShipment() throws InterruptedException {
+		// given
+		Shipment shipment = new Shipment();
+		
+		Message<Shipment> message = MessageBuilder.withPayload(shipment)
+				.setHeader("GV_WarehouseId", 1)
+				.setHeader("GV_Method", "cancel-shipment")
+				.setReplyChannel(outputChannel)
+				.build();
+		
+		ArgumentCaptor<Shipment> captor = ArgumentCaptor.forClass(Shipment.class);
+		
+		// when
+		send(message);
+		
+		// then
+		verify(warehouseService, times(1)).cancelShipment(captor.capture());
+	}
+	
+	@Test
 	public void shouldRequestShipment() throws InterruptedException {
 		// given
 		Long warehouseId = 1L;
@@ -241,6 +284,10 @@ public class RoutingTests {
 		boolean latchCountedToZero = latch.await(2000L, TimeUnit.MILLISECONDS);
 		return latchCountedToZero;
 		
+	}
+	
+	protected void send(Message message) {
+		inputChannel.send(message);
 	}
 	
 	/*

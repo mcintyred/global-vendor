@@ -60,13 +60,11 @@
  	<int:chain input-channel="cancel-shipment">
  		<int:json-to-object-transformer type="gv.api.Shipment"/>
  		<int:service-activator expression="@warehouseService.cancelShipment(payload)"/>
- 		<int:object-to-json-transformer/>
 	</int:chain>
 
  	<int:chain input-channel="discontinue-product">
  		<int:json-to-object-transformer type="gv.stock.api.DiscontinueProductRequest"/>
  		<int:service-activator expression="@warehouseService.discontinueProduct(payload)"/>
- 		<int:object-to-json-transformer/>
 	</int:chain>
 
 </beans>

@@ -70,6 +70,12 @@
 		color: #6a006b;
 	}
 	
+	pre.xml {
+		border: 2px inset #eaeaea;
+		background: #f2f2f2;
+		color: blue;
+	}
+	
 	.screengrab, .diagram {
 		margin-left:15%;
 	}
