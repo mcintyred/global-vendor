@@ -18,7 +18,13 @@
 		<gfe:cache-listener ref="stockListener" />
 	</gfe:local-region>
 
-	<bean id="stockListener" class="gv.warehouse.gemfire.listener.StockChangeListener"/>
+	<bean id="stockListener" class="gv.warehouse.gemfire.listener.StockChangeListener">
+		<property name="stockAlertListener" ref="stockAlertListener"/>
+		<property name="stockAlertThreshold" value="10"/>
+	</bean>
+	
+
+	<bean id="stockAlertListener" class="gv.warehouse.gemfire.service.StockAlertCaptor" />
 	
 	<gfe-data:repositories base-package="gv.warehouse.gemfire"></gfe-data:repositories>
 

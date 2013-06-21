@@ -23,7 +23,7 @@
 		acknowledge-mode="AUTO"
 		channel="inbound-stock-alerts"
 		connection-factory="rabbitConnectionFactory"
-		queue-names="core-stock-alerts"
+		queue-names="stockAlerts"
 	/>
 		
 </beans>

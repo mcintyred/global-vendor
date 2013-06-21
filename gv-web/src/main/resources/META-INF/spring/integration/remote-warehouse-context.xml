@@ -55,14 +55,7 @@
 		<int:method name="discontinueProduct">
 			<int:header name="GV_Method" value="discontinue-product"/>
 		</int:method>
-		
-		<!-- Implement the getName() method -->
-		<int:method name="getName" request-channel="get-name" payload-expression="'null'"/>
-		
 	</int:gateway>
-	
-	<int:channel id="get-name"/>
-	<int:service-activator input-channel="get-name" expression="'Remote Warehouse'"/>
 	
 	<int:header-enricher input-channel="outbound-requests" output-channel="outbound-marshaller">
 		<int:header name="GV_WarehouseName" expression="'warehouse_' + payload.warehouseName"/>

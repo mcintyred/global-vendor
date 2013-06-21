@@ -13,5 +13,7 @@
 	<context:component-scan base-package="gv.warehouse"></context:component-scan>
 	
 	<import resource="classpath:META-INF/gemfire/client/cl-cache-config.xml"/>
+	
+	<bean id="stockAlertListener" class="gv.warehouse.gemfire.service.StockAlertCaptor" />
 			
 </beans>

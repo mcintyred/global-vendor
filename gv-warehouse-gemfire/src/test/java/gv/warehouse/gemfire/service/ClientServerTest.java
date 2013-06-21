@@ -37,35 +37,8 @@ abstract public class ClientServerTest {
 	@Autowired
 	private StockAlertEventSource eventSource;
 	
-	
-	class Captor implements StockAlertListener {
-		
-		private StockAlert alert;
-		
-		private CountDownLatch latch;
-		
-		public void expect() {
-			latch = new CountDownLatch(1);
-		}
-
-		@Override
-		public void handleStockAlert(StockAlert alert) {
-			this.alert = alert;
-			latch.countDown();
-		}
-		
-		public StockAlert getAlert() throws Exception {
-			latch.await(1000L, TimeUnit.MILLISECONDS);
-			return alert;
-		}
-		
-		public void clear() throws Exception {
-			getAlert();
-			alert = null;
-		}
-	}
-	
-	private Captor captor = new Captor();
+	@Autowired
+	private StockAlertCaptor captor;
 	
 	public static final String WAREHOUSE_NAME = "testWarehouse";
 	public static final long PRODUCT_ID = 5;

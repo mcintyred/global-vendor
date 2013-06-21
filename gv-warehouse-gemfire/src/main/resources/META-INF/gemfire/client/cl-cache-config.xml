@@ -22,6 +22,9 @@
 		<gfe:regex-interest pattern=".*" receive-values="true" result-policy="KEYS_VALUES"/>
 	</gfe:client-region>
 	
-	<bean id="stockListener" class="gv.warehouse.gemfire.listener.StockChangeListener"/>
+	<bean id="stockListener" class="gv.warehouse.gemfire.listener.StockChangeListener">
+		<property name="stockAlertListener" ref="stockAlertListener"/>
+		<property name="stockAlertThreshold" value="10"/>
+	</bean>
 			
 </beans>

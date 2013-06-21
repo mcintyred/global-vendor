@@ -4,223 +4,233 @@
 </head>
 <body>
 
-<h1>Global Vendor Remote Node</h1>
-<h2>Using Spring Integration and RabbitMQ</h2>
-<p>
-In this post I am going to discuss using Spring Integration to connect a standalone server running the 
-gv-warehouse-jpa implementation of the WarehouseService.
-</p>
+	<h1>Global Vendor Gemfire Node</h1>
+	<h2>Using Spring Integration, Spring Data and Gemfire</h2>
+	<p>In this post I am going to discuss using Spring Integration and
+		Spring Data Gemfire to connect a variety of implementations of the
+		WarehouseService using Gemfire.</p>
 
-<h3>Prerequisites</h3>
-<p>
-In order to be able to run the example code, you will need to install <a href="http://www.rabbitmq.com/">RabbitMQ</a>.
-Although the diagrams all show RabbitMQ running on a separate server, you can choose to run it on the same
-machine as the rest of the code if you wish.
-</p>
+	<h3>Prerequisites</h3>
+	<p>There is nothing to install this time, since the Spring Data
+		Gemfire support bundles the Gemfire components needed for testing.</p>
 
-<p>
-Once you have installed RabbitMQ, locate the file:
+	<p>
+		Once you have installed RabbitMQ, locate the file:
 
-<code>gv-warehouse-node/src/main/resources/gv-warehouse-node.properties</code> and update the gv.rabbit.* properties to connect to your RabbitMQ installation
-</p>
+		<code>gv-warehouse-node/src/main/resources/gv-warehouse-node.properties</code>
+		and update the gv.rabbit.* properties to connect to your RabbitMQ
+		installation
+	</p>
 
-<p>You can check that your installation is working by starting the gv-warehouse-node project. In your IDE navigate to the Main class (<code>gv-warehouse-node/src/main/java/gv/node/Main.java</code>)
-and run it as a Java Application (in Eclipse, right-click Run As/Java Application).
-</p>
+	<p>
+		You can check that your installation is working by starting the
+		gv-warehouse-node project. In your IDE navigate to the Main class (
+		<code>gv-warehouse-node/src/main/java/gv/node/Main.java</code>
+		) and run it as a Java Application (in Eclipse, right-click Run
+		As/Java Application).
+	</p>
 
-<p>
-Once it has started you should be able to see the queues and exchanges in your RabbitMQ console. By default this will be available on the server where you installed
-RabbitMQ at http://localhost:15672. You should see two exchanges:
+	<p>Once it has started you should be able to see the queues and
+		exchanges in your RabbitMQ console. By default this will be available
+		on the server where you installed RabbitMQ at http://localhost:15672.
+		You should see two exchanges:
+	<ul>
+		<li>stockAlertsExchange</li>
+		<li>stockExchange</li>
+	</ul>
 
-<ul>
-<li>stockAlertsExchange</li>
-<li>stockExchange</li>
-</ul>
+	and there should be one queue: warehouse_london. Note that the name of
+	the node is set in the properties file.
+	</p>
 
-and there should be one queue: warehouse_london. Note that the name of the node is set in the properties file.
-</p>
+	<p>Now start the gv-web project in the same way that you started
+		gv-web-standalone in the previous post. This time, when the admin page
+		comes up, you should be able to create new warehouses of type "Remote
+		Warehouse":</p>
 
-<p>
-Now start the gv-web project in the same way that you started gv-web-standalone in the previous post.
-This time, when the admin page comes up, you should be able to create new warehouses of type "Remote Warehouse":
-</p>
+	<div class="screengrab">
+		<div class="caption">Adding A Remote Warehouse</div>
+		<img src="images/adminStartWithRemote.jpg" />
+	</div>
 
-<div class="screengrab">
-	<div class="caption">Adding A Remote Warehouse</div>
-	<img src="images/adminStartWithRemote.jpg"/>
-</div>
-
-<p>
-Go ahead and create 'Paris' as a local warehouse and 'London' as a remote warehouse, and create products, make purchases etc exactly as
-you did previously. The RemoteWarehouse appears to the system as if it were local due to Spring Integration.
-</p>
+	<p>Go ahead and create 'Paris' as a local warehouse and 'London' as
+		a remote warehouse, and create products, make purchases etc exactly as
+		you did previously. The RemoteWarehouse appears to the system as if it
+		were local due to Spring Integration.</p>
 
 
-<h3>Spring Integration</h3>
-<p>
-The <a href="http://www.springsource.org/spring-integration">Spring Integration</a> project
-is an implementation of Enterprise Integration Patterns which provides a lightweight messaging framework.
-The key concept behind these patterns is that components of a distributed system communicate with each other 
-by sending <strong>messages</strong> over <strong>channels</strong>. This pattern minimises coupling between 
-components, and Spring's implementation means you can take advantage of it without your code having to be
-aware that it is running in a messaging environment.
-</p>
+	<h3>Spring Integration</h3>
+	<p>
+		The <a href="http://www.springsource.org/spring-integration">Spring
+			Integration</a> project is an implementation of Enterprise Integration
+		Patterns which provides a lightweight messaging framework. The key
+		concept behind these patterns is that components of a distributed
+		system communicate with each other by sending <strong>messages</strong>
+		over <strong>channels</strong>. This pattern minimises coupling
+		between components, and Spring's implementation means you can take
+		advantage of it without your code having to be aware that it is
+		running in a messaging environment.
+	</p>
 
-<h4>Gateways</h4>
-<p>
-One of the key components in Spring Integration is the gateway. A gateway is an implementation of your interface
-provided by Spring Integration. That means that it can be injected into other components in your code and will
-respect the interface while hiding where and how the implementation actually works. The implementation Spring Integration
-provides you converts all method calls into messages sent onto channels, and messages received from reply channels
-are converted and returned as the method's return value.
-</p>
+	<h4>Gateways</h4>
+	<p>One of the key components in Spring Integration is the gateway.
+		A gateway is an implementation of your interface provided by Spring
+		Integration. That means that it can be injected into other components
+		in your code and will respect the interface while hiding where and how
+		the implementation actually works. The implementation Spring
+		Integration provides you converts all method calls into messages sent
+		onto channels, and messages received from reply channels are converted
+		and returned as the method's return value.</p>
 
-<h4>Service Activator</h4>
-<p>
-A Service Activator is the counterpart to a Gateway. It turns messages into method calls on a Java component such
-as one of your service beans. Return values are converted back to messages and sent back along the reply channel.
-</p>
+	<h4>Service Activator</h4>
+	<p>A Service Activator is the counterpart to a Gateway. It turns
+		messages into method calls on a Java component such as one of your
+		service beans. Return values are converted back to messages and sent
+		back along the reply channel.</p>
 
-<p>
-With that in mind, let's move on to the implementation of a remote warehouse.
-</p>
+	<p>With that in mind, let's move on to the implementation of a
+		remote warehouse.</p>
 
-<h3>Architecture</h3>
-The diagram below shows the architecture.
+	<h3>Architecture</h3>
+	The diagram below shows the architecture.
 
-<div class="diagram">
-	<div class="caption">Remote JPA Node Architecture</div>
-	<img src="images/remoteJPANode.jpg" />
-</div>
+	<div class="diagram">
+		<div class="caption">Remote JPA Node Architecture</div>
+		<img src="images/remoteJPANode.jpg" />
+	</div>
 
-<p>
-The implementation works as follows:
-</p>
-<ol>
-<li>Spring Integration provides a gateway which implements the WarehouseService interface</li>
-<li>We configure the gateway so that the messages it produces have a custom header <strong>GV_Method</strong>.
-This is set to the name of the method being called - <strong>setStock, updateStock, getStock etc</strong>.</li>
-<li>The request objects which are arguments to the method calls are serialized to a JSON format</li>
-<li>An additional header GV_Warehouse is added, set to the id of the warehouse.</li>
-<li>The message is sent to the RabbitMQ exchange named <strong>stockExchange</strong>, using the GV_Warehouse
-header as the routing key</li>
-<li>Rabbit routes the message to a queue with the same name as the routing key</li>
-<li>The warehouse node listening to the queue receives the message</li>
-<li>The GV_Method header is used to route the message onto the appropriate channel (one channel per method)</li>
-<li>The message is deserialized from JSON back into the appropriate request object</li>
-<li>A SpringIntegration <strong>Service Activator</strong> calls the appropriate method on the WarehouseServiceImpl,
-which queries the database using Spring Data JPA and returns a response</li>
-</ol>
+	<p>The implementation works as follows:</p>
+	<ol>
+		<li>Spring Integration provides a gateway which implements the
+			WarehouseService interface</li>
+		<li>We configure the gateway so that the messages it produces
+			have a custom header <strong>GV_Method</strong>. This is set to the
+			name of the method being called - <strong>setStock,
+				updateStock, getStock etc</strong>.
+		</li>
+		<li>The request objects which are arguments to the method calls
+			are serialized to a JSON format</li>
+		<li>An additional header GV_Warehouse is added, set to the id of
+			the warehouse.</li>
+		<li>The message is sent to the RabbitMQ exchange named <strong>stockExchange</strong>,
+			using the GV_Warehouse header as the routing key
+		</li>
+		<li>Rabbit routes the message to a queue with the same name as
+			the routing key</li>
+		<li>The warehouse node listening to the queue receives the
+			message</li>
+		<li>The GV_Method header is used to route the message onto the
+			appropriate channel (one channel per method)</li>
+		<li>The message is deserialized from JSON back into the
+			appropriate request object</li>
+		<li>A SpringIntegration <strong>Service Activator</strong> calls
+			the appropriate method on the WarehouseServiceImpl, which queries the
+			database using Spring Data JPA and returns a response
+		</li>
+	</ol>
 
-<p>
-If the method being called returns a value, Spring Integration will construct a reply channel and a temporary queue on RabbitMQ to 
-receive it.
-</p>
+	<p>If the method being called returns a value, Spring Integration
+		will construct a reply channel and a temporary queue on RabbitMQ to
+		receive it.</p>
 
-<h3>Configuration</h3>
+	<h3>Configuration</h3>
 
-<p>
-Remember that the StockService calls the WarehouseServiceLocator to get the right WarehouseService to talk to a Warehouse.
-The WarehouseServiceLocator is initialised with a list of service in the application context:
-</p>
-<pre class="xml">
-
-	&lt;!-- Declare the list of WarehouseServices --&gt;
-	&lt;!-- This will be auto-injected into the WarehouseServiceLocator --&gt;
-	&lt;bean id="warehouseServiceList" class="gv.core.service.WarehouseServiceList"&gt;
-		&lt;constructor-arg&gt;
-			&lt;list&gt;
-				&lt;ref bean="localWarehouseService"/&gt;
-			&lt;/list&gt;
-		&lt;/constructor-arg&gt;
-	&lt;/bean&gt;
+	<p>Remember that the StockService calls the WarehouseServiceLocator
+		to get the right WarehouseService to talk to a Warehouse. The
+		WarehouseServiceLocator is initialised with a list of service in the
+		application context:</p>
+	<pre class="xml">
+&lt;!-- Declare the list of WarehouseServices --&gt;
+&lt;bean id="warehouseServiceList" class="gv.core.service.WarehouseServiceMap"&gt;
+	&lt;constructor-arg&gt;
+		&lt;map&gt;
+			&lt;entry key="Local Database Service" value-ref="localWarehouseService"/&gt;		
+		&lt;/map&gt;
+	&lt;/constructor-arg&gt;
+&lt;/bean&gt;
 </pre>
-<p>
-We are going to add to the list of services by getting Spring Integration to create a gateway for us which implements
-the WarehouseService interface:
-</p>
-<pre class="xml">
-
-	&lt;!-- Declare the list of WarehouseServices --&gt;
-	&lt;!-- This will be auto-injected into the WarehouseServiceLocator --&gt;
-	&lt;bean id="warehouseServiceList" class="gv.core.service.WarehouseServiceList"&gt;
-		&lt;constructor-arg&gt;
-			&lt;list&gt;
-				&lt;ref bean="localWarehouseService"/&gt;
-				&lt;ref bean="outboundGateway"/&gt;
-			&lt;/list&gt;
-		&lt;/constructor-arg&gt;
-	&lt;/bean&gt;
-</pre>
-
-<p>
-Now we need to implement the outbound gateway. This is done using the context files in gv-web/src/main/resources/META-INF/spring/integration:
-</p>
-<ul>
-<li>rabbitmq-context.xml - Configures the connection to the RabbitMQ server and declares the exchanges</li>
-<li>amqp-context.xml - Configures the channel adapters which convert between Spring Integration internal messages
-and AMQP messages handled by RabbitMQ</li>
-<li>remote-warehouse-context.xml - Configures the WarehouseServiceGateway</li>
-<li>stock-alerts-context.xml - Configures a ServiceActivator to notify the StockService when stock alerts are received from remote systems.</li>
-</ul>
-<p>
-Let's look at the remote-warehouse-context.xml file in a bit more detail. If you use STS then you can
-view the integration graph and you will see something like this:
-</p>
-
-<div class="diagram">
-	<div class="caption">Remote Warehouse Context</div>
-	<img src="images/remote-warehouse-context.jpg"/>
-</div>
-
-<p>The top half of the diagram corresponds to the method call to the remote
-server, and the bottom half handles the return values.</p>
-
-<h4>Outbound Messages</h4>
-<p>Starting with the top of the integration graph, let's look at the
-actual XML so we can understand exactly what is happening. First, the configuration of
-the gateway itself:
-
-<pre class="xml">
-	&lt;int:gateway id="outboundGateway" service-interface="gv.warehouse.api.WarehouseService"
-		default-request-channel="outbound-requests"
-	&gt;
-		&lt;!-- Set the method header --&gt;
-		&lt;int:method name="setStock"&gt;
-			&lt;int:header name="GV_Method" value="set-stock"/&gt;
-		&lt;/int:method&gt;
-		
-		&lt;int:method name="updateStock"&gt;
-			&lt;int:header name="GV_Method" value="update-stock"/&gt;
-		&lt;/int:method&gt;
-		
-		&lt;int:method name="getStock"&gt;
-			&lt;int:header name="GV_Method" value="get-stock"/&gt;
-		&lt;/int:method&gt;
-		
-		&lt;int:method name="requestShipment"&gt;
-			&lt;int:header name="GV_Method" value="request-shipment"/&gt;
-		&lt;/int:method&gt;
-				
-		&lt;int:method name="cancelShipment"&gt;
-			&lt;int:header name="GV_Method" value="cancel-shipment"/&gt;
-		&lt;/int:method&gt;
-		
-		&lt;int:method name="discontinueProduct"&gt;
-			&lt;int:header name="GV_Method" value="discontinue-product"/&gt;
-		&lt;/int:method&gt;
-		
-		&lt;!-- Implement the getName() method --&gt;
-		&lt;int:method name="getName" request-channel="get-name" payload-expression="'null'"/&gt;
-		
-	&lt;/int:gateway&gt;
+	<p>We are going to add to the list of services by getting Spring
+		Integration to create a gateway for us which implements the
+		WarehouseService interface:</p>
+	<pre class="xml">
+&lt;!-- Declare the list of WarehouseServices --&gt;
+&lt;bean id="warehouseServiceList" class="gv.core.service.WarehouseServiceMap"&gt;
+	&lt;constructor-arg&gt;
+		&lt;map&gt;
+			&lt;entry key="Local Database Service" value-ref="localWarehouseService"/&gt;		
+			&lt;entry key="Remote Service" value-ref="outboundGateway"/&gt;		
+		&lt;/map&gt;
+	&lt;/constructor-arg&gt;
+&lt;/bean&gt;
 </pre>
 
-<p>See how this matches the interface declaration:</p>
-<pre class="java">
+	<p>Now we need to implement the outbound gateway. This is done
+		using the context files in
+		gv-web/src/main/resources/META-INF/spring/integration:</p>
+	<ul>
+		<li>rabbitmq-context.xml - Configures the connection to the
+			RabbitMQ server and declares the exchanges</li>
+		<li>amqp-context.xml - Configures the channel adapters which
+			convert between Spring Integration internal messages and AMQP
+			messages handled by RabbitMQ</li>
+		<li>remote-warehouse-context.xml - Configures the
+			WarehouseServiceGateway</li>
+		<li>stock-alerts-context.xml - Configures a ServiceActivator to
+			notify the StockService when stock alerts are received from remote
+			systems.</li>
+	</ul>
+	<p>Let's look at the remote-warehouse-context.xml file in a bit
+		more detail. If you use STS then you can view the integration graph
+		and you will see something like this:</p>
+
+	<div class="diagram">
+		<div class="caption">Remote Warehouse Context</div>
+		<img src="images/remote-warehouse-context.jpg" />
+	</div>
+
+	<p>The top half of the diagram corresponds to the method call to
+		the remote server, and the bottom half handles the return values.</p>
+
+	<h4>Outbound Messages</h4>
+	<p>Starting with the top of the integration graph, let's look at
+		the actual XML so we can understand exactly what is happening. First,
+		the configuration of the gateway itself:
+	<pre class="xml">
+&lt;int:gateway id="outboundGateway" service-interface="gv.warehouse.api.WarehouseService"
+	default-request-channel="outbound-requests"
+&gt;
+	&lt;!-- Set the method header --&gt;
+	&lt;int:method name="setStock"&gt;
+		&lt;int:header name="GV_Method" value="set-stock"/&gt;
+	&lt;/int:method&gt;
+	
+	&lt;int:method name="updateStock"&gt;
+		&lt;int:header name="GV_Method" value="update-stock"/&gt;
+	&lt;/int:method&gt;
+	
+	&lt;int:method name="getStock"&gt;
+		&lt;int:header name="GV_Method" value="get-stock"/&gt;
+	&lt;/int:method&gt;
+	
+	&lt;int:method name="requestShipment"&gt;
+		&lt;int:header name="GV_Method" value="request-shipment"/&gt;
+	&lt;/int:method&gt;
+			
+	&lt;int:method name="cancelShipment"&gt;
+		&lt;int:header name="GV_Method" value="cancel-shipment"/&gt;
+	&lt;/int:method&gt;
+	
+	&lt;int:method name="discontinueProduct"&gt;
+		&lt;int:header name="GV_Method" value="discontinue-product"/&gt;
+	&lt;/int:method&gt;
+
+&lt;/int:gateway&gt;
+</pre>
+
+	<p>See how this matches the interface declaration:</p>
+	<pre class="java">
 public interface WarehouseService {
 
-	public String getName();
 	int updateStock(StockChangeRequest request);
 	int setStock(StockChangeRequest request);
 	int getStock(StockQueryRequest request);
@@ -230,116 +240,162 @@ public interface WarehouseService {
 }
 </pre>
 
-<p>
-For all the methods except getName(), the GV_Method header is set and the message 
-continues to the default request channel "outbound-requests".
-</p>
+	<p>For all the methods the GV_Method header is set and the message
+		continues to the default request channel "outbound-requests", this is
+		connected to a HeaderEnricher which adds the 'GV_WarehouseId' header:
+	</p>
 
-<p>
-The getName() method is special, because it is just supposed to return the name of the
-service used for binding. I.e. we want it to return 'Remote Warehouse'. This is implemented
-using a ServiceActivator which just evaluates and expression:
-</p>
-
-<pre class="xml">
-	&lt;int:channel id="get-name"/&gt;
-	&lt;int:service-activator input-channel="get-name" expression="'Remote Warehouse'"/&gt;
+	<pre class="xml">
+&lt;int:header-enricher input-channel="outbound-requests" output-channel="outbound-marshaller"&gt;
+	&lt;int:header name="GV_WarehouseId" expression="'warehouse_' + payload.warehouseId"/&gt;
+&lt;/int:header-enricher&gt;
 </pre>
 
-<p>
-All the other methods result in a message being routed to the "outbound-requests" channel,
-this is connected to a HeaderEnricher which adds the 'GV_WarehouseId' header:
-</p>
+	<p>The next step is to convert the body of the message from a Java
+		object to a string by serializing it to JSON. This is needed since
+		AMQP is language-neutral, and we can't in general know what the
+		implementation of message receivers will be:</p>
 
-<pre class="xml">
-	&lt;int:header-enricher input-channel="outbound-requests" output-channel="outbound-marshaller"&gt;
-		&lt;int:header name="GV_WarehouseId" expression="'warehouse_' + payload.warehouseId"/&gt;
-	&lt;/int:header-enricher&gt;
+	<pre class="xml">
+&lt;int:object-to-json-transformer input-channel="outbound-marshaller" output-channel="outbound-rabbit-requests"/&gt;
 </pre>
 
-<p>
-The next step is to convert the body of the message from a Java object to a string
-by serializing it to JSON. This is needed since AMQP is language-neutral, and we can't
-in general know what the implementation of message receivers will be:
-</p>
+	<p>From here the message is sent on to the
+		"outbound-rabbit-requests" channel, where it goes through a gateway
+		which converts it from a Spring Integration message to an AMQP message
+		and sends it to RabbitMQ. Passing through RabbitMQ, it arrives on a
+		warehouse queue, where it is picked up by a system running
+		gv-warehouse-node.
+	<h4>Inbound Messages On a Node</h4>
+	<p>Let's take a look now at the configuration on a node, to see how
+		the message is received, converted and used to call the appropriate
+		method on the node's WarehouseService. Here's part of the
+		configuration in
+		gv-warehouse-node/src/main/resources/META-INF/spring/integration/warehouse-service-context.xml:
+	</p>
+	<div class="screengrab">
+		<div class="caption">Spring Integration Graph For A Node</div>
+		<img src="images/jpaNodeFromCore.jpg" />
+	</div>
 
-<pre class="xml">
-	&lt;int:object-to-json-transformer input-channel="outbound-marshaller" output-channel="outbound-rabbit-requests"/&gt;
-</pre>
+	<p>The flow is actually pretty simple:</p>
+	<ul>
+		<li>Messages arrive on the "inbound" channel</li>
+		<li>A HeaderValue router forwards the message on based on the
+			value of the GV_Method header</li>
+		<li>Each method channel deserializes the message payload from
+			JSON back to the appropriate Java object</li>
+		<li>A ServiceActivator calls a method on the WarehouseService</li>
+		<li>Any return value from the method is sent back along the reply
+			channel which was set up anonymously. Scalar values such as <strong>ints</strong>
+			are serialized automatically.
+		</li>
+		<li>The requestShipment() method returns an object (<strong>ShipmentConfirmation</strong>),
+			so an object-to-json-transformer is used to serialize it to a string
+		</li>
+	</ul>
 
-<p>
-From here the message is sent on to the "outbound-rabbit-requests" channel, where it goes through a gateway
-which converts it from a Spring Integration message to an AMQP message and sends it to RabbitMQ.
-Passing through RabbitMQ, it arrives on a warehouse queue, where it is picked up by a system running
-gv-warehouse-node.
+	<p>Let's go back to Host 1 now and see how the reply messages are
+		handled.</p>
 
-<h4>Inbound Messages On a Node</h4>
-<p>
-Let's take a look now at the configuration on a node, to see how the message is received, converted
-and used to call the appropriate method on the node's WarehouseService.
-Here's part of the configuration in gv-warehouse-node/src/main/resources/META-INF/spring/integration/warehouse-service-context.xml:
-</p>
-<div class="screengrab">
-	<div class="caption">Spring Integration Graph For A Node</div>
-	<img src="images/jpaNodeFromCore.jpg"/>
-</div>
+	<div class="screengrab">
+		<div class="caption">Response Handling</div>
+		<img src="images/coreFromJPANodeInboundResponses.jpg" />
+	</div>
 
-<p>
-The flow is actually pretty simple:
-</p>
-<ul>
-	<li>Messages arrive on the "inbound" channel</li>
-	<li>A HeaderValue router forwards the message on based on the value of the GV_Method header</li>
-	<li>Each method channel deserializes the message payload from JSON back to the appropriate Java object</li>
-	<li>A ServiceActivator calls a method on the WarehouseService</li>
-	<li>Any return value from the method is sent back along the reply channel which was
-	set up anonymously. Scalar values such as <strong>ints</strong> are serialized automatically.</li>
-	<li>The requestShipment() method returns an object (<strong>ShipmentConfirmation</strong>),
-	so an object-to-json-transformer is used to serialize it to a string</li>
-</ul>
+	<ul>
+		<li>Messages arrive back on the "inbound-rabbit-responses"
+			channel</li>
+		<li>A HeaderValue router forwards the messages based on the value
+			of the GV_Method header</li>
+		<li>Responses to all methods other than "request-shipment" are
+			forwarded on as-is, since they can be automatically deserialized back
+			to Java (they are all Integer values)</li>
+		<li>Responses to the "request-shipment" method are sent through a
+			json-to-objet-transformer to deserialize them before begin sent on</li>
+		<li>The messages finish at a ServiceActivator which just returns
+			the value of the payload. This return value then is sent back
+			automatically to the original gateway, where it is returned to the
+			caller</li>
+	</ul>
 
-<p>
-Let's go back to Host 1 now and see how the reply messages are handled.
-</p>
+	<p>Here is the corresponding configuration:</p>
 
-<div class="screengrab">
-	<div class="caption">Response Handling</div>
-	<img src="images/coreFromJPANodeInboundResponses.jpg"/>
-</div>
+	<pre class="xml">
+	&lt;int:header-value-router header-name="GV_Method" input-channel="inbound-rabbit-responses"&gt;
+	&lt;int:mapping value="request-shipment" channel="request-shipment-ack"/&gt;	
+	&lt;int:mapping value="set-stock" channel="inbound-responses"/&gt;	
+	&lt;int:mapping value="get-stock" channel="inbound-responses"/&gt;	
+	&lt;int:mapping value="update-stock" channel="inbound-responses"/&gt;	
+&lt;/int:header-value-router&gt;	
 
-<ul>
-<li>Messages arrive back on the "inbound-rabbit-responses" channel</li>
-<li>A HeaderValue router forwards the messages based on the value of the GV_Method header</li>
-<li>Responses to all methods other than "request-shipment" are forwarded on as-is, since they can be
-  automatically deserialized back to Java (they are all Integer values)</li>
- <li>Responses to the "request-shipment" method are sent through a json-to-objet-transformer to deserialize them
- before begin sent on</li>
- <li>The messages finish at a ServiceActivator which just returns the value of the payload.
- This return value then is sent back automatically to the original gateway, where it is returned to
- the caller</li>
- </ul>
- 
- <p>
- Here is the corresponding configuration:
- </p>
- 
- <pre class="xml">
- 	&lt;int:header-value-router header-name="GV_Method" input-channel="inbound-rabbit-responses"&gt;
-		&lt;int:mapping value="request-shipment" channel="request-shipment-ack"/&gt;	
-		&lt;int:mapping value="set-stock" channel="inbound-responses"/&gt;	
-		&lt;int:mapping value="get-stock" channel="inbound-responses"/&gt;	
-		&lt;int:mapping value="update-stock" channel="inbound-responses"/&gt;	
-	&lt;/int:header-value-router&gt;	
-	
-	&lt;int:json-to-object-transformer type="gv.stock.api.ShipmentConfirmation" input-channel="request-shipment-ack" output-channel="inbound-responses"/&gt;
-	
-	&lt;int:service-activator input-channel="inbound-responses" expression="payload"/&gt;
+&lt;int:json-to-object-transformer type="gv.stock.api.ShipmentConfirmation" 
+	input-channel="request-shipment-ack" output-channel="inbound-responses"/&gt;
+
+&lt;int:service-activator input-channel="inbound-responses" expression="payload"/&gt;
  </pre>
  
+ <h3>Stock Alerts</h3>
  <p>
- That's all for this post. In the next post I'm going to talk about writing a WarehouseService implementation using GemFire.
+ The WarehouseService in the gv-warehouse-jpa project also implements the StockAlertEventSource interface. This means
+ that it will send StockAlertEvents to any registered StockAlertListeners. In the core project, the listener is actually
+ the StockService itself, but in a remote node the listener has been changed to use Spring Integration to send StockAlert
+ messages using RabbitMQ:
  </p>
  
+ <div class="screengrab">
+ 	<div class="caption">Stock Alerts Over RabbitMQ</div>
+ 	<img src="images/stockAlerts.jpg"/>
+</div>
+
+<p>
+On the node, the configuration for this is in <code>gv-warehouse-node/src/main/resources/META-INF/spring/integration/stock-alerts-context.xml</code>
+which configures an outbound gateway as a StockAlertListener, and <code>gv-warehouse-node/src/main/resources/META-INF/spring/services.xml</code> where
+it is wired in to the WarehouseService. The integration graph is simple:
+<div class="screengrab">
+<div class="caption">Stock Alerts Node Integration Graph</div>
+	<img src="images/jpaNodeToCoreStockAlerts.jpg"/>
+</div>
+</p>
+
+<p>
+Similarly the configuration to receive and process the alerts on the StockService is configured in
+<code>gv-web/src/main/resources/META-INF/spring/integration/stock-alerts-context.xml</code>
+<div class="screengrab">
+<div class="caption">Stock Alerts Integration Graph On Master</div>
+	<img src="images/coreFromJPANodeStockAlert.jpg"/>
+</div>
+
+<p>Where the service activator is configured to call <code>handleStockAlert()</code> directly on the StockService:
+<pre class="xml">
+	&lt;int:channel id="inbound-stock-alerts"&gt;
+ 		&lt;int:interceptors&gt;
+			&lt;int:wire-tap channel="logger" /&gt;
+		&lt;/int:interceptors&gt;
+	&lt;/int:channel&gt;
+	&lt;int:logging-channel-adapter id="logger" level="DEBUG" /&gt;	
+	
+	
+	&lt;int:json-to-object-transformer 
+		input-channel="inbound-stock-alerts" 
+		output-channel="stock-alerts" 
+		type="gv.stock.api.StockAlert"
+	/&gt;
+
+	&lt;int:channel id="stock-alerts"/&gt;
+
+	&lt;int:service-activator
+		input-channel="stock-alerts"
+		method="handleStockAlert"
+		ref="stockServiceImpl"
+	/&gt;
+</pre>
+</p>
+
+
+	<p>That's all for this post. In the next post I'm going to talk
+		about writing a WarehouseService implementation using GemFire.</p>
+
 
 </body>
 

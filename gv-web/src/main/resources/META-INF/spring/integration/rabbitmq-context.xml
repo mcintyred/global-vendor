@@ -38,9 +38,9 @@
 	 -->
 	<rabbit:fanout-exchange name="stockAlertsExchange">
 		<rabbit:bindings>
-			<rabbit:binding queue="core-stock-alerts"></rabbit:binding>
+			<rabbit:binding queue="stockAlerts"></rabbit:binding>
 		</rabbit:bindings>
 	</rabbit:fanout-exchange>
 	
-	<rabbit:queue name="core-stock-alerts"/>	
+	<rabbit:queue name="stockAlerts"/>	
 </beans>

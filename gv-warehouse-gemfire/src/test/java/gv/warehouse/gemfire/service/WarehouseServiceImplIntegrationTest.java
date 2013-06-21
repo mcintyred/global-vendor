@@ -40,30 +40,13 @@ public class WarehouseServiceImplIntegrationTest {
 	
 	@Autowired
 	private RegionWrapper wrapper;
-	
-	class Captor implements StockAlertListener {
-		
-		private StockAlert alert;
 
-		@Override
-		public void handleStockAlert(StockAlert alert) {
-			this.alert = alert;
-		}
-		
-		public StockAlert getAlert() {
-			return alert;
-		}
-		
-		public void clear() {
-			alert = null;
-		}
-	}
 	
-	private Captor captor = new Captor();
-	
+	@Autowired 
+	private StockAlertCaptor captor;
 	
 	@Before
-	public void setUp() {
+	public void setUp() throws Exception {
 		listener.setStockAlertListener(captor);
 		listener.setStockAlertThreshold(5);
 		wrapper.getRegion().clear();
@@ -71,11 +54,13 @@ public class WarehouseServiceImplIntegrationTest {
 	}
 
 	@Test
-	public void shouldUpdateStockLevelForNonExistentProduct() {
+	public void shouldUpdateStockLevelForNonExistentProduct() throws Exception {
 		// given
 		long productId = 3L;
 		String warehouseName = "testWarehouse";
 		int stockDelta = 26;
+		
+		captor.expect();
 		
 		// when
 		int newStockLevel = service.updateStock(new StockChangeRequest(warehouseName, productId, stockDelta));
@@ -92,7 +77,7 @@ public class WarehouseServiceImplIntegrationTest {
 	}
 	
 	@Test
-	public void shouldUpdateStockLevelForExistingProduct() {
+	public void shouldUpdateStockLevelForExistingProduct() throws Exception {
 		// given
 		long productId = 3L;
 		String warehouseName = "testWarehouse";
@@ -101,6 +86,7 @@ public class WarehouseServiceImplIntegrationTest {
 		StockChangeRequest existingStock = new StockChangeRequest(warehouseName, productId, currentStock);
 		service.setStock(existingStock);
 		captor.clear();
+		captor.expect();
 		
 		// when
 		int newStockLevel = service.updateStock(new StockChangeRequest(warehouseName, productId, stockDelta));
@@ -117,12 +103,13 @@ public class WarehouseServiceImplIntegrationTest {
 	}
 	
 	@Test 
-	public void shouldSetStockLevelForNonExistentProduct() throws InterruptedException {
+	public void shouldSetStockLevelForNonExistentProduct() throws Exception {
 		// given
 		long productId = 3L;
 		String warehouseName = "testWarehouse";
 		int qty = 26;
-		
+		captor.expect();
+
 		// when
 		int newLevel = service.setStock(new StockChangeRequest(warehouseName, productId, qty));
 		
@@ -138,7 +125,7 @@ public class WarehouseServiceImplIntegrationTest {
 	}
 	
 	@Test 
-	public void shouldSetStockLevelForExistingProduct() {
+	public void shouldSetStockLevelForExistingProduct() throws Exception {
 		// given
 		long productId = 3L;
 		String warehouseName = "testWarehouse";
@@ -146,7 +133,8 @@ public class WarehouseServiceImplIntegrationTest {
 		StockChangeRequest existingStock = new StockChangeRequest(warehouseName, productId, 3);
 		service.setStock(existingStock);
 		captor.clear();
-		
+		captor.expect();
+
 		// when
 		service.setStock(new StockChangeRequest(warehouseName, productId, qty));
 		
@@ -172,7 +160,7 @@ public class WarehouseServiceImplIntegrationTest {
 	}
 
 	@Test
-	public void shouldReturnCurrentStockForExistingProduct() {
+	public void shouldReturnCurrentStockForExistingProduct() throws Exception {
 		// given 
 		Long productId = 3L;
 		String warehouseName = "testWarehouse";
@@ -180,14 +168,15 @@ public class WarehouseServiceImplIntegrationTest {
 		StockChangeRequest existingStock = new StockChangeRequest(warehouseName, productId, qty);
 		service.setStock(existingStock);
 		captor.clear();
-		
+		captor.expect();
+
 		// when
 		int stockLevel = service.getStock(new StockQueryRequest(warehouseName, productId));
 		assertEquals(qty,  stockLevel);
 	}
 	
 	@Test 
-	public void shouldConfirmShipmentRequestAndNotTriggerAnAlert() {
+	public void shouldConfirmShipmentRequestAndNotTriggerAnAlert() throws Exception {
 		// given
 		long productId = 3L;
 		String warehouseName = "testWarehouse";
@@ -195,7 +184,8 @@ public class WarehouseServiceImplIntegrationTest {
 		StockChangeRequest existingStock = new StockChangeRequest(warehouseName, productId, 4);
 		service.setStock(existingStock);
 		captor.clear();
-		
+		captor.expect();
+
 		ShipmentRequest request = new ShipmentRequest(warehouseName, productId, qty);
 		
 		// when
@@ -209,7 +199,7 @@ public class WarehouseServiceImplIntegrationTest {
 	
 
 	@Test 
-	public void shouldConfirmShipmentRequestAndTriggerAnAlert() {
+	public void shouldConfirmShipmentRequestAndTriggerAnAlert() throws Exception {
 		// given
 		long productId = 3L;
 		String warehouseName = "testWarehouse";
@@ -217,7 +207,8 @@ public class WarehouseServiceImplIntegrationTest {
 		StockChangeRequest existingStock = new StockChangeRequest(warehouseName, productId, 15);
 		service.setStock(existingStock);
 		captor.clear();
-		
+		captor.expect();
+
 		ShipmentRequest request = new ShipmentRequest(warehouseName, productId, qty);
 		
 		// when
@@ -235,7 +226,7 @@ public class WarehouseServiceImplIntegrationTest {
 	}
 	
 	@Test 
-	public void shouldCancelShipmentRequestAndNotTriggerAnAlert() {
+	public void shouldCancelShipmentRequestAndNotTriggerAnAlert() throws Exception {
 		// given
 		long productId = 3L;
 		String warehouseName = "testWarehouse";
@@ -244,7 +235,7 @@ public class WarehouseServiceImplIntegrationTest {
 		StockChangeRequest existingStock = new StockChangeRequest(warehouseName, productId, qty);
 		service.setStock(existingStock);
 		captor.clear();
-		
+		captor.expect();
 		
 		ShipmentLine line = new ShipmentLine(null, 1, new Product(productId, "", ""));
 		Shipment shipment = new Shipment(
@@ -259,7 +250,7 @@ public class WarehouseServiceImplIntegrationTest {
 	}
 
 	@Test 
-	public void shouldCancelShipmentRequestAndTriggerAnAlert() {
+	public void shouldCancelShipmentRequestAndTriggerAnAlert() throws Exception {
 		// given
 		long productId = 3L;
 		String warehouseName = "testWarehouse";
@@ -268,7 +259,7 @@ public class WarehouseServiceImplIntegrationTest {
 		StockChangeRequest existingStock = new StockChangeRequest(warehouseName, productId, qty);
 		service.setStock(existingStock);
 		captor.clear();
-		
+		captor.expect();
 		
 		ShipmentLine line = new ShipmentLine(null, 13, new Product(productId, "", ""));
 		Shipment shipment = new Shipment(

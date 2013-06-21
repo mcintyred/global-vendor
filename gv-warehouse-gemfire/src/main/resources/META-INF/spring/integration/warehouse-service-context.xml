@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:int="http://www.springframework.org/schema/integration"
+	xmlns:int-jdbc="http://www.springframework.org/schema/integration/jdbc"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.2.xsd
+	http://www.springframework.org/schema/integration/jdbc http://www.springframework.org/schema/integration/jdbc/spring-integration-jdbc.xsd
+		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!-- 
+	Messages are received on the inbound channel.
+	
+	Messages are routed to the appropriate ServiceActivator based on their GV_Method header:
+	
+	update-stock      - returns the new stock level as the payload
+	set-stock         - no return value
+	get-stock         - returns the current stock level as the payload
+	request-shipment  - returns a JSON-serialized ShipmentConfirmation as the payload
+	
+	 --> 
+	 
+	 <int:channel id="inbound">
+	 		<int:interceptors>
+			<int:wire-tap channel="logger" />
+		</int:interceptors>
+	</int:channel>
+	
+	<int:logging-channel-adapter id="logger" level="DEBUG" />	
+	
+	 <int:channel id="update-stock"/>
+	 <int:channel id="set-stock"/>
+	 <int:channel id="get-stock"/>
+	 <int:channel id="request-shipment"/>
+	 
+ 	<int:header-value-router input-channel="inbound" header-name="GV_Method" />
+ 	 
+ 	<int:chain input-channel="set-stock">
+ 		<int:json-to-object-transformer type="gv.stock.api.StockChangeRequest"/>
+ 		<int:service-activator expression="@warehouseService.setStock(payload)"/>
+ 	</int:chain>
+
+ 	<int:chain input-channel="update-stock">
+ 		<int:json-to-object-transformer type="gv.stock.api.StockChangeRequest"/>
+ 		<int:service-activator expression="@warehouseService.updateStock(payload)"/>
+ 	</int:chain>
+
+ 	<int:chain input-channel="get-stock">
+ 		<int:json-to-object-transformer type="gv.stock.api.StockQueryRequest"/>
+ 		<int:service-activator expression="@warehouseService.getStock(payload)"/>
+ 	</int:chain>
+	
+ 	<int:chain input-channel="request-shipment">
+ 		<int:json-to-object-transformer type="gv.stock.api.ShipmentRequest"/>
+ 		<int:service-activator expression="@warehouseService.requestShipment(payload)"/>
+ 		<int:object-to-json-transformer/>
+	</int:chain>
+
+ 	<int:chain input-channel="cancel-shipment">
+ 		<int:json-to-object-transformer type="gv.api.Shipment"/>
+ 		<int:service-activator expression="@warehouseService.cancelShipment(payload)"/>
+	</int:chain>
+
+ 	<int:chain input-channel="discontinue-product">
+ 		<int:json-to-object-transformer type="gv.stock.api.DiscontinueProductRequest"/>
+ 		<int:service-activator expression="@warehouseService.discontinueProduct(payload)"/>
+	</int:chain>
+
+</beans>

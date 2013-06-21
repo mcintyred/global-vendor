@@ -30,8 +30,8 @@
 	</ul>
 
 	<h4>Optional</h4>
-	All the tests can be run from the command line, but you'll find it
-	easier to use an IDE. The gradle scripts are set up with Eclipse/STS in
+	The projects are set up so that you can run all the code from within your IDE. 
+	The gradle scripts are set up with Eclipse/STS in
 	mind, but should also work with Intellij.
 
 	<ul>
@@ -48,8 +48,9 @@
 <li><a href="http://www.rabbitmq.com/">RabbitMQ</a></li>
 </ul>
 
-The test deployments use the embedded H2 database, but you can opt to use any other database you choose provided you supply the driver. 
-The project comes with a configuration using MySQL.
+<p>
+The test deployments all use the embedded H2 database, so you will lose any data you have entered each time you restart a component.
+</p>
 
 <h3>Project Structure</h3>
 Once you have downloaded the project you should see the following directory structure:
@@ -156,12 +157,20 @@ Click on the Purchase link and get ready to buy 44:
 
 <p>If you go back to the admin page you should see the stock levels now are London 33, and Paris 11.</p>
 <p>
-Now make another purchase of 22 and you should see that the order will be fulfilled from London. This is
+Now make another purchase of 33 and you should see that the order will be fulfilled from London. This is
 because the OrderService always takes stock from the warehouse with the most first.
 </p>
 
 <p>
-Finally, make a purchase of 15 and you should see 11 shipped from London and 4 from Paris.
+From the admin screen click on "View Stock Alerts" and you should see that an alert has been issued from London:
+</p>
+<div class="screengrab">
+	<div class="caption">London Stock Alert</div>
+	<img src="images/londonStockAlert.jpg"/>
+</div>
+
+<p>
+If you now set the stock level in London to greater than the threshold (i.e. 10), you should see the alert disappear.
 </p>
 
 <p>
@@ -200,10 +209,10 @@ With Spring Data JPA you do much the same:
 </p>
 <ul>
 	<li>Include the relevant dependencies</li>
-	<li>Enable Spring Data JPA repository support in your application context</li>
 	<li>Write your JPA annotated entity classes</li>
 	<li>Declare your repositories by writing an <strong>interface</strong>. This is the clever bit where you may not need to write
 	any code.</li>
+	<li>Enable Spring Data JPA repository support in your application context</li>
 </ul>
 <p>That's it. Spring will detect all your repositories for you, create real implementations and inject
 them into any component which requires them.
@@ -269,57 +278,6 @@ dependencies {
     testCompile group: 'org.mockito', name: 'mockito-all', version:'1.9.5'
 
 }
-</pre>
-
-<h3>Enable Repository Support In The Application Context</h3>
-
-For example, here is the WarehouseServiceImplRepositoryTest-context.xml:
-
-<pre class="java">
-&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:tx="http://www.springframework.org/schema/tx"
-	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
-    xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd
-		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
-		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
-		http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd"&gt;
-
-	
-	&lt;!-- Spring will scan the classpath for all classes annotated @Component, @Service etc --&gt;
-	&lt;context:component-scan base-package="gv.warehouse.jpa.service" /&gt;
-	
-	&lt;!-- Enable Spring Data JPA to automatically find and create repositories --&gt;
-	&lt;jpa:repositories base-package="gv.warehouse.jpa.service.repository" /&gt;
-	
-	&lt;!-- Use an in-memory database for testing --&gt;
-	&lt;jdbc:embedded-database id="dataSource" type="HSQL" /&gt;
-
-	&lt;bean id="entityManagerFactory"
-		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
-		&lt;property name="dataSource" ref="dataSource" /&gt;
-		&lt;property name="jpaVendorAdapter"&gt;
-			&lt;bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"&gt;
-				&lt;property name="generateDdl" value="true" /&gt;
-				&lt;property name="database" value="HSQL" /&gt;
-				&lt;property name="showSql" value="true"/&gt;
-			&lt;/bean&gt;
-		&lt;/property&gt;
-		
-		&lt;!-- Automatically scan for all classes annotated @Entity --&gt;
-		&lt;property name="packagesToScan" value="gv.warehouse.jpa.service.entity"/&gt;
-	&lt;/bean&gt;
-	
-	&lt;bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"&gt;
-		&lt;property name="entityManagerFactory" ref="entityManagerFactory" /&gt;
-	&lt;/bean&gt;
-	
-	&lt;tx:annotation-driven transaction-manager="transactionManager" /&gt;
-
-&lt;/beans&gt;
-
 </pre>
 
 <h3>Write Annotated Entity Classes</h3>
@@ -407,13 +365,60 @@ public class WarehouseServiceImpl implements WarehouseService, StockAlertEventSo
 
 </pre>
 
+<h3>Enable Repository Support In The Application Context</h3>
 
 <p>
-Notice how the repository comes with a number of methods
-for dealing with entities so you dont; have to write them: save(), findOne(), findAll() ... etc.
+For example, here is the WarehouseServiceImplRepositoryTest-context.xml. The important line is the line which reads:
+	<pre class="xml">&lt;jpa:repositories base-package="gv.warehouse.jpa.service.repository"&gt;</pre>
+	This is the line which causes Spring Data to create the repositories from your interfaces.
 </p>
 
+<pre class="xml">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+    xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+		http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd"&gt;
 
+	
+	&lt;!-- Spring will scan the classpath for all classes annotated @Component, @Service etc --&gt;
+	&lt;context:component-scan base-package="gv.warehouse.jpa.service" /&gt;
+	
+	&lt;!-- Enable Spring Data JPA to automatically find and create repositories --&gt;
+	&lt;jpa:repositories base-package="gv.warehouse.jpa.service.repository" /&gt;
+	
+	&lt;!-- Use an in-memory database for testing --&gt;
+	&lt;jdbc:embedded-database id="dataSource" type="HSQL" /&gt;
+
+	&lt;bean id="entityManagerFactory"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
+		&lt;property name="dataSource" ref="dataSource" /&gt;
+		&lt;property name="jpaVendorAdapter"&gt;
+			&lt;bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"&gt;
+				&lt;property name="generateDdl" value="true" /&gt;
+				&lt;property name="database" value="HSQL" /&gt;
+				&lt;property name="showSql" value="true"/&gt;
+			&lt;/bean&gt;
+		&lt;/property&gt;
+		
+		&lt;!-- Automatically scan for all classes annotated @Entity --&gt;
+		&lt;property name="packagesToScan" value="gv.warehouse.jpa.service.entity"/&gt;
+	&lt;/bean&gt;
+	
+	&lt;bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"&gt;
+		&lt;property name="entityManagerFactory" ref="entityManagerFactory" /&gt;
+	&lt;/bean&gt;
+	
+	&lt;tx:annotation-driven transaction-manager="transactionManager" /&gt;
+
+&lt;/beans&gt;
+
+</pre>
 
 <h3>Magic Finder Methods</h3>
 <p>So far, so good. The standard repository implements all the methods we need to find, save and delete 
@@ -430,7 +435,7 @@ public interface StockAlertEntityRepository extends CrudRepository&lt;StockAlert
 
 <p>
 The implementation of the method findByWarehouseIdAndProductId() is <strong>provided for us</strong> by Spring Data JPA!
-It knows how to generate the method base on the method name.
+It knows how to generate the method based on the method name.
 </p>
 
 <p>
@@ -463,7 +468,7 @@ So, finally, we can see the piece of configuration which will be the point where
 implementations. It is in gv-web-standalone/src/main/webapp/WEB-INF/spring/root-context.xml:
 </p>
 
-<pre class="java">
+<pre class="xml">
 &lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -477,12 +482,11 @@ implementations. It is in gv-web-standalone/src/main/webapp/WEB-INF/spring/root-
 	&lt;import resource="classpath:/META-INF/spring/data-context.xml"/&gt;
 
 	&lt;!-- Declare the list of WarehouseServices --&gt;
-	&lt;!-- This will be auto-injected into the WarehouseServiceLocator --&gt;
-	&lt;bean id="warehouseServiceList" class="gv.core.service.WarehouseServiceList"&gt;
+	&lt;bean id="warehouseServiceList" class="gv.core.service.WarehouseServiceMap"&gt;
 		&lt;constructor-arg&gt;
-			&lt;list&gt;
-				&lt;ref bean="localWarehouseService"/&gt;
-			&lt;/list&gt;
+			&lt;map&gt;
+				&lt;entry key="Local Database Service" value-ref="localWarehouseService"/&gt;		
+			&lt;/map&gt;
 		&lt;/constructor-arg&gt;
 	&lt;/bean&gt;
 	

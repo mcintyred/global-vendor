@@ -65,7 +65,7 @@
 				<tr>
 					<td>${ product.id }</td>
 					<td>${ product.name }</td>
-					<td>${ product.description }</td>
+					<td>${ product.description } &nbsp;</td>
 					
 					<c:forEach var="warehouse" items="${ warehouses }">
 						<td>${ stockLevels.get(product).get(warehouse.name) + 0}</td>
@@ -73,6 +73,9 @@
 					
 					<td>
 						<a href="./product/${ product.id }/stock.html">Set Stock Levels</a>
+					</td>
+					<td>
+						<a href="./stockAlerts.html">View Stock Alerts</a>
 					</td>
 				</tr>
 			</c:forEach>

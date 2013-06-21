@@ -2,12 +2,8 @@
 <%@ page session="false"%>
 <html>
 <head>
+<link href="./resources/styles.css" type="text/css" rel="stylesheet"/>
 <title>Stock Alerts</title>
-<style>
-th,td {
-	border: 1px solid black;
-}
-</style>
 </head>
 <body>
 

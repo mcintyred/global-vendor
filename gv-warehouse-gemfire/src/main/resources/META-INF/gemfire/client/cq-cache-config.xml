@@ -27,7 +27,10 @@
 			query="select * from /stock_levels" />
 	</gfe:cq-listener-container>
 
-	<bean id="cqListener" class="gv.warehouse.gemfire.listener.CQListener" />
+	<bean id="cqListener" class="gv.warehouse.gemfire.listener.CQListener">
+		<property name="stockAlertListener" ref="stockAlertListener"/>
+		<property name="stockAlertThreshold" value="10"/>
+	</bean>
 	
 	<task:executor id="taskExecutor" pool-size="10"/>
 		
