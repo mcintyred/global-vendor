@@ -16,7 +16,233 @@ using Gemfire.
 There is nothing to install this time, since the Spring Data Gemfire support bundles the Gemfire components needed for testing. 
 </p>
 
+<h3>Architecture</h3>
+<p>
+I have built the Gemfire examples to run in a Gemfire client/server configuration. Spring Integration
+is used with RabbitMQ to connect the clients to the main (Host 1) server. There are two implementations:
+<ul>
+	<li>One uses a Gemfire CacheListener to generate stock alerts</li>
+	<li>The other uses a Gemfire Continuous Query to generate stock alerts</li>
+</ul>
 
+Both use Spring Data Gemfire to use the Gemfire cache as a persistent repository.
+</p>
+
+<div class="diagram">
+	<div class="caption">Gemfire CacheListener</div>
+	<img src="images/gemfireCacheListener.jpg"/>
+</div>
+
+<h3>Starting The Application</h3>
+<p>
+You can choose to run either the CacheListener or the ContinuousQuery clients, but not both at the same time.
+Start the Server first: right-click on <code>gv-warehouse-gemfire/src/main/java/gv.warehouse.gemfire/Server</code>
+and Run As/Java Application. Once the Server has started, do the same for whichever client you want to start.
+</p>
+
+<p>
+The clients are configured (in <code>gv-gemfire-node.properties</code>) to have the warehouse name "tokyo", so in the admin
+interface on Host1 you will need to add a new Remote Server called "tokyo". You can then add stock, place orders etc just
+as you did <a href="remoteNode.html">previously</a>.
+</p>
+
+<h3>Code Discussion</h3>
+<p>
+There are three parts to the implementation:
+</p>
+<ul>
+<li>The Spring Integration configuration</li>
+<li>The Spring Data Gemfire implementation of StockLevelRepository and the WarehouseServiceImpl which uses it</li>
+<li>The StockAlertEventSource implementations using Gemfire CacheListener or ContinuousQuery</li>
+</ul>
+
+<h4>Spring Integration Configuration</h4>
+<p>
+This part is easy. If you look at the configuration files under the <code>META-INF</code> directory, you will see that they
+are almost identical to the ones in the gv-warehouse-node project. The differences are:
+</p>
+<ol>
+<li>The <code>service-context.xml</code> defines a different implementation of WarehouseService - <code>gv.warehouse.gemfire.service.WarehouseServiceImpl</code></li>
+<li>The WarehouseService uses a repository which is found by component-scan in the gemfire/client context files (<code>gv.warehouse.gemfire.service.repository.StockLevelRepository</code>)</li>
+<li>The gemfire/client context files define the appropriate StockAlertEventSource to send StockAlerts to the stockAlertsGateway</li>
+</ol>
+
+<h4>Spring Data Gemfire</h4>
+<p>
+If you compare the implementations WarehouseServiceImpl in the gv-warehouse-gemfire and gv-warehouse-jpa projects
+you will see that they are almost identical. The difference is that the gemfire implementation does not also
+implement StockAlertEventSource. This is because in this project I wanted to take advantage of Gemfire's built-in
+facilities for raising events: Cache Listeners and Continuous Queries.
+</p>
+
+<p>
+The StockLevelRepository and StockLevelEntity in the Gemfire project are different to those in the JPA project.
+In the JPA project the entity used a generated (<code>long</code>) value for its id, and the repository needed to have a method
+defined to retrieve stock levels by warehouseName and productId:
+</p>
+<pre class="java">
+public interface StockLevelRepository extends CrudRepository&lt;StockLevel, Long&gt; {
+	
+	public StockLevel findByWarehouseNameAndProductId(String warehouseName, Long productId);
+
+}
+</pre>
+
+<p>
+In the Gemfire project we must supply a unique key for entity ids, since a Gemfire cache is just a 
+
+<code>Map&lt;K, v&gt;</code> to application code.
+
+So there is an Id class:
+</p>
+<pre class="java">
+@Region("stock_levels")
+public class StockLevel implements Serializable {
+	private static final long serialVersionUID = 1L;
+
+	@org.springframework.data.annotation.Id
+	private final StockLevel.Id id;
+	
+	private final int qty;
+	private final int oldQty;
+	
+	...
+	...
+	...
+	
+	public static class Id implements Serializable {
+		
+		private String warehouseName;
+		
+		private Long productId;
+		...
+		...
+		}
+}
+
+</pre>
+<p>
+Notice how classes which are going to be stored by Gemfire must be serializable, and the equals() and hashCode()
+methods are also implemented so Gemfire can compare objects properly.
+</p>
+
+<p>
+Having the Id class using warehouseName and productId means that there is no need for a special finder
+method on the repository, the WarehouseServiceImpl can just call the repository's <code>findOne()</code> method
+which is supplied for us automatically when we extend CRUDRepository.
+
+<pre class="java">
+public interface StockLevelRepository extends CrudRepository&lt;StockLevel, StockLevel.Id&gt; {
+	
+}
+</pre>
+</p>
+
+<h4>Generating StockAlerts Using Gemfire CacheListener</h4>
+<p>
+Gemfire is designed to run in a distributed manner, where multiple cache nodes can replicate all or part of other nodes' data.
+When data changes in a cache, Gemfire send events to the other participating caches so that they can update their local
+copies. Client applications can register to receive these events by implementing a Gemfire CacheListener.
+</p>
+
+<p>
+The <code>StockChangeListener</code> class is an implementation of <code>CacheListenerAdapter</code> which uses the
+<code>afterCreate(), afterDestroy(), afterUpdate() and afterInvalidate()</code> callbacks to generate <code>StockAlerts</code>.
+</p>
+
+<p>
+The listener is registered with the cache in <code>gemfire/client/cl-cache-config.xml</code>, and the <code>stockAlertsGateway</code>
+is injected into it. Spring Integration takes care of turning the <code>handleStockAlert()</code> call on the gateway into a message send
+to the RabbitMQ stockAlertsExchange.
+</p>
+
+<pre class="xml">
+		
+	&lt;gfe-data:repositories base-package="gv.warehouse.gemfire"&gt;&lt;/gfe-data:repositories&gt;
+	
+	&lt;gfe:pool id="clientPool" subscription-enabled="true"&gt;
+		&lt;gfe:server host="localhost" port="40404"/&gt;
+	&lt;/gfe:pool&gt;
+	
+	&lt;gfe:client-cache id="clientCache" pool-name="clientPool" ready-for-events="true"/&gt;
+	
+	&lt;gfe:client-region id="stock_levels" key-constraint="gv.warehouse.gemfire.entity.StockLevel.Id" cache-ref="clientCache"&gt;
+		&lt;gfe:cache-listener ref="stockListener" /&gt;
+		&lt;gfe:regex-interest pattern=".*" receive-values="true" result-policy="KEYS_VALUES"/&gt;
+	&lt;/gfe:client-region&gt;
+	
+	&lt;bean id="stockListener" class="gv.warehouse.gemfire.listener.StockChangeListener"&gt;
+		&lt;property name="stockAlertListener" ref="stockAlertsGateway"/&gt;
+		&lt;property name="stockAlertThreshold" value="10"/&gt;
+	&lt;/bean&gt;
+</pre>
+<p>
+Notice the <code>&lt;gfe:regex-interest &gt;</code> element in the configuration. This is a way of telling the cache
+which event types should be delivered to the listener, and helps to limit the number of events the listener has to handle.
+Another way of restricting the events you have to process is to use a Gemfire <code>ContinuousQuery</code>.
+</p>
+
+<h4>Generating StockAlerts Using Gemfire ContinuousQueries</h4>
+<p>
+ContinuousQueries provide a way of monitoring the cache and only delivering events to a client when particular entities are affected.
+They are configured by writing a simple Gemfire query such as
+<pre>
+SELECT * FROM /products WHERE sku = 'interesting'
+</pre>
+</p>
+
+<p>
+The configuration file <code>gemfire/client/cq-cache-config.xml</code> configures a CQListener to receive
+events for all updates to the /stock_levels region:
+<pre class="xml">
+...
+...
+	&lt;gfe:cq-listener-container id="cq-listener-container" cache="clientCache"&gt;
+		&lt;gfe:listener ref="cqListener"
+			query="select * from /stock_levels" /&gt;
+	&lt;/gfe:cq-listener-container&gt;
+
+	&lt;bean id="cqListener" class="gv.warehouse.gemfire.listener.CQListener"&gt;
+		&lt;property name="stockAlertListener" ref="stockAlertsGateway"/&gt;
+		&lt;property name="stockAlertThreshold" value="10"/&gt;
+	&lt;/bean&gt;
+...
+...
+</pre>
+</p>
+
+<p>
+If you look at the code for the CQListener you will see that whereas in the CacheListener we had access to the
+previous value of a StockLevel, the CQListener only has access to the current value:
+<pre class="java">
+	public void handleEvent(CqEvent event) {
+		
+		if(event.getBaseOperation().isCreate()) {
+			
+			StockLevel level = (StockLevel) event.getNewValue();
+			raiseStockAlert(level.getId(), 0, level.getQty());
+			
+		} else if(event.getBaseOperation().isUpdate()) {
+			
+			StockLevel level = (StockLevel) event.getNewValue();
+			
+			raiseStockAlert(level.getId(), level.getOldQty(), level.getQty());
+			
+		} else if(event.getBaseOperation().isDestroy()) {
+
+			StockLevel level = (StockLevel) event.getNewValue();
+			
+			raiseStockAlert(level.getId(), level.getQty(), 0);
+		}
+	}
+</pre>
+
+Because of this I modified StockLevel, added the field <code>oldQty</code> and modified WarehouseServiceImpl
+to update the field appropriately.
+</p>
+
+<p>
+That's it for this post.
 
 </body>
 

@@ -28,7 +28,7 @@
 	</gfe:cq-listener-container>
 
 	<bean id="cqListener" class="gv.warehouse.gemfire.listener.CQListener">
-		<property name="stockAlertListener" ref="stockAlertListener"/>
+		<property name="stockAlertListener" ref="stockAlertsGateway"/>
 		<property name="stockAlertThreshold" value="10"/>
 	</bean>
 	

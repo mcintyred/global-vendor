@@ -23,7 +23,7 @@
 	</gfe:client-region>
 	
 	<bean id="stockListener" class="gv.warehouse.gemfire.listener.StockChangeListener">
-		<property name="stockAlertListener" ref="stockAlertListener"/>
+		<property name="stockAlertListener" ref="stockAlertsGateway"/>
 		<property name="stockAlertThreshold" value="10"/>
 	</bean>
 			

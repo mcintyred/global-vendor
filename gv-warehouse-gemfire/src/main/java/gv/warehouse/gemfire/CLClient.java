@@ -11,7 +11,10 @@ public class CLClient {
 	public static void main(String[] args) throws IOException,
 			InterruptedException {
 		
-		ApplicationContext context = new ClassPathXmlApplicationContext("gemfire/client/cl-cache-config.xml");
+		ApplicationContext context = new ClassPathXmlApplicationContext(
+				"META-INF/spring/root-context.xml",
+				"META-INF/gemfire/client/cl-cache-config.xml"
+		);
 		
 		System.out.println("CacheListener Client started");
 		
