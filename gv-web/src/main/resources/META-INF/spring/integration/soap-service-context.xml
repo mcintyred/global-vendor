@@ -13,18 +13,20 @@
 
 	<int:channel id="input">
 		<int:interceptors>
-			<int:wire-tap channel="logXml" />
+			<int:wire-tap channel="logRequests" />
 		</int:interceptors>
 	</int:channel>
 	
-	<int:channel id="logXml"/>
+	<int:channel id="logRequests"/>
 
-	<int-xml:xslt-transformer id="xmlConverter" 
-		input-channel="logXml" 
-		output-channel="logger" 
+	<int-xml:xslt-transformer id="requestConverter" 
+		input-channel="logRequests" 
+		output-channel="requestLogger" 
 		result-transformer="toString" 
 		xsl-resource="classpath:/META-INF/spring/integration/noop.xslt"
 	/>
+	<int:logging-channel-adapter id="requestLogger" logger-name="gv.logger"
+		level="DEBUG" />
 
 	<bean id="toString" class="org.springframework.integration.xml.transformer.ResultToStringTransformer"/>
 
@@ -32,14 +34,23 @@
 	
 	<int:channel id="responses">
 		<int:interceptors>
-			<int:wire-tap channel="logXml" />
+			<int:wire-tap channel="logResponses" />
 		</int:interceptors>
 	</int:channel>
 	
-	<int:channel id="orders"/>
+	<int:channel id="logResponses"/>
 
-	<int:logging-channel-adapter id="logger" logger-name="gv.logger"
+	<int-xml:xslt-transformer id="responseConverter" 
+		input-channel="logResponses" 
+		output-channel="responseLogger" 
+		result-transformer="toString" 
+		xsl-resource="classpath:/META-INF/spring/integration/noop.xslt"
+	/>
+	<int:logging-channel-adapter id="responseLogger" logger-name="gv.logger"
 		level="DEBUG" />
+
+	
+	<int:channel id="orders"/>
 
 	<int-ws:inbound-gateway id="ws-inbound-gateway"
 		request-channel="input" reply-channel="responses" />
@@ -71,7 +82,7 @@
 	</oxm:jaxb2-marshaller>
 
 	<sws:dynamic-wsdl id="orderServiceGateway" portTypeName="ws-inbound-gateway"
-		locationUri="/orders/orderService">
+		locationUri="/orders/orderService" targetNamespace="http://www.gv.demo/api">
 		<sws:xsd location="classpath:/META-INF/schemas/gv.xsd"/>
 	</sws:dynamic-wsdl>
 
