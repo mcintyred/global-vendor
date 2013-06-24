@@ -959,3 +959,5 @@
 2013-06-23T16:56:09,INFO,UpdatedLicenseStateEvent,enforcement=soft|licenseType=local|expirationDate=2013-08-22T16:56:09|used=8|available=60|addons=vf.gf.evaluation
 2013-06-24T09:37:01,INFO,UpdatedLicenseStateEvent,enforcement=soft|licenseType=local|expirationDate=2013-08-23T09:37:01|used=8|available=60|addons=vf.gf.evaluation
 2013-06-24T10:37:01,INFO,UpdatedLicenseStateEvent,enforcement=soft|licenseType=local|expirationDate=2013-08-23T10:37:01|used=8|available=60|addons=vf.gf.evaluation
+2013-06-24T11:39:46,INFO,UpdatedLicenseStateEvent,enforcement=soft|licenseType=local|expirationDate=2013-08-23T11:39:46|used=8|available=60|addons=vf.gf.evaluation
+2013-06-24T12:39:46,INFO,UpdatedLicenseStateEvent,enforcement=soft|licenseType=local|expirationDate=2013-08-23T12:39:46|used=8|available=60|addons=vf.gf.evaluation

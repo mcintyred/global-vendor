@@ -52,9 +52,6 @@
 	
 	<int:channel id="orders"/>
 
-	<int-ws:inbound-gateway id="ws-inbound-gateway"
-		request-channel="input" reply-channel="responses" />
-
 	<int-xml:unmarshalling-transformer
 		unmarshaller="jaxb" input-channel="input" output-channel="orders"/>
 
@@ -71,6 +68,8 @@
 	<!-- Beans -->
 
 	<oxm:jaxb2-marshaller id="jaxb">
+		<oxm:class-to-be-bound name="gv.api.OrderRequest" />
+		<oxm:class-to-be-bound name="gv.api.OrderResponse" />
 		<oxm:class-to-be-bound name="gv.api.Order" />
 		<oxm:class-to-be-bound name="gv.api.OrderLine" />
 		<oxm:class-to-be-bound name="gv.api.Product" />
@@ -81,14 +80,22 @@
 		<oxm:class-to-be-bound name="gv.api.ShipmentLine" />
 	</oxm:jaxb2-marshaller>
 
-	<sws:dynamic-wsdl id="orderServiceGateway" portTypeName="ws-inbound-gateway"
-		locationUri="/orders/orderService" targetNamespace="http://www.gv.demo/api">
-		<sws:xsd location="classpath:/META-INF/schemas/gv.xsd"/>
-	</sws:dynamic-wsdl>
+	<!-- Declare a web-services gateway -->
+	<int-ws:inbound-gateway id="ws-inbound-gateway"
+		request-channel="input" reply-channel="responses" />
 
+	<!-- Declare the gateway as the default endpoint for all web-services requests -->
 	<bean
 		class="org.springframework.ws.server.endpoint.mapping.UriEndpointMapping">
 		<property name="defaultEndpoint" ref="ws-inbound-gateway" />
 	</bean>
+
+	<!-- Generate a WSDL automatically from the XSD -->
+	<sws:dynamic-wsdl id="orderServiceGateway" 
+		portTypeName="ws-inbound-gateway"
+		locationUri="/orders/orderService" 
+		targetNamespace="http://www.gv.demo/api">
+		<sws:xsd location="classpath:/META-INF/schemas/gv.xsd"/>
+	</sws:dynamic-wsdl>
 
 </beans>

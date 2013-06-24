@@ -13,7 +13,6 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author mcintyred
  *
  */
-
 @XmlRootElement()
 public class Order {
 	

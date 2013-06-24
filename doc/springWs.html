@@ -8,3 +8,137 @@
 <h2>Using Spring Integration To Take Orders Via A Webservice</h2>
 
 <p>
+In this post I'm going to describe using Spring Integration to create a simple
+Web Service (SOAP) endpoint which processes orders. 
+</p>
+
+<p>In order to create the Web Service there are three tasks to accomplish:
+
+<ol>
+<li>Define the structure of the XML documents used to communicate order details and confirmations</li>
+<li>Configure Spring Integration to process the documents</li>
+<li>Configure a servlet which can accept web requests and forward them to Spring Integration for processing</li>
+</ol>
+</p>
+
+<h3>Define the XML Documents</h3>
+<p>
+This bit was easy, mostly because I cheated. The correct way to write the contract for the documents exchanged
+by a web service is to write an XSD. You can then use the XSD to generate the Java classes into or from which the documents
+will be transformed. Because I didn't really care about the contract I used JAXB Schemagen to create the XSD from my existing POJOs
+in gv-api - all I had to do was add annotations to the relevant classes, and supply two additional classes <code>OrderRequest</code>
+and <code>OrderResponse</code> as wrappers.
+</p>
+
+<h4>Running Schemagen</h4>
+<p>
+You can run schemagen from the command line, but I chose to use Maven to do it for me using the maven-jaxb-schemagen-plugin.
+The pom I used to do this is available <a href="gv-api-pom.xml">here</a>.
+The plugin puts the generated xsd in <code>target/META-INF/schemas/gv.xsd</code>, so once generated I moved it manually
+to <code>src/main/resources/META-INF/schemas</code>.
+</p>
+
+<h3>Configure Spring Integration</h3>
+<p>
+This is the interesting bit. You will find the configuration file in <code>gv-web/src/main/resources/META-INF/spring/integration/soap-service-context.xml</code>.
+If you open it in STS you should see an integration graph something like this:
+<div class="diagram">
+<div class="caption">SOAP Service Context Integration Graph</div>
+<img src="images/ws-inbound-gateway.jpg"/>
+</div>
+In this diagram the actual processing is handled by the top line of components - everything else is logging:
+<ul>
+<li>Messages arrive at the <strong>ws-inbound-gateway</strong> and are sent on to the <strong>input</strong> channel</li>
+<li>An <strong>unmarshalling-transformer</strong> uses a JAXB marshaller to convert the document into an <code>Order</code> POJO and send it to the <strong>orders</strong> channel</li>
+<li>A service-activator calls the <code>placeOrder()</code> method on the <code>OrderService</code>
+and sends the returned <code>OrderConfirmation</code> to the <strong>confirmations</strong> channel</li>
+<li>A <strong>marshalling-transformer</strong> turns the POJO back into an XML document and sends it on to the <strong>responses</strong> channel</li>
+<li>The <stong>ws-inbound-gateway</stong> receives the response, wraps it in a SOAP envelope and returns it to the caller</li>
+</ul>
+</p>
+
+<p>The configuration of the <strong>ws-inbound-gateway</strong> itself is relatively simple:</p>
+
+<pre class="xml">
+
+	&lt;!-- Declare a web-services gateway --&gt;
+	&lt;int-ws:inbound-gateway id="ws-inbound-gateway"
+		request-channel="input" reply-channel="responses" /&gt;
+
+	&lt;!-- Declare the gateway as the default endpoint for all web-services requests --&gt;
+	&lt;bean
+		class="org.springframework.ws.server.endpoint.mapping.UriEndpointMapping"&gt;
+		&lt;property name="defaultEndpoint" ref="ws-inbound-gateway" /&gt;
+	&lt;/bean&gt;
+</pre>
+
+<p>
+Note that the gateway has "marshaller" and "unmarshaller" attributes - I just chose to declare them separately so that they would appear on the integration graph.
+</p>
+
+<p>
+The final part of the configuration is another little cheat which allows the system to generate a WSDL for us automatically:
+
+<pre class="xml">
+	&lt;!-- Generate a WSDL automatically from the XSD --&gt;
+	&lt;sws:dynamic-wsdl id="orderServiceGateway" 
+		portTypeName="ws-inbound-gateway"
+		locationUri="/orders/orderService" 
+		targetNamespace="http://www.gv.demo/api"&gt;
+		&lt;sws:xsd location="classpath:/META-INF/schemas/gv.xsd"/&gt;
+	&lt;/sws:dynamic-wsdl&gt;
+</pre>
+
+It is not recommended to use this feature on a production system.
+
+</p>
+
+<h3>Configure The Servlet</h3>
+<p>
+This is done by adding a few lines to <code>web.xml</code>:
+
+<pre class="xml">
+	&lt;servlet&gt;
+		&lt;servlet-name&gt;gv-ws&lt;/servlet-name&gt;
+		&lt;servlet-class&gt;org.springframework.ws.transport.http.MessageDispatcherServlet&lt;/servlet-class&gt;
+		&lt;init-param&gt;
+			&lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;
+			&lt;param-value&gt;WEB-INF/gv-ws-config.xml&lt;/param-value&gt;
+		&lt;/init-param&gt;
+		&lt;init-param&gt;
+			&lt;param-name&gt;transformWsdlLocations&lt;/param-name&gt;
+			&lt;param-value&gt;true&lt;/param-value&gt;
+		&lt;/init-param&gt;
+		&lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+	&lt;/servlet&gt;
+
+	&lt;servlet-mapping&gt;
+		&lt;servlet-name&gt;gv-ws&lt;/servlet-name&gt;
+		&lt;url-pattern&gt;/orders/*&lt;/url-pattern&gt;
+	&lt;/servlet-mapping&gt;
+</pre>
+</p>
+
+<h2>Testing The Service</h2>
+<p>
+If you have gv-web running, you can test the service by visiting <a href="http://localhost:8080/gv-web/orders/orderServiceGateway.wsdl">the WSDL URL</a> in a browser.
+Even better, if you are running Firefox, install <a href="https://addons.mozilla.org/en-us/firefox/addon/soa-client/">SOA Client</a> and you can use it to view the WSDL and
+make a request:
+
+<div class="screengrab">
+	<div class="caption">Viewing The WSDL In SOA Client</div>
+	<img src="images/soaClientWsdl.jpg"/>
+</div>
+
+<div class="screengrab">
+	<div class="caption">Placing An Order</div>
+	<img src="images/soaClientOrder.jpg"/>
+</div>
+
+<div class="screengrab">
+	<div class="caption">Order Confirmation</div>
+	<img src="images/soaClientConfirmation.jpg"/>
+</div>
+</p>
+
+</body>

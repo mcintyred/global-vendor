@@ -5,6 +5,10 @@
 
   <xs:element name="orderConfirmation" type="tns:orderConfirmation"/>
 
+  <xs:element name="orderRequest" type="tns:orderRequest"/>
+
+  <xs:element name="orderResponse" type="tns:orderResponse"/>
+
   <xs:complexType name="order">
     <xs:sequence>
       <xs:element name="lines" minOccurs="0">
@@ -69,6 +73,18 @@
     </xs:sequence>
     <xs:attribute name="id" type="xs:long"/>
     <xs:attribute name="name" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="orderRequest">
+    <xs:sequence>
+      <xs:element ref="tns:order" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="orderResponse">
+    <xs:sequence>
+      <xs:element name="confirmation" type="tns:orderConfirmation" minOccurs="0"/>
+    </xs:sequence>
   </xs:complexType>
 </xs:schema>
 

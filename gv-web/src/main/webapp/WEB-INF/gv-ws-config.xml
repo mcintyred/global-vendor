@@ -5,9 +5,4 @@
 
 	<import resource="classpath:/META-INF/spring/integration/soap-service-context.xml"/>
 
-	<!-- Ensures that all incoming requests will be routed to the ws:inbound-gateway -->
-	<bean class="org.springframework.ws.server.endpoint.mapping.UriEndpointMapping">
-		<property name="defaultEndpoint" ref="ws-inbound-gateway"/>
-	</bean>
-
 </beans>
