@@ -11,6 +11,7 @@ import gv.stock.api.StockQueryRequest;
 import gv.stock.api.StockService;
 import gv.warehouse.api.WarehouseService;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,8 @@ public class AdminController {
 	
 	@Autowired
 	private WarehouseServiceLocator warehouseServiceLocator;
+	
+	private List<Product> leaks = new ArrayList<Product>();
 
 	@RequestMapping("/admin.html")
 	public String index(Model model) {
@@ -68,6 +71,51 @@ public class AdminController {
 		
 		WarehouseForm bindingForm = new WarehouseForm();
 		model.addAttribute("warehouseForm", bindingForm);
+		
+		return "admin";
+	}
+	
+	@RequestMapping("/heap.html")
+	public String heap(Model model) {
+		
+		List<WarehouseServiceBinding> warehouses = warehouseServiceLocator.listBindings();
+		List<Product> products = productService.listProducts();
+		
+		Set<String> serviceNames = warehouseServiceLocator.getServiceNameMap().keySet();
+		
+		model.addAttribute("serviceNames", serviceNames);
+		model.addAttribute("warehouses", warehouses);
+		model.addAttribute("products", products);
+		
+		Map<Product, Map<String, Integer>> stock = new HashMap<Product, Map<String, Integer>>();
+		for(Product product : products) {
+
+			stock.put(product, getStockLevels(product));
+		}
+		
+		model.addAttribute("stockLevels", stock);
+		
+		WarehouseForm bindingForm = new WarehouseForm();
+		model.addAttribute("warehouseForm", bindingForm);
+		
+		/**
+		 * Now allocate gobs of memory to mung up the heap
+		 */
+		Product[] heaps = new Product[100000];
+		for(int i=0; i< 100000; i++) {
+			heaps[i++] = new Product();
+		}
+		
+		model.addAttribute("heapsOfSpace", heaps);
+		
+		for(int i=0; i< 10000; i++) {
+			leaks.add(new Product());
+		}
+		
+		// every so often, flush the heap
+		if(Math.random() > 0.8) {
+			leaks.clear();
+		}
 		
 		return "admin";
 	}
